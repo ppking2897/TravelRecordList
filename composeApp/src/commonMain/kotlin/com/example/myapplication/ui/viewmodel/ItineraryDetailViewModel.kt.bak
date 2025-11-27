@@ -1,0 +1,147 @@
+package com.example.myapplication.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.model.Itinerary
+import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.data.repository.ItineraryItemRepository
+import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.usecase.AddItineraryItemUseCase
+import com.example.myapplication.domain.usecase.DeleteItineraryItemUseCase
+import com.example.myapplication.domain.usecase.UpdateItineraryItemUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
+
+/**
+ * 行程詳情 ViewModel
+ * 管理單一行程的詳細資訊和項目
+ */
+@ExperimentalTime
+class ItineraryDetailViewModel(
+    private val itineraryRepository: ItineraryRepository,
+    private val itemRepository: ItineraryItemRepository,
+    private val addItemUseCase: AddItineraryItemUseCase,
+    private val updateItemUseCase: UpdateItineraryItemUseCase,
+    private val deleteItemUseCase: DeleteItineraryItemUseCase
+) : ViewModel() {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main)
+    
+    private val _itinerary = MutableStateFlow<Itinerary?>(null)
+    val itinerary: StateFlow<Itinerary?> = _itinerary.asStateFlow()
+    
+    private val _items = MutableStateFlow<List<ItineraryItem>>(emptyList())
+    val items: StateFlow<List<ItineraryItem>> = _items.asStateFlow()
+    
+    private val _progress = MutableStateFlow(0f)
+    val progress: StateFlow<Float> = _progress.asStateFlow()
+    
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+    
+    /**
+     * 載入行程詳情
+     */
+    fun loadItinerary(itineraryId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            
+            // 載入行程
+            itineraryRepository.getItinerary(itineraryId)
+                .onSuccess { itinerary ->
+                    _itinerary.value = itinerary
+                    
+                    // 載入項目
+                    if (itinerary != null) {
+                        loadItems(itineraryId)
+                    }
+                }
+                .onFailure { exception ->
+                    _error.value = exception.message ?: "Failed to load itinerary"
+                }
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * 載入行程項目
+     */
+    private fun loadItems(itineraryId: String) {
+        viewModelScope.launch {
+            itemRepository.getItemsByItinerary(itineraryId)
+                .onSuccess { items ->
+                    _items.value = items
+                    updateProgress(itineraryId)
+                }
+                .onFailure { exception ->
+                    _error.value = exception.message ?: "Failed to load items"
+                }
+        }
+    }
+    
+    /**
+     * 更新進度
+     */
+    private fun updateProgress(itineraryId: String) {
+        viewModelScope.launch {
+            itemRepository.calculateProgress(itineraryId)
+                .onSuccess { progress ->
+                    _progress.value = progress
+                }
+        }
+    }
+    
+    /**
+     * 切換項目完成狀態
+     */
+    fun toggleItemCompletion(itemId: String) {
+        viewModelScope.launch {
+            val currentTimestamp = kotlin.time.Clock.System.now()
+            
+            itemRepository.toggleCompletion(itemId, currentTimestamp)
+                .onSuccess { updatedItem ->
+                    // 重新載入項目列表
+                    _itinerary.value?.let { itinerary ->
+                        loadItems(itinerary.id)
+                    }
+                }
+                .onFailure { exception ->
+                    _error.value = exception.message ?: "Failed to toggle completion"
+                }
+        }
+    }
+    
+    /**
+     * 刪除項目
+     */
+    fun deleteItem(itemId: String) {
+        viewModelScope.launch {
+            deleteItemUseCase(itemId)
+                .onSuccess {
+                    // 重新載入項目列表
+                    _itinerary.value?.let { itinerary ->
+                        loadItems(itinerary.id)
+                    }
+                }
+                .onFailure { exception ->
+                    _error.value = exception.message ?: "Failed to delete item"
+                }
+        }
+    }
+    
+    /**
+     * 清除錯誤訊息
+     */
+    fun clearError() {
+        _error.value = null
+    }
+}
