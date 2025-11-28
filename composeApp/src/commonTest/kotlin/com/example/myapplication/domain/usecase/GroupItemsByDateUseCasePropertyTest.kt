@@ -30,7 +30,7 @@ class GroupItemsByDateUseCasePropertyTest : StringSpec({
             
             // 驗證每組內的時間順序
             grouped.forEach { group ->
-                val times = group.items.map { it.time ?: LocalTime(23, 59, 59) }
+                val times = group.items.map { it.primaryTime() ?: LocalTime(23, 59, 59) }
                 for (i in 0 until times.size - 1) {
                     times[i] shouldBe times[i].coerceAtMost(times[i + 1])
                 }
@@ -75,6 +75,7 @@ class GroupItemsByDateUseCasePropertyTest : StringSpec({
 /**
  * 生成隨機 ItineraryItem 的 Arb
  */
+@OptIn(kotlin.time.ExperimentalTime::class)
 fun Arb.Companion.itineraryItem(): Arb<ItineraryItem> = arbitrary {
     ItineraryItem(
         id = Arb.string(10..20).bind(),
@@ -86,13 +87,14 @@ fun Arb.Companion.itineraryItem(): Arb<ItineraryItem> = arbitrary {
         ),
         activity = Arb.string(10..50).bind(),
         date = Arb.localDate().bind(),
-        time = Arb.localTime().orNull().bind(),
+        arrivalTime = Arb.localTime().orNull().bind(),
+        departureTime = Arb.localTime().orNull().bind(),
         notes = Arb.string(0..100).bind(),
-        photoUrls = emptyList(),
+        photoReferences = emptyList(),
         isCompleted = Arb.boolean().bind(),
         completedAt = null,
-        createdAt = Instant.fromEpochMilliseconds(Arb.long(0..System.currentTimeMillis()).bind()),
-        modifiedAt = Instant.fromEpochMilliseconds(Arb.long(0..System.currentTimeMillis()).bind())
+        createdAt = kotlin.time.Clock.System.now(),
+        modifiedAt = kotlin.time.Clock.System.now()
     )
 }
 

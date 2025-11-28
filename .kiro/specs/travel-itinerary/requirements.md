@@ -34,11 +34,13 @@
 
 #### Acceptance Criteria
 
-1. WHEN a user adds an itinerary item THEN the TravelApp SHALL store the item with date, time, location, activity description, and notes
+1. WHEN a user adds an itinerary item THEN the TravelApp SHALL store the item with date, optional arrival time, optional departure time, location, activity description, and notes
 2. WHEN a user specifies a location for an item THEN the TravelApp SHALL validate that the location name is not empty
 3. WHEN an itinerary item is added THEN the TravelApp SHALL automatically sort items chronologically within the itinerary
-4. WHEN a user adds multiple items with the same date THEN the TravelApp SHALL maintain all items and order them by time
+4. WHEN a user adds multiple items with the same date THEN the TravelApp SHALL maintain all items and order them by arrival time if provided
 5. WHEN an itinerary item is created THEN the TravelApp SHALL assign it a unique identifier within the itinerary
+6. WHEN a user provides both arrival and departure times THEN the TravelApp SHALL validate that departure time is after arrival time
+7. WHEN a user provides only arrival time or only departure time THEN the TravelApp SHALL accept the partial time information without validation errors
 
 ### Requirement 3
 
@@ -99,6 +101,8 @@
 3. WHEN generating a route THEN the TravelApp SHALL validate that the itinerary contains at least two locations
 4. WHEN a route is created THEN the TravelApp SHALL assign it a unique shareable identifier
 5. WHEN a user exports a route THEN the TravelApp SHALL serialize the route data in a standard format
+6. WHEN generating a route from items without time information THEN the TravelApp SHALL display a warning message indicating that time details are missing for optimal route planning
+7. WHEN a route is generated with complete time information THEN the TravelApp SHALL calculate estimated travel time between locations based on departure and arrival times
 
 ### Requirement 8
 
