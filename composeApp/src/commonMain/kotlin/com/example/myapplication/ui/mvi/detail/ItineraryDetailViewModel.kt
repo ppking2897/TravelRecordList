@@ -16,7 +16,11 @@ class ItineraryDetailViewModel(
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
     private val groupItemsByDateUseCase: GroupItemsByDateUseCase,
     private val filterItemsByDateUseCase: FilterItemsByDateUseCase,
-    private val createRouteUseCase: CreateRouteFromItineraryUseCase
+    private val createRouteUseCase: CreateRouteFromItineraryUseCase,
+    private val addPhotoUseCase: AddPhotoUseCase,
+    private val deletePhotoUseCase: DeletePhotoUseCase,
+    private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
+    private val filterByHashtagUseCase: FilterByHashtagUseCase
 ) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
@@ -29,6 +33,11 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.DeleteItem -> deleteItem(intent.itemId)
             is ItineraryDetailIntent.DeleteItinerary -> deleteItinerary(intent.id)
             is ItineraryDetailIntent.GenerateRoute -> generateRoute()
+            is ItineraryDetailIntent.ToggleItemExpansion -> toggleItemExpansion(intent.itemId)
+            is ItineraryDetailIntent.AddPhoto -> addPhoto(intent.itemId, intent.imageData)
+            is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
+            is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
+            is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
         }
     }
     
@@ -147,6 +156,81 @@ class ItineraryDetailViewModel(
                 }
                 .onFailure { exception ->
                     sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "生成路線失敗"))
+                }
+        }
+    }
+    
+    private fun toggleItemExpansion(itemId: String) {
+        val expandedIds = currentState.expandedItemIds
+        updateState {
+            copy(
+                expandedItemIds = if (itemId in expandedIds) {
+                    expandedIds - itemId
+                } else {
+                    expandedIds + itemId
+                }
+            )
+        }
+    }
+    
+    private suspend fun addPhoto(itemId: String, imageData: ByteArray) {
+        addPhotoUseCase(itemId, imageData)
+            .onSuccess { photo ->
+                sendEvent(ItineraryDetailEvent.PhotoAdded(itemId))
+                currentState.itinerary?.let { itinerary ->
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+            }
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "新增照片失敗"))
+            }
+    }
+    
+    private suspend fun deletePhoto(photoId: String) {
+        deletePhotoUseCase(photoId)
+            .onSuccess {
+                sendEvent(ItineraryDetailEvent.PhotoDeleted(photoId))
+                currentState.itinerary?.let { itinerary ->
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+            }
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "刪除照片失敗"))
+            }
+    }
+    
+    private suspend fun setCoverPhoto(itemId: String, photoId: String) {
+        setCoverPhotoUseCase(itemId, photoId)
+            .onSuccess {
+                currentState.itinerary?.let { itinerary ->
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+            }
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "設定封面失敗"))
+            }
+    }
+    
+    private suspend fun filterByHashtag(hashtag: String?) {
+        updateState { copy(selectedHashtag = hashtag) }
+        
+        currentState.itinerary?.let { itinerary ->
+            itemRepository.getItemsByItinerary(itinerary.id)
+                .onSuccess { items ->
+                    val filtered = if (hashtag != null) {
+                        filterByHashtagUseCase(items, hashtag)
+                    } else {
+                        items
+                    }
+                    
+                    val dateFiltered = currentState.selectedDate?.let { date ->
+                        filterItemsByDateUseCase(filtered, date)
+                    } ?: filtered
+                    
+                    val grouped = groupItemsByDateUseCase(dateFiltered)
+                    updateState {
+                        copy(groupedItems = grouped.map { ItemsByDate(it.date, it.items) })
+                    }
                 }
         }
     }

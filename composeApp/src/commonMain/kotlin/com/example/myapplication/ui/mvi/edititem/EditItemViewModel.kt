@@ -30,7 +30,8 @@ class EditItemViewModel(
             is EditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
             is EditItemIntent.UpdateNotes -> updateNotes(intent.notes)
             is EditItemIntent.UpdateDate -> updateDate(intent.date)
-            is EditItemIntent.UpdateTime -> updateTime(intent.time)
+            is EditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
+            is EditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
             is EditItemIntent.Save -> save()
         }
     }
@@ -49,7 +50,8 @@ class EditItemViewModel(
                 locationAddress = item.location.address ?: "",
                 notes = item.notes,
                 selectedDate = item.date,
-                selectedTime = item.arrivalTime,
+                arrivalTime = item.arrivalTime,
+                departureTime = item.departureTime,
                 hasDateRange = hasDateRange
             )
         }
@@ -106,10 +108,17 @@ class EditItemViewModel(
     }
     
     /**
-     * 更新時間
+     * 更新到達時間
      */
-    private fun updateTime(time: LocalTime?) {
-        updateState { copy(selectedTime = time) }
+    private fun updateArrivalTime(time: LocalTime?) {
+        updateState { copy(arrivalTime = time) }
+    }
+    
+    /**
+     * 更新離開時間
+     */
+    private fun updateDepartureTime(time: LocalTime?) {
+        updateState { copy(departureTime = time) }
     }
     
     /**
@@ -150,8 +159,8 @@ class EditItemViewModel(
         
         val updatedItem = snapshot.item.copy(
             date = snapshot.selectedDate,
-            arrivalTime = snapshot.selectedTime,
-            departureTime = snapshot.item.departureTime,
+            arrivalTime = snapshot.arrivalTime,
+            departureTime = snapshot.departureTime,
             location = location,
             activity = snapshot.activity,
             notes = snapshot.notes

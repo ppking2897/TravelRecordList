@@ -32,8 +32,10 @@ fun AddEditItemScreen(
     var locationAddress by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-    var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var arrivalTime by remember { mutableStateOf<LocalTime?>(null) }
+    var departureTime by remember { mutableStateOf<LocalTime?>(null) }
+    var showArrivalTimePicker by remember { mutableStateOf(false) }
+    var showDepartureTimePicker by remember { mutableStateOf(false) }
     
     var activityError by remember { mutableStateOf<String?>(null) }
     var locationError by remember { mutableStateOf<String?>(null) }
@@ -124,15 +126,29 @@ fun AddEditItemScreen(
                 )
             }
             
-            // 時間選擇
+            // 到達時間選擇
             OutlinedTextField(
-                value = selectedTime?.toString() ?: "",
+                value = arrivalTime?.toString() ?: "",
                 onValueChange = {},
-                label = { Text("時間") },
+                label = { Text("到達時間") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 trailingIcon = {
-                    TextButton(onClick = { showTimePicker = true }) {
+                    TextButton(onClick = { showArrivalTimePicker = true }) {
+                        Text("選擇")
+                    }
+                }
+            )
+            
+            // 離開時間選擇
+            OutlinedTextField(
+                value = departureTime?.toString() ?: "",
+                onValueChange = {},
+                label = { Text("離開時間") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    TextButton(onClick = { showDepartureTimePicker = true }) {
                         Text("選擇")
                     }
                 }
@@ -187,8 +203,8 @@ fun AddEditItemScreen(
                         addItemUseCase(
                             itineraryId = itinerary.id,
                             date = selectedDate!!,
-                            arrivalTime = selectedTime,
-                            departureTime = null,
+                            arrivalTime = arrivalTime,
+                            departureTime = departureTime,
                             location = location,
                             activity = activity,
                             notes = notes,
@@ -217,15 +233,27 @@ fun AddEditItemScreen(
         }
     }
     
-    // TimePicker Dialog
-    if (showTimePicker) {
+    // 到達時間 TimePicker Dialog
+    if (showArrivalTimePicker) {
         TimePickerDialog(
-            onDismissRequest = { showTimePicker = false },
+            onDismissRequest = { showArrivalTimePicker = false },
             onConfirm = { time ->
-                selectedTime = time
-                showTimePicker = false
+                arrivalTime = time
+                showArrivalTimePicker = false
             },
-            initialTime = selectedTime
+            initialTime = arrivalTime
+        )
+    }
+    
+    // 離開時間 TimePicker Dialog
+    if (showDepartureTimePicker) {
+        TimePickerDialog(
+            onDismissRequest = { showDepartureTimePicker = false },
+            onConfirm = { time ->
+                departureTime = time
+                showDepartureTimePicker = false
+            },
+            initialTime = departureTime
         )
     }
 }

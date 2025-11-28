@@ -1,12 +1,13 @@
 package com.example.myapplication.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,8 +19,16 @@ fun ItemCard(
     onToggleComplete: (String) -> Unit,
     onDelete: (String) -> Unit,
     onEdit: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isExpanded: Boolean = false,
+    onExpandToggle: ((String) -> Unit)? = null,
+    onAddPhoto: ((String) -> Unit)? = null,
+    onPhotoClick: ((String) -> Unit)? = null,
+    onSetCoverPhoto: ((String, String) -> Unit)? = null,
+    onDeletePhoto: ((String) -> Unit)? = null
 ) {
+    var expanded by remember(isExpanded) { mutableStateOf(isExpanded) }
+    
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -28,6 +37,7 @@ fun ItemCard(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // 標題列：Checkbox + 活動名稱 + 編輯/刪除按鈕
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -95,22 +105,63 @@ fun ItemCard(
                 }
             }
             
-            // Google Maps 縮圖
-            item.location.address?.let { address ->
-                GoogleMapThumbnail(
-                    address = address,
+            // 封面照片（如果有）
+            item.getCoverPhoto()?.let { coverPhoto ->
+                CoverPhotoDisplay(
+                    photoPath = coverPhoto.filePath,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
                 )
             }
             
-            // 備註
-            if (item.notes.isNotBlank()) {
+            // 標籤顯示
+            if (item.hashtags.isNotEmpty()) {
+                HashtagRow(
+                    hashtags = item.hashtags,
+                    onHashtagClick = { /* 可選：點擊標籤進行篩選 */ }
+                )
+            }
+            
+            // 簡短備註（未展開時）
+            if (!expanded && item.notes.isNotBlank()) {
                 Text(
-                    text = item.notes,
+                    text = item.notes.take(50) + if (item.notes.length > 50) "..." else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // 展開/收起按鈕
+            if (onExpandToggle != null) {
+                TextButton(
+                    onClick = { 
+                        expanded = !expanded
+                        onExpandToggle(item.id)
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(if (expanded) "收起" else "展開")
+                    Icon(
+                        if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            
+            // 展開的詳細內容
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                ExpandedItemDetail(
+                    item = item,
+                    onAddPhoto = onAddPhoto,
+                    onPhotoClick = onPhotoClick,
+                    onSetCoverPhoto = onSetCoverPhoto,
+                    onDeletePhoto = onDeletePhoto
                 )
             }
         }
@@ -118,18 +169,10 @@ fun ItemCard(
 }
 
 @Composable
-fun GoogleMapThumbnail(
-    address: String,
+fun CoverPhotoDisplay(
+    photoPath: String,
     modifier: Modifier = Modifier
 ) {
-    // Google Maps Static API URL
-    val mapUrl = "https://maps.googleapis.com/maps/api/staticmap?" +
-            "center=${address.replace(" ", "+")}" +
-            "&zoom=15" +
-            "&size=600x300" +
-            "&markers=color:red%7C${address.replace(" ", "+")}" +
-            "&key=YOUR_GOOGLE_MAPS_API_KEY"
-    
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -140,30 +183,16 @@ fun GoogleMapThumbnail(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            // 暫時顯示地址文字，實際使用時需要載入圖片
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    Icons.Default.Place,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "點擊查看地圖",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            // TODO: 實際載入圖片
+            // 暫時顯示佔位符
+            Icon(
+                Icons.Default.Image,
+                contentDescription = "封面照片",
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
+
+

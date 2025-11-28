@@ -21,7 +21,8 @@ data class AddEditItemState(
     val locationAddress: String = "",
     val notes: String = "",
     val selectedDate: LocalDate? = null,
-    val selectedTime: LocalTime? = null,
+    val arrivalTime: LocalTime? = null,
+    val departureTime: LocalTime? = null,
     val activityError: String? = null,
     val locationError: String? = null,
     val dateError: String? = null,
@@ -40,7 +41,8 @@ sealed class AddEditItemIntent : UiIntent {
     data class UpdateLocationAddress(val address: String) : AddEditItemIntent()
     data class UpdateNotes(val notes: String) : AddEditItemIntent()
     data class UpdateDate(val date: LocalDate?) : AddEditItemIntent()
-    data class UpdateTime(val time: LocalTime?) : AddEditItemIntent()
+    data class UpdateArrivalTime(val time: LocalTime?) : AddEditItemIntent()
+    data class UpdateDepartureTime(val time: LocalTime?) : AddEditItemIntent()
     object Save : AddEditItemIntent()
 }
 

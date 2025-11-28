@@ -9,7 +9,8 @@ import com.example.myapplication.data.repository.ItineraryItemRepository
  */
 @OptIn(kotlin.time.ExperimentalTime::class)
 class UpdateItineraryItemUseCase(
-    private val itemRepository: ItineraryItemRepository
+    private val itemRepository: ItineraryItemRepository,
+    private val extractHashtagsUseCase: ExtractHashtagsUseCase
 ) {
     suspend operator fun invoke(
         item: ItineraryItem,
@@ -19,8 +20,14 @@ class UpdateItineraryItemUseCase(
             // 驗證輸入
             Validation.validateItineraryItem(item).getOrElse { return Result.failure(it) }
             
-            // 更新 modifiedAt
-            val updatedItem = item.copy(modifiedAt = currentTimestamp)
+            // 提取標籤
+            val hashtags = extractHashtagsUseCase(item.notes)
+            
+            // 更新 modifiedAt 和 hashtags
+            val updatedItem = item.copy(
+                modifiedAt = currentTimestamp,
+                hashtags = hashtags
+            )
             
             // 儲存
             itemRepository.updateItem(updatedItem)

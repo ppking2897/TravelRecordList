@@ -17,6 +17,8 @@ data class ItineraryDetailState(
     val groupedItems: List<ItemsByDate> = emptyList(),
     val selectedDate: LocalDate? = null,
     val dateRange: ClosedRange<LocalDate>? = null,
+    val expandedItemIds: Set<String> = emptySet(),
+    val selectedHashtag: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 ) : UiState
@@ -28,6 +30,11 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class DeleteItem(val itemId: String) : ItineraryDetailIntent()
     data class DeleteItinerary(val id: String) : ItineraryDetailIntent()
     object GenerateRoute : ItineraryDetailIntent()
+    data class ToggleItemExpansion(val itemId: String) : ItineraryDetailIntent()
+    data class AddPhoto(val itemId: String, val imageData: ByteArray) : ItineraryDetailIntent()
+    data class DeletePhoto(val photoId: String) : ItineraryDetailIntent()
+    data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
+    data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
 }
 
 sealed class ItineraryDetailEvent : UiEvent {
@@ -39,4 +46,8 @@ sealed class ItineraryDetailEvent : UiEvent {
     data class ShowDeleteItineraryConfirm(val itinerary: Itinerary) : ItineraryDetailEvent()
     data class NavigateToRoute(val routeId: String) : ItineraryDetailEvent()
     data class ShowError(val message: String) : ItineraryDetailEvent()
+    data class ShowPhotoViewer(val photoId: String) : ItineraryDetailEvent()
+    data class ShowImagePicker(val itemId: String) : ItineraryDetailEvent()
+    data class PhotoAdded(val itemId: String) : ItineraryDetailEvent()
+    data class PhotoDeleted(val photoId: String) : ItineraryDetailEvent()
 }

@@ -225,7 +225,12 @@ private fun ItineraryDetailScreenContent(
                                     item = item,
                                     onToggleComplete = onToggleItemCompletion,
                                     onDelete = onDeleteItem,
-                                    onEdit = onEditItemClick
+                                    onEdit = onEditItemClick,
+                                    onExpandToggle = { /* TODO: 實作展開/收起 */ },
+                                    onAddPhoto = { itemId ->
+                                        // TODO: 開啟照片選擇器
+                                        // 暫時顯示提示訊息
+                                    }
                                 )
                             }
                         }

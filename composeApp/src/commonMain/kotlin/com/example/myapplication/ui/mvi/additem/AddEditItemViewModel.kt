@@ -28,7 +28,8 @@ class AddEditItemViewModel(
             is AddEditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
             is AddEditItemIntent.UpdateNotes -> updateNotes(intent.notes)
             is AddEditItemIntent.UpdateDate -> updateDate(intent.date)
-            is AddEditItemIntent.UpdateTime -> updateTime(intent.time)
+            is AddEditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
+            is AddEditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
             is AddEditItemIntent.Save -> save()
         }
     }
@@ -97,10 +98,17 @@ class AddEditItemViewModel(
     }
     
     /**
-     * 更新時間
+     * 更新到達時間
      */
-    private fun updateTime(time: LocalTime?) {
-        updateState { copy(selectedTime = time) }
+    private fun updateArrivalTime(time: LocalTime?) {
+        updateState { copy(arrivalTime = time) }
+    }
+    
+    /**
+     * 更新離開時間
+     */
+    private fun updateDepartureTime(time: LocalTime?) {
+        updateState { copy(departureTime = time) }
     }
     
     /**
@@ -142,8 +150,8 @@ class AddEditItemViewModel(
         addItemUseCase(
             itineraryId = snapshot.itinerary.id,
             date = snapshot.selectedDate,
-            arrivalTime = snapshot.selectedTime,
-            departureTime = null,
+            arrivalTime = snapshot.arrivalTime,
+            departureTime = snapshot.departureTime,
             location = location,
             activity = snapshot.activity,
             notes = snapshot.notes,

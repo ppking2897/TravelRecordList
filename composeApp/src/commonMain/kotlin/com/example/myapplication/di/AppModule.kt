@@ -39,19 +39,27 @@ val appModule = module {
     single<ItineraryItemRepository> { ItineraryItemRepositoryImpl(get()) }
     single<RouteRepository> { RouteRepositoryImpl(get(), get()) }
     single<DraftRepository> { DraftRepositoryImpl(get()) }
+    single<PhotoRepository> { PhotoRepositoryImpl(get(), get()) }
+    single<HashtagRepository> { HashtagRepositoryImpl(get()) }
     
     // Use Cases
     factory { CreateItineraryUseCase(get()) }
     factory { UpdateItineraryUseCase(get()) }
     factory { DeleteItineraryUseCase(get(), get()) }
-    factory { AddItineraryItemUseCase(get(), get()) }
-    factory { UpdateItineraryItemUseCase(get()) }
+    factory { ExtractHashtagsUseCase(get()) }
+    factory { AddItineraryItemUseCase(get(), get(), get()) }
+    factory { UpdateItineraryItemUseCase(get(), get()) }
     factory { DeleteItineraryItemUseCase(get()) }
     factory { GetTravelHistoryUseCase(get(), get()) }
     factory { CreateRouteFromItineraryUseCase(get()) }
     factory { SearchItinerariesUseCase(get()) }
     factory { AddPhotoToItemUseCase(get()) }
     factory { RemovePhotoFromItemUseCase(get()) }
+    factory { AddPhotoUseCase(get()) }
+    factory { DeletePhotoUseCase(get()) }
+    factory { SetCoverPhotoUseCase(get()) }
+    factory { ReorderPhotosUseCase(get()) }
+    factory { FilterByHashtagUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }
     factory { SaveDraftUseCase(get()) }
@@ -66,7 +74,7 @@ val appModule = module {
     viewModel { RouteViewViewModel(get()) }
     viewModel { TravelHistoryViewModelMVI(get(), get()) }
     viewModel { ItineraryListViewModelMVI(get(), get()) }
-    viewModel { ItineraryDetailViewModelMVI(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ItineraryDetailViewModelMVI(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { AddEditItemViewModel(get()) }
     viewModel { EditItemViewModel(get()) }

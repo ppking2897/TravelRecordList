@@ -16,7 +16,8 @@ import kotlin.uuid.Uuid
 @OptIn(kotlin.time.ExperimentalTime::class, ExperimentalUuidApi::class)
 class AddItineraryItemUseCase(
     private val itemRepository: ItineraryItemRepository,
-    private val itineraryRepository: ItineraryRepository
+    private val itineraryRepository: ItineraryRepository,
+    private val extractHashtagsUseCase: ExtractHashtagsUseCase
 ) {
     suspend operator fun invoke(
         itineraryId: String,
@@ -45,6 +46,9 @@ class AddItineraryItemUseCase(
                 return Result.failure(Exception("Departure time must be after arrival time"))
             }
             
+            // 提取標籤
+            val hashtags = extractHashtagsUseCase(notes)
+            
             // 建立 item
             val item = ItineraryItem(
                 id = Uuid.random().toString(),
@@ -55,6 +59,7 @@ class AddItineraryItemUseCase(
                 location = location,
                 activity = activity,
                 notes = notes,
+                hashtags = hashtags,
                 isCompleted = false,
                 completedAt = null,
                 photoReferences = emptyList(),

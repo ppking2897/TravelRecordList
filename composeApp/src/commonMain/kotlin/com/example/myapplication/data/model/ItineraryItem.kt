@@ -34,9 +34,12 @@ data class ItineraryItem(
     val location: Location,
     val activity: String,
     val notes: String = "",
+    val hashtags: List<Hashtag> = emptyList(),  // 新增：標籤列表
+    val photos: List<Photo> = emptyList(),     // 新增：照片列表
+    val coverPhotoId: String? = null,          // 新增：封面照片 ID
     val isCompleted: Boolean = false,
     @Contextual val completedAt: Instant? = null,
-    val photoReferences: List<String> = emptyList(),
+    val photoReferences: List<String> = emptyList(),  // 保留向後相容
     @Contextual val createdAt: Instant,
     @Contextual val modifiedAt: Instant
 ) {
@@ -64,4 +67,9 @@ data class ItineraryItem(
      * 檢查是否有完整的時間資訊
      */
     fun hasCompleteTimeInfo(): Boolean = arrivalTime != null && departureTime != null
+    
+    /**
+     * 取得封面照片
+     */
+    fun getCoverPhoto(): Photo? = photos.find { it.id == coverPhotoId }
 }
