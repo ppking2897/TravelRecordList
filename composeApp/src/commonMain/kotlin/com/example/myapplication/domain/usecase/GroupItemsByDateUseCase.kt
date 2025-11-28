@@ -33,7 +33,7 @@ class GroupItemsByDateUseCase {
                     items = groupItems.sortedWith(
                         compareBy<ItineraryItem> { 
                             // 沒有時間的項目排在最後
-                            it.time ?: LocalTime(23, 59, 59)
+                            it.primaryTime() ?: LocalTime(23, 59, 59)
                         }
                     )
                 )

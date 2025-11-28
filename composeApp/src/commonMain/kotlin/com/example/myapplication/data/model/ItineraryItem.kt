@@ -12,7 +12,8 @@ import kotlinx.serialization.Serializable
  * @property id 唯一識別碼
  * @property itineraryId 所屬行程的 ID
  * @property date 日期
- * @property time 時間（可選）
+ * @property arrivalTime 到達時間（可選）
+ * @property departureTime 離開時間（可選）
  * @property location 地點
  * @property activity 活動描述
  * @property notes 備註
@@ -28,7 +29,8 @@ data class ItineraryItem(
     val id: String,
     val itineraryId: String,
     val date: LocalDate,
-    val time: LocalTime? = null,
+    val arrivalTime: LocalTime? = null,      // 到達時間（可選）
+    val departureTime: LocalTime? = null,    // 離開時間（可選）
     val location: Location,
     val activity: String,
     val notes: String = "",
@@ -37,4 +39,29 @@ data class ItineraryItem(
     val photoReferences: List<String> = emptyList(),
     @Contextual val createdAt: Instant,
     @Contextual val modifiedAt: Instant
-)
+) {
+    /**
+     * 計算停留時間
+     * 如果有到達和離開時間，計算兩者之間的時間差
+     */
+    fun stayDuration(): kotlin.time.Duration? {
+        return if (arrivalTime != null && departureTime != null) {
+            val arrivalSeconds = arrivalTime.toSecondOfDay()
+            val departureSeconds = departureTime.toSecondOfDay()
+            kotlin.time.Duration.Companion.parse("PT${departureSeconds - arrivalSeconds}S")
+        } else {
+            null
+        }
+    }
+    
+    /**
+     * 取得主要時間（用於排序）
+     * 優先使用到達時間，如果沒有則使用離開時間
+     */
+    fun primaryTime(): LocalTime? = arrivalTime ?: departureTime
+    
+    /**
+     * 檢查是否有完整的時間資訊
+     */
+    fun hasCompleteTimeInfo(): Boolean = arrivalTime != null && departureTime != null
+}

@@ -98,10 +98,10 @@ class ItineraryItemRepositoryImpl(
             // 過濾屬於指定 itinerary 的 items
             val filtered = allItems.filter { it.itineraryId == itineraryId }
             
-            // 按時間順序排序（date 升序，相同 date 則按 time 升序）
+            // 按時間順序排序（date 升序，相同 date 則按 primaryTime 升序）
             val sorted = filtered.sortedWith(
                 compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.time }
+                    .thenBy { it.primaryTime() }
             )
             
             Result.success(sorted)
@@ -122,7 +122,7 @@ class ItineraryItemRepositoryImpl(
             // 按日期排序
             val sorted = filtered.sortedWith(
                 compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.time }
+                    .thenBy { it.primaryTime() }
             )
             
             Result.success(sorted)
@@ -146,7 +146,7 @@ class ItineraryItemRepositoryImpl(
             // 按時間順序排序
             val sorted = filtered.sortedWith(
                 compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.time }
+                    .thenBy { it.primaryTime() }
             )
             
             Result.success(sorted)

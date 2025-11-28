@@ -83,7 +83,7 @@ class TravelHistoryViewModel(
                     val sorted = grouped.mapValues { (_, items) ->
                         items.sortedWith(
                             compareBy<ItineraryItem> { it.date }
-                                .thenBy { it.time }
+                                .thenBy { it.primaryTime() }
                         )
                     }
 

@@ -21,7 +21,8 @@ class AddItineraryItemUseCase(
     suspend operator fun invoke(
         itineraryId: String,
         date: LocalDate,
-        time: LocalTime?,
+        arrivalTime: LocalTime? = null,
+        departureTime: LocalTime? = null,
         location: Location,
         activity: String,
         notes: String,
@@ -39,12 +40,18 @@ class AddItineraryItemUseCase(
                 return Result.failure(Exception("Activity description must not be empty"))
             }
             
+            // 驗證時間邏輯
+            if (arrivalTime != null && departureTime != null && departureTime < arrivalTime) {
+                return Result.failure(Exception("Departure time must be after arrival time"))
+            }
+            
             // 建立 item
             val item = ItineraryItem(
                 id = Uuid.random().toString(),
                 itineraryId = itineraryId,
                 date = date,
-                time = time,
+                arrivalTime = arrivalTime,
+                departureTime = departureTime,
                 location = location,
                 activity = activity,
                 notes = notes,

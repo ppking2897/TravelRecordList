@@ -92,6 +92,26 @@ class ItineraryListViewModel(
     }
     
     /**
+     * 刪除行程
+     */
+    fun deleteItinerary(id: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            
+            itineraryRepository.deleteItinerary(id)
+                .onSuccess {
+                    // 重新載入列表
+                    loadItineraries()
+                }
+                .onFailure { exception ->
+                    _error.value = exception.message ?: "刪除失敗"
+                    _isLoading.value = false
+                }
+        }
+    }
+    
+    /**
      * 清除錯誤訊息
      */
     fun clearError() {

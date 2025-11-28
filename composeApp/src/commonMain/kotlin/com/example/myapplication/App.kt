@@ -11,6 +11,7 @@ import com.example.myapplication.di.appModule
 import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.ui.screen.*
 import com.example.myapplication.ui.viewmodel.*
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -49,11 +50,12 @@ fun TravelApp() {
     ) {
         // 行程列表
         composable(Screen.ItineraryList.route) {
-            val viewModel: ItineraryListViewModel = koinViewModel()
             ItineraryListScreen(
-                viewModel = viewModel,
                 onItineraryClick = { id ->
                     navController.navigate(Screen.ItineraryDetail.createRoute(id))
+                },
+                onEditClick = { id ->
+                    navController.navigate(Screen.EditItinerary.createRoute(id))
                 },
                 onAddClick = {
                     navController.navigate(Screen.AddItinerary.route)
@@ -64,8 +66,45 @@ fun TravelApp() {
         // 新增行程
         composable(Screen.AddItinerary.route) {
             val createUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.CreateItineraryUseCase>()
+            val saveDraftUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.SaveDraftUseCase>()
+            val loadDraftUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.LoadDraftUseCase>()
+            val draftRepository = org.koin.compose.koinInject<com.example.myapplication.data.repository.DraftRepository>()
+            
             AddEditItineraryScreen(
                 createItineraryUseCase = createUseCase,
+                saveDraftUseCase = saveDraftUseCase,
+                loadDraftUseCase = loadDraftUseCase,
+                draftRepository = draftRepository,
+                onNavigateBack = { navController.popBackStack() },
+                onSaveSuccess = { id ->
+                    navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
+                        popUpTo(Screen.ItineraryList.route)
+                    }
+                }
+            )
+        }
+        
+        // 編輯行程
+        composable(
+            route = Screen.EditItinerary.route,
+            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
+            val createUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.CreateItineraryUseCase>()
+            val updateUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.UpdateItineraryUseCase>()
+            val itineraryRepository = org.koin.compose.koinInject<com.example.myapplication.data.repository.ItineraryRepository>()
+            val saveDraftUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.SaveDraftUseCase>()
+            val loadDraftUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.LoadDraftUseCase>()
+            val draftRepository = org.koin.compose.koinInject<com.example.myapplication.data.repository.DraftRepository>()
+            
+            AddEditItineraryScreen(
+                itineraryId = itineraryId,
+                createItineraryUseCase = createUseCase,
+                updateItineraryUseCase = updateUseCase,
+                itineraryRepository = itineraryRepository,
+                saveDraftUseCase = saveDraftUseCase,
+                loadDraftUseCase = loadDraftUseCase,
+                draftRepository = draftRepository,
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { id ->
                     navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
@@ -82,6 +121,17 @@ fun TravelApp() {
         ) { backStackEntry ->
             val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
             val viewModel: ItineraryDetailViewModel = koinViewModel()
+            val deleteUseCase = org.koin.compose.koinInject<com.example.myapplication.domain.usecase.DeleteItineraryUseCase>()
+            
+            var showDeleteDialog by remember { mutableStateOf(false) }
+            var itineraryTitle by remember { mutableStateOf("") }
+            
+            LaunchedEffect(itineraryId) {
+                viewModel.itinerary.collect { itinerary ->
+                    itinerary?.let { itineraryTitle = it.title }
+                }
+            }
+            
             ItineraryDetailScreen(
                 viewModel = viewModel,
                 itineraryId = itineraryId,
@@ -92,10 +142,35 @@ fun TravelApp() {
                 onEditItemClick = { itemId ->
                     navController.navigate(Screen.EditItem.createRoute(itemId))
                 },
+                onEditItineraryClick = {
+                    navController.navigate(Screen.EditItinerary.createRoute(itineraryId))
+                },
+                onDeleteItineraryClick = {
+                    showDeleteDialog = true
+                },
                 onGenerateRouteClick = {
                     // TODO: 實作路線生成並導航到 RouteView
                 }
             )
+            
+            // 刪除行程確認 Dialog
+            if (showDeleteDialog) {
+                com.example.myapplication.ui.component.DeleteConfirmDialog(
+                    title = "確認刪除",
+                    message = "確定要刪除「$itineraryTitle」嗎？此操作無法復原，所有項目也會被刪除。",
+                    onConfirm = {
+                        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                            deleteUseCase(itineraryId).onSuccess {
+                                navController.popBackStack()
+                            }
+                        }
+                        showDeleteDialog = false
+                    },
+                    onDismiss = {
+                        showDeleteDialog = false
+                    }
+                )
+            }
         }
         
         // 新增項目
@@ -161,9 +236,7 @@ fun TravelApp() {
         
         // 旅遊歷史
         composable(Screen.TravelHistory.route) {
-            val viewModel: TravelHistoryViewModel = koinViewModel()
             TravelHistoryScreen(
-                viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -174,12 +247,10 @@ fun TravelApp() {
             arguments = listOf(navArgument("routeId") { type = NavType.StringType })
         ) { backStackEntry ->
             val routeId = backStackEntry.arguments?.getString("routeId") ?: return@composable
-            val routeRepository = org.koin.compose.koinInject<com.example.myapplication.data.repository.RouteRepository>()
             RouteViewScreen(
                 routeId = routeId,
-                routeRepository = routeRepository,
                 onNavigateBack = { navController.popBackStack() },
-                onExportClick = { json ->
+                onExportSuccess = { json ->
                     // TODO: 實作匯出功能（分享、儲存等）
                     println("Export JSON: $json")
                 }

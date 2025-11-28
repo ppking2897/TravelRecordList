@@ -103,7 +103,7 @@ class RouteRepositoryImpl(
             // 按時間順序排序 items
             val sortedItems = itinerary.items.sortedWith(
                 compareBy<com.example.myapplication.data.model.ItineraryItem> { it.date }
-                    .thenBy { it.time }
+                    .thenBy { it.primaryTime() }
             )
             
             // 生成 route locations（去重但保持順序）

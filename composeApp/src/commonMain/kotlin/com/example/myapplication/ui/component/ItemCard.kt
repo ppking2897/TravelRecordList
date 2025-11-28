@@ -65,9 +65,19 @@ fun ItemCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        item.time?.let { time ->
+                        // 顯示時間資訊
+                        val timeText = when {
+                            item.arrivalTime != null && item.departureTime != null -> 
+                                "${item.arrivalTime} - ${item.departureTime}"
+                            item.arrivalTime != null -> 
+                                "到達 ${item.arrivalTime}"
+                            item.departureTime != null -> 
+                                "離開 ${item.departureTime}"
+                            else -> null
+                        }
+                        timeText?.let { text ->
                             Text(
-                                text = time.toString(),
+                                text = text,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

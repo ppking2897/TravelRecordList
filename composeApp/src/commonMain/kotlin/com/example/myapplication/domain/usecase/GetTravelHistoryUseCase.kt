@@ -40,7 +40,7 @@ class GetTravelHistoryUseCase(
             val sortedGroupedByLocation = groupedByLocation.mapValues { (_, items) ->
                 items.sortedWith(
                     compareBy<ItineraryItem> { it.date }
-                        .thenBy { it.time }
+                        .thenBy { it.primaryTime() }
                 )
             }
             

@@ -16,8 +16,14 @@ import com.example.myapplication.ui.component.TimePickerDialog
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.ExperimentalTime
 
+/**
+ * 編輯項目畫面
+ * 
+ * 用於編輯現有行程項目的資訊
+ */
 @ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +39,7 @@ fun EditItemScreen(
     var locationAddress by remember { mutableStateOf(item.location.address ?: "") }
     var notes by remember { mutableStateOf(item.notes) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(item.date) }
-    var selectedTime by remember { mutableStateOf<LocalTime?>(item.time) }
+    var selectedTime by remember { mutableStateOf<LocalTime?>(item.arrivalTime) }
     var showTimePicker by remember { mutableStateOf(false) }
     
     var activityError by remember { mutableStateOf<String?>(null) }
@@ -95,6 +101,7 @@ fun EditItemScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             
+            // 日期選擇
             if (hasDateRange) {
                 DateDropdown(
                     dateRange = itinerary.startDate!!..itinerary.endDate!!,
@@ -113,8 +120,18 @@ fun EditItemScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            } else {
+                OutlinedTextField(
+                    value = selectedDate?.toString() ?: "",
+                    onValueChange = {},
+                    label = { Text("日期 *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    supportingText = { Text("請先在行程中設定日期範圍") }
+                )
             }
             
+            // 時間選擇
             OutlinedTextField(
                 value = selectedTime?.toString() ?: "",
                 onValueChange = {},
@@ -122,15 +139,8 @@ fun EditItemScreen(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 trailingIcon = {
-                    Row {
-                        if (selectedTime != null) {
-                            TextButton(onClick = { selectedTime = null }) {
-                                Text("清除")
-                            }
-                        }
-                        TextButton(onClick = { showTimePicker = true }) {
-                            Text("選擇")
-                        }
+                    TextButton(onClick = { showTimePicker = true }) {
+                        Text("選擇")
                     }
                 }
             )
@@ -178,12 +188,12 @@ fun EditItemScreen(
                     )
                     
                     val updatedItem = item.copy(
-                        activity = activity,
-                        location = location,
                         date = selectedDate!!,
-                        time = selectedTime,
-                        notes = notes,
-                        modifiedAt = kotlin.time.Clock.System.now()
+                        arrivalTime = selectedTime,
+                        departureTime = item.departureTime,
+                        location = location,
+                        activity = activity,
+                        notes = notes
                     )
                     
                     scope.launch {
@@ -203,7 +213,7 @@ fun EditItemScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
+                enabled = !isLoading && hasDateRange
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -217,6 +227,7 @@ fun EditItemScreen(
         }
     }
     
+    // TimePicker Dialog
     if (showTimePicker) {
         TimePickerDialog(
             onDismissRequest = { showTimePicker = false },
@@ -226,5 +237,187 @@ fun EditItemScreen(
             },
             initialTime = selectedTime
         )
+    }
+}
+
+
+// Preview
+@Preview
+@ExperimentalTime
+@Composable
+private fun EditItemScreenPreview() {
+    MaterialTheme {
+        Surface {
+            EditItemScreenContent(
+                activity = "參觀淺草寺",
+                locationName = "淺草寺",
+                locationAddress = "東京都台東區",
+                notes = "早上參觀",
+                selectedDate = kotlinx.datetime.LocalDate(2024, 3, 15),
+                selectedTime = kotlinx.datetime.LocalTime(9, 0),
+                activityError = null,
+                locationError = null,
+                dateError = null,
+                error = null,
+                isLoading = false,
+                hasDateRange = true,
+                dateRange = kotlinx.datetime.LocalDate(2024, 3, 15)..kotlinx.datetime.LocalDate(2024, 3, 20),
+                onActivityChange = {},
+                onLocationNameChange = {},
+                onLocationAddressChange = {},
+                onNotesChange = {},
+                onDateSelected = {},
+                onTimeClick = {},
+                onSave = {},
+                onNavigateBack = {}
+            )
+        }
+    }
+}
+
+@ExperimentalTime
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditItemScreenContent(
+    activity: String,
+    locationName: String,
+    locationAddress: String,
+    notes: String,
+    selectedDate: LocalDate?,
+    selectedTime: LocalTime?,
+    activityError: String?,
+    locationError: String?,
+    dateError: String?,
+    error: String?,
+    isLoading: Boolean,
+    hasDateRange: Boolean,
+    dateRange: ClosedRange<LocalDate>?,
+    onActivityChange: (String) -> Unit,
+    onLocationNameChange: (String) -> Unit,
+    onLocationAddressChange: (String) -> Unit,
+    onNotesChange: (String) -> Unit,
+    onDateSelected: (LocalDate?) -> Unit,
+    onTimeClick: () -> Unit,
+    onSave: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("編輯項目") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            OutlinedTextField(
+                value = activity,
+                onValueChange = onActivityChange,
+                label = { Text("活動 *") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = activityError != null,
+                supportingText = activityError?.let { { Text(it) } }
+            )
+            
+            OutlinedTextField(
+                value = locationName,
+                onValueChange = onLocationNameChange,
+                label = { Text("地點名稱 *") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = locationError != null,
+                supportingText = locationError?.let { { Text(it) } }
+            )
+            
+            OutlinedTextField(
+                value = locationAddress,
+                onValueChange = onLocationAddressChange,
+                label = { Text("地點地址") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            // 日期選擇
+            if (hasDateRange && dateRange != null) {
+                DateDropdown(
+                    dateRange = dateRange,
+                    selectedDate = selectedDate,
+                    onDateSelected = onDateSelected,
+                    label = "日期 *",
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (dateError != null) {
+                    Text(
+                        text = dateError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            } else {
+                OutlinedTextField(
+                    value = selectedDate?.toString() ?: "",
+                    onValueChange = {},
+                    label = { Text("日期 *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    supportingText = { Text("請先在行程中設定日期範圍") }
+                )
+            }
+            
+            // 時間選擇
+            OutlinedTextField(
+                value = selectedTime?.toString() ?: "",
+                onValueChange = {},
+                label = { Text("時間") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    TextButton(onClick = onTimeClick) {
+                        Text("選擇")
+                    }
+                }
+            )
+            
+            OutlinedTextField(
+                value = notes,
+                onValueChange = onNotesChange,
+                label = { Text("備註") },
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+                maxLines = 5
+            )
+            
+            error?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Button(
+                onClick = onSave,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading && hasDateRange
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("儲存")
+                }
+            }
+        }
     }
 }

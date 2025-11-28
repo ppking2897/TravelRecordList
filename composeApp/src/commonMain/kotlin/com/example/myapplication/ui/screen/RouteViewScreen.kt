@@ -12,149 +12,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.Route
 import com.example.myapplication.data.model.RouteLocation
-import com.example.myapplication.data.repository.RouteRepository
-import kotlinx.coroutines.launch
+import com.example.myapplication.ui.mvi.route.RouteViewEvent
+import com.example.myapplication.ui.mvi.route.RouteViewIntent
+import com.example.myapplication.ui.mvi.route.RouteViewViewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * 路線檢視畫面
+ * 路線檢視畫面（MVI 架構）
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteViewScreen(
     routeId: String,
-    routeRepository: RouteRepository,
     onNavigateBack: () -> Unit,
-    onExportClick: (String) -> Unit
+    onExportSuccess: (String) -> Unit,
+    viewModel: RouteViewViewModel = koinViewModel()
 ) {
-    var route by remember { mutableStateOf<Route?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val state by viewModel.state.collectAsState()
     
-    val scope = rememberCoroutineScope()
+    // 收集 Event
+    LaunchedEffect(Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                is RouteViewEvent.NavigateBack -> onNavigateBack()
+                is RouteViewEvent.ExportSuccess -> onExportSuccess(event.json)
+                is RouteViewEvent.ShowError -> {
+                    // 錯誤訊息透過 Event 顯示
+                }
+            }
+        }
+    }
     
+    // 載入路線
     LaunchedEffect(routeId) {
-        scope.launch {
-            isLoading = true
-            error = null
-            
-            routeRepository.getRoute(routeId)
-                .onSuccess { loadedRoute ->
-                    route = loadedRoute
-                }
-                .onFailure { exception ->
-                    error = exception.message ?: "載入路線失敗"
-                }
-            
-            isLoading = false
-        }
+        viewModel.handleIntent(RouteViewIntent.LoadRoute(routeId))
     }
     
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(route?.title ?: "路線詳情") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                routeRepository.exportRoute(routeId)
-                                    .onSuccess { json ->
-                                        onExportClick(json)
-                                    }
-                                    .onFailure { exception ->
-                                        error = exception.message ?: "匯出失敗"
-                                    }
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.Share, contentDescription = "匯出")
-                    }
-                }
-            )
+    RouteViewScreenContent(
+        route = state.route,
+        isLoading = state.isLoading,
+        isExporting = state.isExporting,
+        error = state.error,
+        onNavigateBack = onNavigateBack,
+        onExportClick = {
+            viewModel.handleIntent(RouteViewIntent.ExportRoute(routeId))
         }
-    ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (route == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = error ?: "找不到路線",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // 路線資訊卡片
-                item {
-                    RouteInfoCard(route = route!!)
-                }
-                
-                // 錯誤訊息
-                error?.let { errorMessage ->
-                    item {
-                        Text(
-                            text = errorMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                }
-                
-                // 地點列表標題
-                item {
-                    Text(
-                        text = "路線地點",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-                
-                // 地點列表
-                itemsIndexed(route!!.locations) { index, routeLocation ->
-                    RouteLocationCard(
-                        routeLocation = routeLocation,
-                        isFirst = index == 0,
-                        isLast = index == route!!.locations.lastIndex
-                    )
-                }
-            }
-        }
-    }
+    )
 }
 
 @Composable
@@ -334,6 +237,205 @@ private fun RouteLocationCard(
                     Text(
                         text = routeLocation.notes,
                         style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+// Preview
+@Preview
+@Composable
+private fun RouteViewScreenPreview() {
+    MaterialTheme {
+        Surface {
+            RouteViewScreenContent(
+                route = Route(
+                    id = "1",
+                    title = "東京一日遊",
+                    locations = listOf(
+                        RouteLocation(
+                            location = com.example.myapplication.data.model.Location(
+                                name = "淺草寺",
+                                latitude = 35.7148,
+                                longitude = 139.7967,
+                                address = "東京都台東區淺草2-3-1"
+                            ),
+                            order = 0,
+                            recommendedDuration = kotlin.time.Duration.parse("2h"),
+                            notes = "參觀雷門和五重塔"
+                        ),
+                        RouteLocation(
+                            location = com.example.myapplication.data.model.Location(
+                                name = "晴空塔",
+                                latitude = 35.7101,
+                                longitude = 139.8107,
+                                address = "東京都墨田區押上1-1-2"
+                            ),
+                            order = 1,
+                            recommendedDuration = kotlin.time.Duration.parse("3h"),
+                            notes = "登塔觀景"
+                        )
+                    ),
+                    createdFrom = "1"
+                ),
+                isLoading = false,
+                isExporting = false,
+                error = null,
+                onNavigateBack = {},
+                onExportClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RouteViewScreenPreview_Loading() {
+    MaterialTheme {
+        Surface {
+            RouteViewScreenContent(
+                route = null,
+                isLoading = true,
+                isExporting = false,
+                error = null,
+                onNavigateBack = {},
+                onExportClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RouteViewScreenPreview_Error() {
+    MaterialTheme {
+        Surface {
+            RouteViewScreenContent(
+                route = null,
+                isLoading = false,
+                isExporting = false,
+                error = "找不到路線",
+                onNavigateBack = {},
+                onExportClick = {}
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RouteViewScreenContent(
+    route: Route?,
+    isLoading: Boolean,
+    isExporting: Boolean,
+    error: String?,
+    onNavigateBack: () -> Unit,
+    onExportClick: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(route?.title ?: "路線詳情") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                    }
+                },
+                actions = {
+                    if (isExporting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(horizontal = 12.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        IconButton(
+                            onClick = onExportClick,
+                            enabled = route != null
+                        ) {
+                            Icon(Icons.Default.Share, contentDescription = "匯出")
+                        }
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (route == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = error ?: "找不到路線",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 路線資訊卡片
+                item {
+                    RouteInfoCard(route = route)
+                }
+                
+                // 錯誤訊息
+                error?.let { errorMessage ->
+                    item {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+                
+                // 地點列表標題
+                item {
+                    Text(
+                        text = "路線地點",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                
+                // 地點列表
+                itemsIndexed(route.locations) { index, routeLocation ->
+                    RouteLocationCard(
+                        routeLocation = routeLocation,
+                        isFirst = index == 0,
+                        isLast = index == route.locations.lastIndex
                     )
                 }
             }

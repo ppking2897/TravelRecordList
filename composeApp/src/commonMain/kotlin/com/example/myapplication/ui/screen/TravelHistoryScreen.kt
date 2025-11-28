@@ -12,24 +12,61 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.ItineraryItem
 import com.example.myapplication.data.model.Location
-import com.example.myapplication.ui.viewmodel.TravelHistoryViewModel
+import com.example.myapplication.ui.mvi.history.TravelHistoryEvent
+import com.example.myapplication.ui.mvi.history.TravelHistoryIntent
+import com.example.myapplication.ui.mvi.history.TravelHistoryViewModel
+import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
 
 /**
- * 旅遊歷史畫面
+ * 旅遊歷史畫面（MVI 架構）
  */
+@ExperimentalTime
+@Composable
+fun TravelHistoryScreen(
+    onNavigateBack: () -> Unit,
+    viewModel: TravelHistoryViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    
+    // 收集 Event
+    LaunchedEffect(Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                is TravelHistoryEvent.NavigateBack -> onNavigateBack()
+                is TravelHistoryEvent.ShowFilterDialog -> {
+                    // Dialog 在 UI 中處理
+                }
+                is TravelHistoryEvent.ShowError -> {
+                    // 錯誤已經在 state 中
+                }
+            }
+        }
+    }
+    
+    TravelHistoryScreenContent(
+        historyByLocation = state.historyByLocation,
+        dateFilter = state.dateFilter,
+        isLoading = state.isLoading,
+        error = state.error,
+        onNavigateBack = onNavigateBack,
+        onClearFilter = { viewModel.handleIntent(TravelHistoryIntent.ClearFilter) }
+    )
+}
+
 @ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TravelHistoryScreen(
-    viewModel: TravelHistoryViewModel,
-    onNavigateBack: () -> Unit
+private fun TravelHistoryScreenContent(
+    historyByLocation: Map<String, List<ItineraryItem>>,
+    dateFilter: ClosedRange<LocalDate>?,
+    isLoading: Boolean,
+    error: String?,
+    onNavigateBack: () -> Unit,
+    onClearFilter: () -> Unit
 ) {
-    val historyByLocation by viewModel.historyByLocation.collectAsState()
-    val dateFilter by viewModel.dateFilter.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
-    
     var showFilterDialog by remember { mutableStateOf(false) }
     
     Scaffold(
@@ -53,7 +90,7 @@ fun TravelHistoryScreen(
                         )
                     }
                     if (dateFilter != null) {
-                        IconButton(onClick = { viewModel.clearFilter() }) {
+                        IconButton(onClick = onClearFilter) {
                             Icon(Icons.Default.Clear, contentDescription = "清除過濾")
                         }
                     }
@@ -83,7 +120,7 @@ fun TravelHistoryScreen(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "${filter.start} - ${filter.end}",
+                            text = "${filter.start} - ${filter.endInclusive}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -118,10 +155,10 @@ fun TravelHistoryScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    historyByLocation.forEach { (location, items) ->
+                    historyByLocation.forEach { (locationName, items) ->
                         item {
                             LocationHistoryCard(
-                                location = location,
+                                locationName = locationName,
                                 items = items
                             )
                         }
@@ -164,7 +201,7 @@ private fun EmptyHistoryState() {
 
 @Composable
 private fun LocationHistoryCard(
-    location: Location,
+    locationName: String,
     items: List<ItineraryItem>
 ) {
     Card(
@@ -186,12 +223,12 @@ private fun LocationHistoryCard(
                 )
                 Column {
                     Text(
-                        text = location.name,
+                        text = locationName,
                         style = MaterialTheme.typography.titleLarge
                     )
-                    if (location.address != null) {
+                    items.firstOrNull()?.location?.address?.let { address ->
                         Text(
-                            text = location.address,
+                            text = address,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -258,7 +295,7 @@ private fun HistoryItemRow(item: ItineraryItem) {
                 text = item.activity,
                 style = MaterialTheme.typography.bodyMedium
             )
-            item.time?.let { time ->
+            item.primaryTime()?.let { time ->
                 Text(
                     text = time.toString(),
                     style = MaterialTheme.typography.bodySmall,
@@ -274,6 +311,95 @@ private fun HistoryItemRow(item: ItineraryItem) {
                 contentDescription = "已完成",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+
+// Preview
+@Preview
+@ExperimentalTime
+@Composable
+private fun TravelHistoryScreenPreview() {
+    MaterialTheme {
+        Surface {
+            TravelHistoryScreenContent(
+                historyByLocation = mapOf(
+                    "淺草寺" to listOf(
+                        ItineraryItem(
+                            id = "1",
+                            itineraryId = "1",
+                            date = kotlinx.datetime.LocalDate(2024, 3, 15),
+                            arrivalTime = kotlinx.datetime.LocalTime(9, 0),
+                            departureTime = null,
+                            location = Location("淺草寺", null, null, "東京都台東區"),
+                            activity = "參觀雷門",
+                            notes = "",
+                            isCompleted = true,
+                            completedAt = kotlin.time.Clock.System.now(),
+                            photoReferences = emptyList(),
+                            createdAt = kotlin.time.Clock.System.now(),
+                            modifiedAt = kotlin.time.Clock.System.now()
+                        ),
+                        ItineraryItem(
+                            id = "2",
+                            itineraryId = "2",
+                            date = kotlinx.datetime.LocalDate(2024, 4, 10),
+                            arrivalTime = kotlinx.datetime.LocalTime(14, 0),
+                            departureTime = null,
+                            location = Location("淺草寺", null, null, "東京都台東區"),
+                            activity = "購買紀念品",
+                            notes = "",
+                            isCompleted = true,
+                            completedAt = kotlin.time.Clock.System.now(),
+                            photoReferences = emptyList(),
+                            createdAt = kotlin.time.Clock.System.now(),
+                            modifiedAt = kotlin.time.Clock.System.now()
+                        )
+                    )
+                ),
+                dateFilter = null,
+                isLoading = false,
+                error = null,
+                onNavigateBack = {},
+                onClearFilter = {}
+            )
+        }
+    }
+}
+
+@Preview
+@ExperimentalTime
+@Composable
+private fun TravelHistoryScreenPreview_Loading() {
+    MaterialTheme {
+        Surface {
+            TravelHistoryScreenContent(
+                historyByLocation = emptyMap(),
+                dateFilter = null,
+                isLoading = true,
+                error = null,
+                onNavigateBack = {},
+                onClearFilter = {}
+            )
+        }
+    }
+}
+
+@Preview
+@ExperimentalTime
+@Composable
+private fun TravelHistoryScreenPreview_Empty() {
+    MaterialTheme {
+        Surface {
+            TravelHistoryScreenContent(
+                historyByLocation = emptyMap(),
+                dateFilter = null,
+                isLoading = false,
+                error = null,
+                onNavigateBack = {},
+                onClearFilter = {}
             )
         }
     }

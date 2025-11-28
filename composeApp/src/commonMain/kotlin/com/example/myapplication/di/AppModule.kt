@@ -5,6 +5,13 @@ import com.example.myapplication.data.storage.InMemoryStorageService
 import com.example.myapplication.data.storage.StorageService
 import com.example.myapplication.data.sync.SyncManager
 import com.example.myapplication.domain.usecase.*
+import com.example.myapplication.ui.mvi.addedit.AddEditItineraryViewModel
+import com.example.myapplication.ui.mvi.additem.AddEditItemViewModel
+import com.example.myapplication.ui.mvi.detail.ItineraryDetailViewModel as ItineraryDetailViewModelMVI
+import com.example.myapplication.ui.mvi.edititem.EditItemViewModel
+import com.example.myapplication.ui.mvi.history.TravelHistoryViewModel as TravelHistoryViewModelMVI
+import com.example.myapplication.ui.mvi.itinerary.ItineraryListViewModel as ItineraryListViewModelMVI
+import com.example.myapplication.ui.mvi.route.RouteViewViewModel
 import com.example.myapplication.ui.viewmodel.*
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -31,9 +38,12 @@ val appModule = module {
     single<ItineraryRepository> { ItineraryRepositoryImpl(get()) }
     single<ItineraryItemRepository> { ItineraryItemRepositoryImpl(get()) }
     single<RouteRepository> { RouteRepositoryImpl(get(), get()) }
+    single<DraftRepository> { DraftRepositoryImpl(get()) }
     
     // Use Cases
     factory { CreateItineraryUseCase(get()) }
+    factory { UpdateItineraryUseCase(get()) }
+    factory { DeleteItineraryUseCase(get(), get()) }
     factory { AddItineraryItemUseCase(get(), get()) }
     factory { UpdateItineraryItemUseCase(get()) }
     factory { DeleteItineraryItemUseCase(get()) }
@@ -44,9 +54,20 @@ val appModule = module {
     factory { RemovePhotoFromItemUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }
+    factory { SaveDraftUseCase(get()) }
+    factory { LoadDraftUseCase(get()) }
     
     // ViewModels
     viewModel { ItineraryListViewModel(get(), get()) }
     viewModel { ItineraryDetailViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { TravelHistoryViewModel(get(), get()) }
+    
+    // MVI ViewModels
+    viewModel { RouteViewViewModel(get()) }
+    viewModel { TravelHistoryViewModelMVI(get(), get()) }
+    viewModel { ItineraryListViewModelMVI(get(), get()) }
+    viewModel { ItineraryDetailViewModelMVI(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { AddEditItemViewModel(get()) }
+    viewModel { EditItemViewModel(get()) }
 }
