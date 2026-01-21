@@ -90,7 +90,6 @@ fun Arb.Companion.itineraryItem(): Arb<ItineraryItem> = arbitrary {
         arrivalTime = Arb.localTime().orNull().bind(),
         departureTime = Arb.localTime().orNull().bind(),
         notes = Arb.string(0..100).bind(),
-        photoReferences = emptyList(),
         isCompleted = Arb.boolean().bind(),
         completedAt = null,
         createdAt = kotlin.time.Clock.System.now(),
