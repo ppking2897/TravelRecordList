@@ -9,8 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.ui.theme.CardStyle
+import com.example.myapplication.ui.theme.IconSize
+import com.example.myapplication.ui.theme.ListStyle
+import com.example.myapplication.ui.theme.Spacing
 import com.example.myapplication.data.model.Location
 import com.example.myapplication.ui.mvi.history.TravelHistoryEvent
 import com.example.myapplication.ui.mvi.history.TravelHistoryIntent
@@ -110,8 +113,8 @@ private fun TravelHistoryScreenContent(
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(Spacing.lg),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -133,10 +136,10 @@ private fun TravelHistoryScreenContent(
                 Text(
                     text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(Spacing.lg)
                 )
             }
-            
+
             // 載入中
             if (isLoading) {
                 Box(
@@ -152,8 +155,8 @@ private fun TravelHistoryScreenContent(
                 // 歷史列表
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(ListStyle.contentPadding),
+                    verticalArrangement = Arrangement.spacedBy(ListStyle.contentPadding)
                 ) {
                     historyByLocation.forEach { (locationName, items) ->
                         item {
@@ -174,23 +177,23 @@ private fun EmptyHistoryState() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(Spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             Icons.Default.Place,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(IconSize.xxl),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
             text = "還沒有旅遊歷史",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
             text = "完成行程項目後會顯示在這裡",
             style = MaterialTheme.typography.bodyMedium,
@@ -205,15 +208,16 @@ private fun LocationHistoryCard(
     items: List<ItineraryItem>
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(CardStyle.contentPadding),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             // 地點標題
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -247,7 +251,7 @@ private fun LocationHistoryCard(
             
             // 項目列表
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 items.forEach { item ->
                     HistoryItemRow(item = item)
@@ -261,7 +265,7 @@ private fun LocationHistoryCard(
 private fun HistoryItemRow(item: ItineraryItem) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 日期
@@ -270,7 +274,7 @@ private fun HistoryItemRow(item: ItineraryItem) {
             shape = MaterialTheme.shapes.small
         ) {
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(Spacing.sm),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -289,7 +293,7 @@ private fun HistoryItemRow(item: ItineraryItem) {
         // 活動資訊
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs / 2)
         ) {
             Text(
                 text = item.activity,
@@ -303,14 +307,14 @@ private fun HistoryItemRow(item: ItineraryItem) {
                 )
             }
         }
-        
+
         // 完成標記
         if (item.isCompleted) {
             Icon(
                 Icons.Default.Check,
                 contentDescription = "已完成",
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(IconSize.sm)
             )
         }
     }
@@ -338,8 +342,7 @@ private fun TravelHistoryScreenPreview() {
                             notes = "",
                             isCompleted = true,
                             completedAt = kotlin.time.Clock.System.now(),
-                            photoReferences = emptyList(),
-                            createdAt = kotlin.time.Clock.System.now(),
+                                                        createdAt = kotlin.time.Clock.System.now(),
                             modifiedAt = kotlin.time.Clock.System.now()
                         ),
                         ItineraryItem(
@@ -353,8 +356,7 @@ private fun TravelHistoryScreenPreview() {
                             notes = "",
                             isCompleted = true,
                             completedAt = kotlin.time.Clock.System.now(),
-                            photoReferences = emptyList(),
-                            createdAt = kotlin.time.Clock.System.now(),
+                                                        createdAt = kotlin.time.Clock.System.now(),
                             modifiedAt = kotlin.time.Clock.System.now()
                         )
                     )

@@ -2,6 +2,7 @@
 
 package com.example.myapplication.ui.screen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -9,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.data.model.DraftType
 import com.example.myapplication.data.model.Itinerary
 import com.example.myapplication.data.repository.DraftRepository
 import com.example.myapplication.data.repository.ItineraryRepository
@@ -16,6 +18,7 @@ import com.example.myapplication.domain.usecase.CreateItineraryUseCase
 import com.example.myapplication.domain.usecase.LoadDraftUseCase
 import com.example.myapplication.domain.usecase.SaveDraftUseCase
 import com.example.myapplication.domain.usecase.UpdateItineraryUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -44,29 +47,37 @@ fun AddEditItineraryScreen(
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var currentItinerary by remember { mutableStateOf<Itinerary?>(null) }
     var showDraftSaved by remember { mutableStateOf(false) }
-    
+
     // 載入草稿（僅新增模式）
     LaunchedEffect(Unit) {
         if (!isEditMode && loadDraftUseCase != null) {
-            loadDraftUseCase(com.example.myapplication.data.model.DraftType.ITINERARY).onSuccess { draftData ->
+            loadDraftUseCase(DraftType.ITINERARY).onSuccess { draftData ->
                 draftData?.let {
                     title = it["title"] ?: ""
                     description = it["description"] ?: ""
-                    it["startDate"]?.let { date -> 
-                        startDate = try { LocalDate.parse(date) } catch (e: Exception) { null }
+                    it["startDate"]?.let { date ->
+                        startDate = try {
+                            LocalDate.parse(date)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
                     it["endDate"]?.let { date ->
-                        endDate = try { LocalDate.parse(date) } catch (e: Exception) { null }
+                        endDate = try {
+                            LocalDate.parse(date)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
                 }
             }
         }
     }
-    
+
     // 載入現有行程資料（編輯模式）
     LaunchedEffect(itineraryId) {
         if (isEditMode && itineraryRepository != null) {
-            itineraryRepository.getItinerary(itineraryId!!).onSuccess { itinerary ->
+            itineraryRepository.getItinerary(itineraryId).onSuccess { itinerary ->
                 itinerary?.let {
                     currentItinerary = it
                     title = it.title
@@ -77,25 +88,25 @@ fun AddEditItineraryScreen(
             }
         }
     }
-    
+
     // 自動儲存草稿（僅新增模式，使用 debounce）
     LaunchedEffect(title, description, startDate, endDate) {
         if (!isEditMode && saveDraftUseCase != null) {
-            kotlinx.coroutines.delay(500) // debounce 500ms
-            
+            delay(500) // debounce 500ms
+
             val draftData = buildMap {
                 put("title", title)
                 put("description", description)
                 startDate?.let { put("startDate", it.toString()) }
                 endDate?.let { put("endDate", it.toString()) }
             }
-            
+
             saveDraftUseCase(
-                com.example.myapplication.data.model.DraftType.ITINERARY,
+                DraftType.ITINERARY,
                 draftData
             ).onSuccess {
                 showDraftSaved = true
-                kotlinx.coroutines.delay(3000) // 3秒後隱藏
+                delay(3000) // 3秒後隱藏
                 showDraftSaved = false
             }
         }
@@ -106,12 +117,12 @@ fun AddEditItineraryScreen(
     var dateError by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    
+
     val scope = rememberCoroutineScope()
-    
+
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text(if (isEditMode) "編輯行程" else "新增行程") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -139,7 +150,7 @@ fun AddEditItineraryScreen(
                 isError = titleError != null,
                 supportingText = titleError?.let { { Text(it) } }
             )
-            
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -147,7 +158,7 @@ fun AddEditItineraryScreen(
                 modifier = Modifier.fillMaxWidth().height(120.dp),
                 maxLines = 5
             )
-            
+
             OutlinedTextField(
                 value = startDate?.toString() ?: "",
                 onValueChange = {},
@@ -160,7 +171,7 @@ fun AddEditItineraryScreen(
                     }
                 }
             )
-            
+
             OutlinedTextField(
                 value = endDate?.toString() ?: "",
                 onValueChange = {},
@@ -175,7 +186,7 @@ fun AddEditItineraryScreen(
                     }
                 }
             )
-            
+
             error?.let {
                 Text(
                     text = it,
@@ -183,9 +194,9 @@ fun AddEditItineraryScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            
+
             // 草稿儲存指示器
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = showDraftSaved && !isEditMode,
                 enter = androidx.compose.animation.fadeIn(),
                 exit = androidx.compose.animation.fadeOut()
@@ -196,26 +207,26 @@ fun AddEditItineraryScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Button(
                 onClick = {
                     if (title.isBlank()) {
                         titleError = "標題不可為空"
                         return@Button
                     }
-                    
+
                     if (startDate != null && endDate != null && endDate!! < startDate!!) {
                         dateError = "結束日期不能早於開始日期"
                         return@Button
                     }
-                    
+
                     scope.launch {
                         isLoading = true
                         error = null
                         dateError = null
-                        
+
                         if (isEditMode && updateItineraryUseCase != null && currentItinerary != null) {
                             // 編輯模式
                             val updatedItinerary = currentItinerary!!.copy(
@@ -243,14 +254,14 @@ fun AddEditItineraryScreen(
                             ).onSuccess { itinerary ->
                                 // 清除草稿
                                 if (!isEditMode && draftRepository != null) {
-                                    draftRepository.deleteDraft(com.example.myapplication.data.model.DraftType.ITINERARY)
+                                    draftRepository.deleteDraft(DraftType.ITINERARY)
                                 }
                                 onSaveSuccess(itinerary.id)
                             }.onFailure { exception ->
                                 error = exception.message ?: "儲存失敗"
                             }
                         }
-                        
+
                         isLoading = false
                     }
                 },
@@ -268,7 +279,7 @@ fun AddEditItineraryScreen(
             }
         }
     }
-    
+
     // Material3 DatePickerDialog for Start Date
     if (showStartDatePicker) {
         val datePickerState = rememberDatePickerState()
@@ -294,7 +305,7 @@ fun AddEditItineraryScreen(
             DatePicker(state = datePickerState)
         }
     }
-    
+
     // Material3 DatePickerDialog for End Date
     if (showEndDatePicker) {
         val datePickerState = rememberDatePickerState()
@@ -400,7 +411,7 @@ private fun AddEditItineraryScreenContent(
                 isError = titleError != null,
                 supportingText = titleError?.let { { Text(it) } }
             )
-            
+
             OutlinedTextField(
                 value = description,
                 onValueChange = onDescriptionChange,
@@ -408,7 +419,7 @@ private fun AddEditItineraryScreenContent(
                 modifier = Modifier.fillMaxWidth().height(120.dp),
                 maxLines = 5
             )
-            
+
             OutlinedTextField(
                 value = startDate?.toString() ?: "",
                 onValueChange = {},
@@ -421,7 +432,7 @@ private fun AddEditItineraryScreenContent(
                     }
                 }
             )
-            
+
             OutlinedTextField(
                 value = endDate?.toString() ?: "",
                 onValueChange = {},
@@ -436,7 +447,7 @@ private fun AddEditItineraryScreenContent(
                     }
                 }
             )
-            
+
             error?.let {
                 Text(
                     text = it,
@@ -444,7 +455,7 @@ private fun AddEditItineraryScreenContent(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            
+
             // 草稿儲存指示器
             androidx.compose.animation.AnimatedVisibility(
                 visible = showDraftSaved && !isEditMode,
@@ -457,9 +468,9 @@ private fun AddEditItineraryScreenContent(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Button(
                 onClick = onSave,
                 modifier = Modifier.fillMaxWidth(),

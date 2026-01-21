@@ -9,7 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.data.model.Location
 import com.example.myapplication.data.model.Route
 import com.example.myapplication.data.model.RouteLocation
 import com.example.myapplication.ui.mvi.route.RouteViewEvent
@@ -29,6 +31,7 @@ fun RouteViewScreen(
     viewModel: RouteViewViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val uriHandler = LocalUriHandler.current
     
     // 收集 Event
     LaunchedEffect(Unit) {
@@ -56,6 +59,15 @@ fun RouteViewScreen(
         onNavigateBack = onNavigateBack,
         onExportClick = {
             viewModel.handleIntent(RouteViewIntent.ExportRoute(routeId))
+        },
+        onOpenMapClick = { location ->
+            val query = if (location.latitude != null && location.longitude != null) {
+                "${location.latitude},${location.longitude}"
+            } else {
+                location.address ?: location.name
+            }
+            val url = "https://www.google.com/maps/search/?api=1&query=${query.replace(" ", "+")}"
+            uriHandler.openUri(url)
         }
     )
 }
@@ -118,7 +130,8 @@ private fun RouteInfoCard(route: Route) {
 private fun RouteLocationCard(
     routeLocation: RouteLocation,
     isFirst: Boolean,
-    isLast: Boolean
+    isLast: Boolean,
+    onOpenMapClick: (Location) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -129,12 +142,11 @@ private fun RouteLocationCard(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 順序指示器
+            // ... (順序指示器 code unchanged)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // 上方連接線
                 if (!isFirst) {
                     Divider(
                         modifier = Modifier
@@ -144,7 +156,6 @@ private fun RouteLocationCard(
                     )
                 }
                 
-                // 順序圓圈
                 Surface(
                     modifier = Modifier.size(40.dp),
                     shape = MaterialTheme.shapes.medium,
@@ -161,7 +172,6 @@ private fun RouteLocationCard(
                     }
                 }
                 
-                // 下方連接線
                 if (!isLast) {
                     Divider(
                         modifier = Modifier
@@ -177,11 +187,25 @@ private fun RouteLocationCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // 地點名稱
-                Text(
-                    text = routeLocation.location.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = routeLocation.location.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    IconButton(onClick = { onOpenMapClick(routeLocation.location) }) {
+                        Icon(
+                            Icons.Default.Map,
+                            contentDescription = "開啟地圖",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 
                 // 地址
                 routeLocation.location.address?.let { address ->
@@ -257,7 +281,7 @@ private fun RouteViewScreenPreview() {
                     title = "東京一日遊",
                     locations = listOf(
                         RouteLocation(
-                            location = com.example.myapplication.data.model.Location(
+                            location = Location(
                                 name = "淺草寺",
                                 latitude = 35.7148,
                                 longitude = 139.7967,
@@ -268,7 +292,7 @@ private fun RouteViewScreenPreview() {
                             notes = "參觀雷門和五重塔"
                         ),
                         RouteLocation(
-                            location = com.example.myapplication.data.model.Location(
+                            location = Location(
                                 name = "晴空塔",
                                 latitude = 35.7101,
                                 longitude = 139.8107,
@@ -285,7 +309,8 @@ private fun RouteViewScreenPreview() {
                 isExporting = false,
                 error = null,
                 onNavigateBack = {},
-                onExportClick = {}
+                onExportClick = {},
+                onOpenMapClick = {}
             )
         }
     }
@@ -302,7 +327,8 @@ private fun RouteViewScreenPreview_Loading() {
                 isExporting = false,
                 error = null,
                 onNavigateBack = {},
-                onExportClick = {}
+                onExportClick = {},
+                onOpenMapClick = {}
             )
         }
     }
@@ -319,7 +345,8 @@ private fun RouteViewScreenPreview_Error() {
                 isExporting = false,
                 error = "找不到路線",
                 onNavigateBack = {},
-                onExportClick = {}
+                onExportClick = {},
+                onOpenMapClick = {}
             )
         }
     }
@@ -333,7 +360,8 @@ private fun RouteViewScreenContent(
     isExporting: Boolean,
     error: String?,
     onNavigateBack: () -> Unit,
-    onExportClick: () -> Unit
+    onExportClick: () -> Unit,
+    onOpenMapClick: (Location) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -435,7 +463,8 @@ private fun RouteViewScreenContent(
                     RouteLocationCard(
                         routeLocation = routeLocation,
                         isFirst = index == 0,
-                        isLast = index == route.locations.lastIndex
+                        isLast = index == route.locations.lastIndex,
+                        onOpenMapClick = onOpenMapClick
                     )
                 }
             }
