@@ -4,7 +4,17 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(./gradlew :composeApp:compileKotlinMetadata:*)",
+      "Bash(./gradlew :composeApp:compileDebugKotlinAndroid:*)",
+      "WebSearch",
+      "Bash(claude mcp add context7 -- npx -y @upstash/context7-mcp@latest)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(./gradlew compileKotlinAndroid:*)",
+      "Bash(./gradlew compileDebugKotlinAndroid:*)",
+      "Bash(./gradlew compileKotlinDesktop:*)",
+      "Bash(./gradlew :composeApp:compileKotlinAndroid:*)"
     ],
     "deny": [],
     "ask": []
