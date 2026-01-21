@@ -14,7 +14,70 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.model.Photo
 
 /**
- * 照片網格元件
+ * 照片網格元件 (含預覽功能)
+ *
+ * @param photos 照片列表
+ * @param coverPhotoId 封面照片 ID
+ * @param onSetCoverPhoto 設為封面回調 (photoId)
+ * @param onDeletePhoto 刪除照片回調 (photoId)
+ * @param enablePreview 是否啟用點擊預覽 (預設 true)
+ */
+@Composable
+fun PhotoGallery(
+    photos: List<Photo>,
+    coverPhotoId: String?,
+    onSetCoverPhoto: ((String) -> Unit)?,
+    onDeletePhoto: ((String) -> Unit)?,
+    modifier: Modifier = Modifier,
+    enablePreview: Boolean = true
+) {
+    var selectedPhotoForPreview by remember { mutableStateOf<Photo?>(null) }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(photos, key = { it.id }) { photo ->
+            PhotoGridItem(
+                photo = photo,
+                isCover = photo.id == coverPhotoId,
+                onClick = {
+                    if (enablePreview) {
+                        selectedPhotoForPreview = photo
+                    }
+                },
+                onSetCoverPhoto = { onSetCoverPhoto?.invoke(photo.id) },
+                onDelete = { onDeletePhoto?.invoke(photo.id) }
+            )
+        }
+    }
+
+    // 照片預覽 Dialog
+    selectedPhotoForPreview?.let { photo ->
+        PhotoPreviewDialog(
+            photo = photo,
+            isCover = photo.id == coverPhotoId,
+            onDismiss = { selectedPhotoForPreview = null },
+            onSetCoverPhoto = onSetCoverPhoto?.let { callback ->
+                {
+                    callback(photo.id)
+                    selectedPhotoForPreview = null
+                }
+            },
+            onDeletePhoto = onDeletePhoto?.let { callback ->
+                {
+                    callback(photo.id)
+                    selectedPhotoForPreview = null
+                }
+            }
+        )
+    }
+}
+
+/**
+ * 照片網格元件 (舊版相容 - 使用 onPhotoClick)
  */
 @Composable
 fun PhotoGallery(
@@ -65,19 +128,13 @@ fun PhotoGridItem(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // TODO: 實際載入照片縮圖
-            // 暫時顯示佔位符
-            Box(
+            // 使用縮圖顯示照片
+            LocalImage(
+                photo = photo,
+                contentDescription = "照片",
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Image,
-                    contentDescription = "照片",
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+                useThumbnail = true
+            )
             
             // 封面標記
             if (isCover) {
