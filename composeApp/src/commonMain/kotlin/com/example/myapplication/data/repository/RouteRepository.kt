@@ -29,4 +29,13 @@ interface RouteRepository {
      * @return JSON 字串或錯誤
      */
     suspend fun exportRoute(id: String): Result<String>
+
+    /**
+     * 從行程建立路線
+     * 
+     * @param itineraryId 行程 ID
+     * @param routeId 路線 ID
+     * @return 建立成功的路線或錯誤
+     */
+    suspend fun createRouteFromItinerary(itineraryId: String, routeId: String): Result<Route>
 }

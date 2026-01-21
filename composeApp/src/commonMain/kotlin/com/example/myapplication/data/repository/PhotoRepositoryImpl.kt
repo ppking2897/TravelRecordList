@@ -1,8 +1,10 @@
 package com.example.myapplication.data.repository
 
+import com.example.myapplication.data.model.Itinerary
+import com.example.myapplication.data.model.ItineraryItem
 import com.example.myapplication.data.model.Photo
 import com.example.myapplication.data.storage.ImageStorageService
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 /**
  * PhotoRepository 的實作
@@ -10,22 +12,31 @@ import kotlinx.datetime.Clock
 @OptIn(kotlin.time.ExperimentalTime::class)
 class PhotoRepositoryImpl(
     private val imageStorageService: ImageStorageService,
-    private val itineraryRepository: ItineraryRepository
+    private val itineraryRepository: ItineraryRepository,
+    private val itineraryItemRepository: ItineraryItemRepository
 ) : PhotoRepository {
     
     override suspend fun addPhoto(itemId: String, imageData: ByteArray): Result<Photo> {
         return try {
-            // 儲存圖片
+            // 儲存原圖
             val imagePath = imageStorageService.saveImage(imageData, itemId).getOrThrow()
-            
+
+            // 生成並儲存縮圖
+            val thumbnailPath = try {
+                val thumbnailData = imageStorageService.generateThumbnail(imageData).getOrThrow()
+                imageStorageService.saveImage(thumbnailData, "${itemId}_thumb").getOrThrow()
+            } catch (e: Exception) {
+                null // 縮圖生成失敗不影響主流程
+            }
+
             // 建立 Photo 物件
-            val now = kotlin.time.Clock.System.now()
+            val now = Clock.System.now()
             val photo = Photo(
                 id = generatePhotoId(),
                 itemId = itemId,
                 fileName = imagePath.substringAfterLast('/'),
                 filePath = imagePath,
-                thumbnailPath = null,
+                thumbnailPath = thumbnailPath,
                 order = 0,
                 isCover = false,
                 width = null,
@@ -34,12 +45,12 @@ class PhotoRepositoryImpl(
                 uploadedAt = now,
                 modifiedAt = now
             )
-            
+
             // 更新 ItineraryItem 的 photos 列表
             updateItemPhotos(itemId) { photos ->
                 photos + photo
             }.getOrThrow()
-            
+
             Result.success(photo)
         } catch (e: Exception) {
             Result.failure(e)
@@ -55,9 +66,14 @@ class PhotoRepositoryImpl(
             val photo = item.photos.find { it.id == photoId }
                 ?: return Result.failure(Exception("Photo not found: $photoId"))
             
-            // 刪除圖片檔案
+            // 刪除原圖檔案
             imageStorageService.deleteImage(photo.filePath).getOrThrow()
-            
+
+            // 刪除縮圖檔案（如果存在）
+            photo.thumbnailPath?.let { thumbPath ->
+                imageStorageService.deleteImage(thumbPath)
+            }
+
             // 從 item 的 photos 列表中移除
             val updatedPhotos = item.photos.filter { it.id != photoId }
             
@@ -75,6 +91,7 @@ class PhotoRepositoryImpl(
             )
             
             itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            itineraryItemRepository.updateItem(updatedItem).getOrThrow()
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -99,6 +116,7 @@ class PhotoRepositoryImpl(
             )
             
             itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            itineraryItemRepository.updateItem(updatedItem).getOrThrow()
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -132,6 +150,34 @@ class PhotoRepositoryImpl(
         return imageStorageService.loadImage(photoPath)
     }
     
+    override suspend fun generateAndSaveThumbnail(photo: Photo): Result<Photo> {
+        return try {
+            // 1. 讀取原圖
+            val originalData = imageStorageService.loadImage(photo.filePath).getOrThrow()
+            
+            // 2. 生成縮圖
+            val thumbnailData = imageStorageService.generateThumbnail(originalData).getOrThrow()
+            
+            // 3. 儲存縮圖 (使用 _thumb 後綴)
+            val thumbnailPath = imageStorageService.saveImage(thumbnailData, "${photo.itemId}_thumb").getOrThrow()
+            
+            // 4. 更新 Photo 物件
+            val updatedPhoto = photo.copy(
+                thumbnailPath = thumbnailPath,
+                modifiedAt = Clock.System.now()
+            )
+            
+            // 5. 更新資料庫
+            updateItemPhotos(photo.itemId) { photos ->
+                photos.map { if (it.id == photo.id) updatedPhoto else it }
+            }.getOrThrow()
+            
+            Result.success(updatedPhoto)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
     /**
      * 更新 ItineraryItem 的照片列表
      */
@@ -145,11 +191,15 @@ class PhotoRepositoryImpl(
             val updatedPhotos = transform(item.photos)
             val updatedItem = item.copy(photos = updatedPhotos)
             
+            // 1. 更新 ItineraryRepository
             val updatedItinerary = itinerary.copy(
                 items = itinerary.items.map { if (it.id == itemId) updatedItem else it }
             )
-            
             itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            
+            // 2. 更新 ItineraryItemRepository
+            itineraryItemRepository.updateItem(updatedItem).getOrThrow()
+            
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -159,17 +209,17 @@ class PhotoRepositoryImpl(
     /**
      * 根據 itemId 找到對應的 Itinerary 和 ItineraryItem
      */
-    private suspend fun findItemById(itemId: String): Result<Pair<com.example.myapplication.data.model.Itinerary, com.example.myapplication.data.model.ItineraryItem>> {
+    private suspend fun findItemById(itemId: String): Result<Pair<Itinerary, ItineraryItem>> {
         return try {
             val allItineraries = itineraryRepository.getAllItineraries().getOrThrow()
-            
+
             for (itinerary in allItineraries) {
                 val item = itinerary.items.find { it.id == itemId }
                 if (item != null) {
                     return Result.success(itinerary to item)
                 }
             }
-            
+
             Result.failure(Exception("Item not found: $itemId"))
         } catch (e: Exception) {
             Result.failure(e)
@@ -179,7 +229,7 @@ class PhotoRepositoryImpl(
     /**
      * 根據 photoId 找到對應的 Itinerary 和 ItineraryItem
      */
-    private suspend fun findItemByPhotoId(photoId: String): Result<Pair<com.example.myapplication.data.model.Itinerary, com.example.myapplication.data.model.ItineraryItem>> {
+    private suspend fun findItemByPhotoId(photoId: String): Result<Pair<Itinerary, ItineraryItem>> {
         return try {
             val allItineraries = itineraryRepository.getAllItineraries().getOrThrow()
             
@@ -201,6 +251,6 @@ class PhotoRepositoryImpl(
      * 生成唯一的照片 ID
      */
     private fun generatePhotoId(): String {
-        return "photo_${kotlin.time.Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
+        return "photo_${Clock.System.now().toEpochMilliseconds()}_${(0..9999).random()}"
     }
 }

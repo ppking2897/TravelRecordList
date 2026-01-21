@@ -72,11 +72,10 @@ class ItineraryRepositoryImpl(
     override suspend fun updateItinerary(itinerary: Itinerary): Result<Itinerary> {
         return try {
             // 檢查 itinerary 是否存在
-            val existing = getItinerary(itinerary.id).getOrNull()
-            if (existing == null) {
+            if (getItinerary(itinerary.id).getOrNull() == null) {
                 return Result.failure(Exception("Itinerary not found: ${itinerary.id}"))
             }
-            
+
             // 更新 itinerary
             val key = "$ITINERARY_KEY_PREFIX${itinerary.id}"
             val jsonData = JsonSerializer.serializeItinerary(itinerary)

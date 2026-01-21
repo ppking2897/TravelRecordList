@@ -5,6 +5,7 @@ import com.example.myapplication.data.model.DraftType
 import com.example.myapplication.data.storage.StorageService
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
 /**
@@ -32,16 +33,12 @@ class DraftRepositoryImpl(
     override suspend fun getDraft(type: DraftType): Result<Draft?> {
         return try {
             val key = getDraftKey(type)
-            val jsonString = storageService.load(key).getOrNull()
-            
-            if (jsonString == null) {
-                return Result.success(null)
-            }
-            
+            val jsonString = storageService.load(key).getOrNull() ?: return Result.success(null)
+
             val draft = json.decodeFromString<Draft>(jsonString)
             
             // 檢查是否過期（超過 7 天）
-            val now = kotlin.time.Clock.System.now()
+            val now = Clock.System.now()
             val age = now - draft.createdAt
             if (age > 7.days) {
                 // 過期，刪除並返回 null

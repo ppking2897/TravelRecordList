@@ -80,7 +80,7 @@ class RouteRepositoryImpl(
      * @param routeId 新 route 的 ID
      * @return 生成的 route 或錯誤
      */
-    suspend fun createRouteFromItinerary(
+    override suspend fun createRouteFromItinerary(
         itineraryId: String,
         routeId: String
     ): Result<Route> {

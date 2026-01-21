@@ -58,19 +58,13 @@ class ItineraryItemRepositoryImpl(
     
     override suspend fun deleteItem(id: String): Result<Unit> {
         return try {
-            // 清理照片參考（在刪除前取得列表）
-            val photoReferences = cleanupPhotoReferences(id).getOrElse { emptyList() }
-            
-            // TODO: 實際的照片檔案刪除應該由 platform-specific 的 PhotoStorageService 處理
-            // 這裡只是記錄需要清理的照片參考
-            
             // 刪除 item
             val key = "$ITEM_KEY_PREFIX$id"
             storageService.delete(key).getOrThrow()
-            
+
             // 從索引中移除
             updateIndex { ids -> ids - id }
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -271,102 +265,6 @@ class ItineraryItemRepositoryImpl(
             val progress = (completedCount.toFloat() / totalCount.toFloat()) * 100f
             
             Result.success(progress)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    /**
-     * 新增照片參考到項目
-     * 
-     * @param itemId 項目 ID
-     * @param photoReference 照片參考（例如：檔案路徑或 URL）
-     * @param currentTimestamp 當前時間戳
-     * @return 更新後的項目或錯誤
-     */
-    suspend fun addPhotoReference(
-        itemId: String,
-        photoReference: String,
-        currentTimestamp: kotlinx.datetime.Instant
-    ): Result<ItineraryItem> {
-        return try {
-            // 載入現有 item
-            val key = "$ITEM_KEY_PREFIX$itemId"
-            val jsonData = storageService.load(key).getOrNull()
-                ?: return Result.failure(Exception("Item not found: $itemId"))
-            
-            val item = JsonSerializer.deserializeItineraryItem(jsonData)
-            
-            // 檢查照片參考是否已存在
-            if (item.photoReferences.contains(photoReference)) {
-                return Result.failure(Exception("Photo reference already exists"))
-            }
-            
-            // 新增照片參考
-            val updatedItem = item.copy(
-                photoReferences = item.photoReferences + photoReference,
-                modifiedAt = currentTimestamp
-            )
-            
-            // 儲存更新後的 item
-            updateItem(updatedItem)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    /**
-     * 從項目移除照片參考
-     * 
-     * @param itemId 項目 ID
-     * @param photoReference 要移除的照片參考
-     * @param currentTimestamp 當前時間戳
-     * @return 更新後的項目或錯誤
-     */
-    suspend fun removePhotoReference(
-        itemId: String,
-        photoReference: String,
-        currentTimestamp: kotlinx.datetime.Instant
-    ): Result<ItineraryItem> {
-        return try {
-            // 載入現有 item
-            val key = "$ITEM_KEY_PREFIX$itemId"
-            val jsonData = storageService.load(key).getOrNull()
-                ?: return Result.failure(Exception("Item not found: $itemId"))
-            
-            val item = JsonSerializer.deserializeItineraryItem(jsonData)
-            
-            // 移除照片參考
-            val updatedItem = item.copy(
-                photoReferences = item.photoReferences.filter { it != photoReference },
-                modifiedAt = currentTimestamp
-            )
-            
-            // 儲存更新後的 item
-            updateItem(updatedItem)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    /**
-     * 清理項目的所有照片參考
-     * 當刪除項目時應該調用此方法
-     * 
-     * @param itemId 項目 ID
-     * @return 被清理的照片參考列表或錯誤
-     */
-    suspend fun cleanupPhotoReferences(itemId: String): Result<List<String>> {
-        return try {
-            // 載入 item 以取得照片參考列表
-            val key = "$ITEM_KEY_PREFIX$itemId"
-            val jsonData = storageService.load(key).getOrNull()
-                ?: return Result.success(emptyList())
-            
-            val item = JsonSerializer.deserializeItineraryItem(jsonData)
-            
-            // 返回照片參考列表供呼叫者處理實際的檔案刪除
-            Result.success(item.photoReferences)
         } catch (e: Exception) {
             Result.failure(e)
         }
