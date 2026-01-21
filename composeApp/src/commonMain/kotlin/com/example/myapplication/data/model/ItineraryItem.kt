@@ -19,7 +19,6 @@ import kotlinx.serialization.Serializable
  * @property notes 備註
  * @property isCompleted 是否已完成
  * @property completedAt 完成時間戳記（只有當 isCompleted 為 true 時才設定）
- * @property photoReferences 照片參考列表
  * @property createdAt 建立時間戳記
  * @property modifiedAt 修改時間戳記
  */
@@ -39,7 +38,6 @@ data class ItineraryItem(
     val coverPhotoId: String? = null,          // 新增：封面照片 ID
     val isCompleted: Boolean = false,
     @Contextual val completedAt: Instant? = null,
-    val photoReferences: List<String> = emptyList(),  // 保留向後相容
     @Contextual val createdAt: Instant,
     @Contextual val modifiedAt: Instant
 ) {
