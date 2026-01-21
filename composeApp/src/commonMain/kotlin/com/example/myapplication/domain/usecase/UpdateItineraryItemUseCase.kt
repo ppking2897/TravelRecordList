@@ -3,6 +3,7 @@ package com.example.myapplication.domain.usecase
 import com.example.myapplication.data.model.ItineraryItem
 import com.example.myapplication.data.model.Validation
 import com.example.myapplication.data.repository.ItineraryItemRepository
+import com.example.myapplication.data.repository.ItineraryRepository
 
 /**
  * 更新行程項目的 Use Case
@@ -10,6 +11,7 @@ import com.example.myapplication.data.repository.ItineraryItemRepository
 @OptIn(kotlin.time.ExperimentalTime::class)
 class UpdateItineraryItemUseCase(
     private val itemRepository: ItineraryItemRepository,
+    private val itineraryRepository: ItineraryRepository,
     private val extractHashtagsUseCase: ExtractHashtagsUseCase
 ) {
     suspend operator fun invoke(
@@ -29,8 +31,19 @@ class UpdateItineraryItemUseCase(
                 hashtags = hashtags
             )
             
-            // 儲存
-            itemRepository.updateItem(updatedItem)
+            // 儲存 Item
+            itemRepository.updateItem(updatedItem).getOrThrow()
+            
+            // 同步更新 Itinerary
+            val itinerary = itineraryRepository.getItinerary(updatedItem.itineraryId).getOrThrow()
+            if (itinerary != null) {
+                val updatedItinerary = itinerary.copy(
+                    items = itinerary.items.map { if (it.id == updatedItem.id) updatedItem else it }
+                )
+                itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            }
+            
+            Result.success(updatedItem)
         } catch (e: Exception) {
             Result.failure(e)
         }

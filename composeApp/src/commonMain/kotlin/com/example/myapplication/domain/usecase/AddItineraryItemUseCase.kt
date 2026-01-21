@@ -27,6 +27,7 @@ class AddItineraryItemUseCase(
         location: Location,
         activity: String,
         notes: String,
+        photoPaths: List<String> = emptyList(),
         currentTimestamp: kotlinx.datetime.Instant
     ): Result<ItineraryItem> {
         return try {
@@ -49,9 +50,25 @@ class AddItineraryItemUseCase(
             // 提取標籤
             val hashtags = extractHashtagsUseCase(notes)
             
+            val itemId = Uuid.random().toString()
+            
+            // 建立照片物件
+            val photos = photoPaths.mapIndexed { index, path ->
+                com.example.myapplication.data.model.Photo(
+                    id = Uuid.random().toString(),
+                    itemId = itemId,
+                    fileName = path.substringAfterLast('/'),
+                    filePath = path,
+                    order = index,
+                    fileSize = 0L,
+                    uploadedAt = currentTimestamp,
+                    modifiedAt = currentTimestamp
+                )
+            }
+            
             // 建立 item
             val item = ItineraryItem(
-                id = Uuid.random().toString(),
+                id = itemId,
                 itineraryId = itineraryId,
                 date = date,
                 arrivalTime = arrivalTime,
@@ -60,15 +77,24 @@ class AddItineraryItemUseCase(
                 activity = activity,
                 notes = notes,
                 hashtags = hashtags,
+                photos = photos,
                 isCompleted = false,
                 completedAt = null,
-                photoReferences = emptyList(),
                 createdAt = currentTimestamp,
                 modifiedAt = currentTimestamp
             )
             
-            // 儲存
-            itemRepository.addItem(item)
+            // 儲存 item
+            itemRepository.addItem(item).getOrThrow()
+            
+            // 同步更新 Itinerary (因為 Itinerary 內含 items 列表)
+            val updatedItinerary = itinerary.copy(
+                items = itinerary.items + item,
+                modifiedAt = currentTimestamp
+            )
+            itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            
+            Result.success(item)
         } catch (e: Exception) {
             Result.failure(e)
         }

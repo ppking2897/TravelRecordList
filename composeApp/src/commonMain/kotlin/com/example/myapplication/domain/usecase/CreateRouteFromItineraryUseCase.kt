@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
 import com.example.myapplication.data.model.Route
-import com.example.myapplication.data.repository.RouteRepositoryImpl
+import com.example.myapplication.data.repository.RouteRepository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -10,7 +10,7 @@ import kotlin.uuid.Uuid
  */
 @OptIn(ExperimentalUuidApi::class)
 class CreateRouteFromItineraryUseCase(
-    private val routeRepository: RouteRepositoryImpl
+    private val routeRepository: RouteRepository
 ) {
     suspend operator fun invoke(itineraryId: String): Result<Route> {
         return try {
