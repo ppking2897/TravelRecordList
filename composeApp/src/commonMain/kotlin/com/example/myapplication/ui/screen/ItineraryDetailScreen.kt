@@ -9,13 +9,26 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.example.myapplication.data.model.Itinerary
+import com.example.myapplication.ui.theme.ListStyle
+import com.example.myapplication.ui.theme.Spacing
+import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.data.model.Location
+import com.example.myapplication.domain.usecase.ItemsByDate
 import com.example.myapplication.ui.component.DateTabsRow
 import com.example.myapplication.ui.component.DeleteConfirmDialog
 import com.example.myapplication.ui.component.EmptyState
 import com.example.myapplication.ui.component.ItemCard
-import com.example.myapplication.ui.viewmodel.ItineraryDetailViewModel
+import com.example.myapplication.ui.mvi.detail.ItineraryDetailEvent
+import com.example.myapplication.ui.mvi.detail.ItineraryDetailIntent
+import com.example.myapplication.ui.mvi.detail.ItineraryDetailViewModel
+import com.example.myapplication.ui.theme.TravelRecordTheme
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -31,38 +44,78 @@ fun ItineraryDetailScreen(
     onDeleteItineraryClick: () -> Unit,
     onGenerateRouteClick: () -> Unit
 ) {
-    val itinerary by viewModel.itinerary.collectAsState()
-    val groupedItems by viewModel.groupedItems.collectAsState()
-    val selectedDate by viewModel.selectedDate.collectAsState()
-    val dateRange by viewModel.dateRange.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val state by viewModel.state.collectAsState()
+    val itinerary = state.itinerary
+    val groupedItems = state.groupedItems
+    val selectedDate = state.selectedDate
+    val dateRange = state.dateRange
+    val isLoading = state.isLoading
+    val error = state.error
     
     var showDeleteItemDialog by remember { mutableStateOf(false) }
-    var itemToDelete by remember { mutableStateOf<com.example.myapplication.data.model.ItineraryItem?>(null) }
+    var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
+    var selectedItemIdForPhoto by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    
+    val singleImagePicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = { byteArrays ->
+            val imageData = byteArrays.firstOrNull()
+            val itemId = selectedItemIdForPhoto
+            
+            if (imageData != null && itemId != null) {
+                viewModel.handleIntent(ItineraryDetailIntent.AddPhoto(itemId, imageData))
+            }
+            selectedItemIdForPhoto = null
+        }
+    )
     
     LaunchedEffect(itineraryId) {
-        viewModel.loadItinerary(itineraryId)
+        viewModel.handleIntent(ItineraryDetailIntent.LoadItinerary(itineraryId))
+    }
+    
+    LaunchedEffect(Unit) {
+        viewModel.event.collect { event ->
+            when (event) {
+                is ItineraryDetailEvent.NavigateBack -> onNavigateBack()
+                is ItineraryDetailEvent.ShowError -> { /* Handle Error */ }
+                is ItineraryDetailEvent.NavigateToRoute -> { /* Handle Route Navigation if needed here or in UI */ }
+                else -> {}
+            }
+        }
     }
     
     ItineraryDetailScreenContent(
         itinerary = itinerary,
-        groupedItems = groupedItems,
+        groupedItems = groupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
         dateRange = dateRange,
+        expandedItemIds = state.expandedItemIds,
         isLoading = isLoading,
         error = error,
         onNavigateBack = onNavigateBack,
         onAddItemClick = onAddItemClick,
         onEditItemClick = onEditItemClick,
         onEditItineraryClick = onEditItineraryClick,
-        onDeleteItineraryClick = onDeleteItineraryClick,
-        onGenerateRouteClick = onGenerateRouteClick,
-        onSelectDate = { viewModel.selectDate(it) },
-        onToggleItemCompletion = { viewModel.toggleItemCompletion(it) },
+        onDeleteItineraryClick = { viewModel.handleIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId)) },
+        onGenerateRouteClick = { viewModel.handleIntent(ItineraryDetailIntent.GenerateRoute) },
+        onSelectDate = { viewModel.handleIntent(ItineraryDetailIntent.SelectDate(it)) },
+        onToggleItemCompletion = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemCompletion(it)) },
+        onToggleItemExpansion = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemExpansion(it)) },
         onDeleteItem = { itemId ->
             itemToDelete = groupedItems.flatMap { it.items }.find { it.id == itemId }
             showDeleteItemDialog = true
+        },
+        onAddPhoto = { itemId ->
+            selectedItemIdForPhoto = itemId
+            singleImagePicker.launch()
+        },
+        onSetCoverPhoto = { itemId, photoId ->
+            viewModel.handleIntent(ItineraryDetailIntent.SetCoverPhoto(itemId, photoId))
+        },
+        onDeletePhoto = { photoId ->
+            viewModel.handleIntent(ItineraryDetailIntent.DeletePhoto(photoId))
         }
     )
     
@@ -72,7 +125,7 @@ fun ItineraryDetailScreen(
             title = "確認刪除",
             message = "確定要刪除「${itemToDelete!!.activity}」嗎？此操作無法復原。",
             onConfirm = {
-                viewModel.deleteItem(itemToDelete!!.id)
+                viewModel.handleIntent(ItineraryDetailIntent.DeleteItem(itemToDelete!!.id))
                 showDeleteItemDialog = false
                 itemToDelete = null
             },
@@ -88,10 +141,11 @@ fun ItineraryDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ItineraryDetailScreenContent(
-    itinerary: com.example.myapplication.data.model.Itinerary?,
-    groupedItems: List<com.example.myapplication.domain.usecase.ItemsByDate>,
-    selectedDate: kotlinx.datetime.LocalDate?,
-    dateRange: ClosedRange<kotlinx.datetime.LocalDate>?,
+    itinerary: Itinerary?,
+    groupedItems: List<ItemsByDate>,
+    selectedDate: LocalDate?,
+    dateRange: ClosedRange<LocalDate>?,
+    expandedItemIds: Set<String>,
     isLoading: Boolean,
     error: String?,
     onNavigateBack: () -> Unit,
@@ -100,9 +154,13 @@ private fun ItineraryDetailScreenContent(
     onEditItineraryClick: () -> Unit,
     onDeleteItineraryClick: () -> Unit,
     onGenerateRouteClick: () -> Unit,
-    onSelectDate: (kotlinx.datetime.LocalDate?) -> Unit,
+    onSelectDate: (LocalDate?) -> Unit,
     onToggleItemCompletion: (String) -> Unit,
-    onDeleteItem: (String) -> Unit
+    onToggleItemExpansion: (String) -> Unit,
+    onDeleteItem: (String) -> Unit,
+    onAddPhoto: (String) -> Unit,
+    onSetCoverPhoto: (String, String) -> Unit,
+    onDeletePhoto: (String) -> Unit
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     
@@ -185,9 +243,9 @@ private fun ItineraryDetailScreenContent(
                 
                 // 內容
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentPadding = PaddingValues(ListStyle.contentPadding),
+                    verticalArrangement = Arrangement.spacedBy(ListStyle.contentPadding)
                 ) {
                     // 錯誤訊息
                     error?.let {
@@ -195,7 +253,7 @@ private fun ItineraryDetailScreenContent(
                             Text(
                                 text = it,
                                 color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(vertical = Spacing.sm)
                             )
                         }
                     }
@@ -216,21 +274,29 @@ private fun ItineraryDetailScreenContent(
                                 Text(
                                     text = group.date.toString(),
                                     style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(top = 8.dp)
+                                    modifier = Modifier.padding(top = Spacing.sm)
                                 )
                             }
                             
-                            items(group.items, key = { it.id }) { item ->
+                            items(
+                                items = group.items,
+                                key = { it.id }
+                            ) { item ->
+                                val isLastInGroup = item == group.items.last()
+                                val isLastGroup = group == groupedItems.last()
+                                val isLastItem = isLastInGroup && isLastGroup
+
                                 ItemCard(
                                     item = item,
+                                    isExpanded = expandedItemIds.contains(item.id),
+                                    isLastItem = isLastItem,
                                     onToggleComplete = onToggleItemCompletion,
                                     onDelete = onDeleteItem,
                                     onEdit = onEditItemClick,
-                                    onExpandToggle = { /* TODO: 實作展開/收起 */ },
-                                    onAddPhoto = { itemId ->
-                                        // TODO: 開啟照片選擇器
-                                        // 暫時顯示提示訊息
-                                    }
+                                    onExpandToggle = onToggleItemExpansion,
+                                    onAddPhoto = onAddPhoto,
+                                    onSetCoverPhoto = onSetCoverPhoto,
+                                    onDeletePhoto = onDeletePhoto
                                 )
                             }
                         }
@@ -246,43 +312,43 @@ private fun ItineraryDetailScreenContent(
 @ExperimentalTime
 @Composable
 private fun ItineraryDetailScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             ItineraryDetailScreenContent(
-                itinerary = com.example.myapplication.data.model.Itinerary(
+                itinerary = Itinerary(
                     id = "1",
                     title = "東京之旅",
                     description = "探索日本首都",
-                    startDate = kotlinx.datetime.LocalDate(2024, 3, 15),
-                    endDate = kotlinx.datetime.LocalDate(2024, 3, 17),
+                    startDate = LocalDate(2024, 3, 15),
+                    endDate = LocalDate(2024, 3, 17),
                     items = emptyList(),
-                    createdAt = kotlin.time.Clock.System.now(),
-                    modifiedAt = kotlin.time.Clock.System.now()
+                    createdAt = Clock.System.now(),
+                    modifiedAt = Clock.System.now()
                 ),
                 groupedItems = listOf(
-                    com.example.myapplication.domain.usecase.ItemsByDate(
-                        date = kotlinx.datetime.LocalDate(2024, 3, 15),
+                    ItemsByDate(
+                        date = LocalDate(2024, 3, 15),
                         items = listOf(
-                            com.example.myapplication.data.model.ItineraryItem(
+                            ItineraryItem(
                                 id = "1",
                                 itineraryId = "1",
-                                date = kotlinx.datetime.LocalDate(2024, 3, 15),
-                                arrivalTime = kotlinx.datetime.LocalTime(9, 0),
+                                date = LocalDate(2024, 3, 15),
+                                arrivalTime = LocalTime(9, 0),
                                 departureTime = null,
-                                location = com.example.myapplication.data.model.Location("淺草寺", null, null, "東京都台東區"),
+                                location = Location("淺草寺", null, null, "東京都台東區"),
                                 activity = "參觀淺草寺",
                                 notes = "早上參觀",
                                 isCompleted = false,
                                 completedAt = null,
-                                photoReferences = emptyList(),
-                                createdAt = kotlin.time.Clock.System.now(),
-                                modifiedAt = kotlin.time.Clock.System.now()
+                                createdAt = Clock.System.now(),
+                                modifiedAt = Clock.System.now()
                             )
                         )
                     )
                 ),
                 selectedDate = null,
-                dateRange = kotlinx.datetime.LocalDate(2024, 3, 15)..kotlinx.datetime.LocalDate(2024, 3, 17),
+                dateRange = LocalDate(2024, 3, 15)..LocalDate(2024, 3, 17),
+                expandedItemIds = emptySet(),
                 isLoading = false,
                 error = null,
                 onNavigateBack = {},
@@ -293,7 +359,11 @@ private fun ItineraryDetailScreenPreview() {
                 onGenerateRouteClick = {},
                 onSelectDate = {},
                 onToggleItemCompletion = {},
-                onDeleteItem = {}
+                onToggleItemExpansion = {},
+                onDeleteItem = {},
+                onAddPhoto = {},
+                onSetCoverPhoto = { _, _ -> },
+                onDeletePhoto = {}
             )
         }
     }

@@ -12,12 +12,13 @@ import com.example.myapplication.data.model.ItineraryItem
 
 /**
  * 展開的行程項目詳細內容
+ *
+ * 照片點擊會自動開啟預覽，可在預覽中刪除或設為封面
  */
 @Composable
 fun ExpandedItemDetail(
     item: ItineraryItem,
     onAddPhoto: ((String) -> Unit)?,
-    onPhotoClick: ((String) -> Unit)?,
     onSetCoverPhoto: ((String, String) -> Unit)?,
     onDeletePhoto: ((String) -> Unit)?,
     modifier: Modifier = Modifier
@@ -105,14 +106,20 @@ fun ExpandedItemDetail(
                 }
                 
                 if (item.photos.isNotEmpty()) {
+                    // 計算高度：每行 3 張，假設寬度足夠，高度約為寬度的 1/3 (因為 aspect ratio 1f)
+                    // 這裡簡單給一個高度限制，避免巢狀捲動錯誤
+                    val rows = (item.photos.size + 2) / 3
+                    val height = (rows * 120).dp // 粗略估計
+
                     PhotoGallery(
                         photos = item.photos,
                         coverPhotoId = item.coverPhotoId,
-                        onPhotoClick = onPhotoClick,
                         onSetCoverPhoto = { photoId ->
                             onSetCoverPhoto?.invoke(item.id, photoId)
                         },
-                        onDeletePhoto = onDeletePhoto
+                        onDeletePhoto = onDeletePhoto,
+                        modifier = Modifier.height(height),
+                        enablePreview = true
                     )
                 }
             }

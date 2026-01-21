@@ -1,18 +1,40 @@
 package com.example.myapplication.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.data.model.Photo
+import com.example.myapplication.ui.theme.CardStyle
+import com.example.myapplication.ui.theme.ComponentSize
+import com.example.myapplication.ui.theme.CornerRadius
+import com.example.myapplication.ui.theme.IconSize
+import com.example.myapplication.ui.theme.Spacing
 
+/**
+ * 時間軸風格的行程項目卡片
+ *
+ * 設計特點：
+ * - 左側時間軸顯示到達/離開時間
+ * - 右側主內容區展示活動資訊
+ * - 完成狀態有明顯的視覺回饋
+ * - 操作按鈕收斂在 more menu 中
+ */
 @Composable
 fun ItemCard(
     item: ItineraryItem,
@@ -21,178 +43,384 @@ fun ItemCard(
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = false,
+    isLastItem: Boolean = false,
     onExpandToggle: ((String) -> Unit)? = null,
     onAddPhoto: ((String) -> Unit)? = null,
-    onPhotoClick: ((String) -> Unit)? = null,
     onSetCoverPhoto: ((String, String) -> Unit)? = null,
     onDeletePhoto: ((String) -> Unit)? = null
 ) {
-    var expanded by remember(isExpanded) { mutableStateOf(isExpanded) }
-    
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    val expanded = isExpanded
+    var showMoreMenu by remember { mutableStateOf(false) }
+
+    // 動畫顏色
+    val cardBackgroundColor by animateColorAsState(
+        targetValue = if (item.isCompleted) {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        label = "cardBackground"
+    )
+
+    Row(
+        modifier = modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        // ========== 左側時間軸區域 ==========
+        TimelineSection(
+            arrivalTime = item.arrivalTime,
+            departureTime = item.departureTime,
+            isCompleted = item.isCompleted,
+            isLastItem = isLastItem
+        )
+
+        Spacer(modifier = Modifier.width(Spacing.md))
+
+        // ========== 右側內容卡片 ==========
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(enabled = onExpandToggle != null) {
+                    onExpandToggle?.invoke(item.id)
+                },
+            colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = if (item.isCompleted) CardStyle.listCardElevation / 2 else CardStyle.listCardElevation
+            ),
+            shape = RoundedCornerShape(CornerRadius.md)
         ) {
-            // 標題列：Checkbox + 活動名稱 + 編輯/刪除按鈕
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.md)
             ) {
+                // 頂部：封面照片（如果有且未展開）
+                if (!expanded) {
+                    item.getCoverPhoto()?.let { coverPhoto ->
+                        CoverPhotoDisplay(
+                            photo = coverPhoto,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(ComponentSize.thumbnailSize)
+                                .clip(RoundedCornerShape(CornerRadius.sm))
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.sm))
+                    }
+                }
+
+                // 標題列：活動名稱 + more 按鈕
                 Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Checkbox(
-                        checked = item.isCompleted,
-                        onCheckedChange = { onToggleComplete(item.id) }
-                    )
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
+                        // 活動名稱
                         Text(
                             text = item.activity,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.titleMedium,
+                            textDecoration = if (item.isCompleted) TextDecoration.LineThrough else null,
+                            color = if (item.isCompleted) {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                        Spacer(modifier = Modifier.height(Spacing.xs))
+
+                        // 地點標籤
+                        LocationChip(location = item.location.name)
+                    }
+
+                    // More 按鈕
+                    Box {
+                        IconButton(
+                            onClick = { showMoreMenu = true },
+                            modifier = Modifier.size(IconSize.lg)
                         ) {
                             Icon(
-                                Icons.Default.Place,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
+                                Icons.Default.MoreVert,
+                                contentDescription = "更多選項",
+                                modifier = Modifier.size(IconSize.sm),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                text = item.location.name,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+
+                        DropdownMenu(
+                            expanded = showMoreMenu,
+                            onDismissRequest = { showMoreMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(if (item.isCompleted) "標記未完成" else "標記完成") },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onToggleComplete(item.id)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        if (item.isCompleted) Icons.Default.Refresh else Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             )
-                        }
-                        // 顯示時間資訊
-                        val timeText = when {
-                            item.arrivalTime != null && item.departureTime != null -> 
-                                "${item.arrivalTime} - ${item.departureTime}"
-                            item.arrivalTime != null -> 
-                                "到達 ${item.arrivalTime}"
-                            item.departureTime != null -> 
-                                "離開 ${item.departureTime}"
-                            else -> null
-                        }
-                        timeText?.let { text ->
-                            Text(
-                                text = text,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            DropdownMenuItem(
+                                text = { Text("編輯") },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onEdit(item.id)
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Edit, contentDescription = null)
+                                }
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "刪除",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    onDelete(item.id)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
                             )
                         }
                     }
                 }
-                
-                Row {
-                    IconButton(onClick = { onEdit(item.id) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "編輯")
-                    }
-                    IconButton(onClick = { onDelete(item.id) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "刪除")
-                    }
-                }
-            }
-            
-            // 封面照片（如果有）
-            item.getCoverPhoto()?.let { coverPhoto ->
-                CoverPhotoDisplay(
-                    photoPath = coverPhoto.filePath,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                )
-            }
-            
-            // 標籤顯示
-            if (item.hashtags.isNotEmpty()) {
-                HashtagRow(
-                    hashtags = item.hashtags,
-                    onHashtagClick = { /* 可選：點擊標籤進行篩選 */ }
-                )
-            }
-            
-            // 簡短備註（未展開時）
-            if (!expanded && item.notes.isNotBlank()) {
-                Text(
-                    text = item.notes.take(50) + if (item.notes.length > 50) "..." else "",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            // 展開/收起按鈕
-            if (onExpandToggle != null) {
-                TextButton(
-                    onClick = { 
-                        expanded = !expanded
-                        onExpandToggle(item.id)
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(if (expanded) "收起" else "展開")
-                    Icon(
-                        if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+
+                // 標籤列（Hashtags）
+                if (item.hashtags.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    HashtagRow(
+                        hashtags = item.hashtags,
+                        onHashtagClick = { /* 篩選功能 */ }
                     )
                 }
-            }
-            
-            // 展開的詳細內容
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                ExpandedItemDetail(
-                    item = item,
-                    onAddPhoto = onAddPhoto,
-                    onPhotoClick = onPhotoClick,
-                    onSetCoverPhoto = onSetCoverPhoto,
-                    onDeletePhoto = onDeletePhoto
-                )
+
+                // 備註預覽（未展開時）
+                if (!expanded && item.notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Text(
+                        text = item.notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // 完成狀態標籤
+                if (item.isCompleted) {
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    CompletedBadge()
+                }
+
+                // 展開指示器
+                if (onExpandToggle != null) {
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (expanded) "收起" else "展開",
+                            modifier = Modifier.size(IconSize.sm),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+
+                // 展開的詳細內容
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    ExpandedItemDetail(
+                        item = item,
+                        onAddPhoto = onAddPhoto,
+                        onSetCoverPhoto = onSetCoverPhoto,
+                        onDeletePhoto = onDeletePhoto
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * 時間軸區域
+ */
+@Composable
+private fun TimelineSection(
+    arrivalTime: kotlinx.datetime.LocalTime?,
+    departureTime: kotlinx.datetime.LocalTime?,
+    isCompleted: Boolean,
+    isLastItem: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val primaryTime = arrivalTime ?: departureTime
+    val timelineColor = if (isCompleted) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+    Column(
+        modifier = modifier.width(Spacing.xxxl + Spacing.sm),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // 時間顯示
+        if (primaryTime != null) {
+            Text(
+                text = formatTime(primaryTime),
+                style = MaterialTheme.typography.labelLarge,
+                color = if (isCompleted) {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.xs))
+        }
+
+        // 時間軸圓點
+        Box(
+            modifier = Modifier
+                .size(IconSize.xs)
+                .background(timelineColor, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isCompleted) {
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(IconSize.xs - Spacing.xs),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+
+        // 時間軸連接線
+        if (!isLastItem) {
+            Box(
+                modifier = Modifier
+                    .width(Spacing.xs / 2)
+                    .weight(1f)
+                    .background(timelineColor.copy(alpha = 0.3f))
+            )
+        }
+    }
+}
+
+/**
+ * 地點標籤
+ */
+@Composable
+private fun LocationChip(
+    location: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = RoundedCornerShape(CornerRadius.xs)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Icon(
+                Icons.Default.Place,
+                contentDescription = null,
+                modifier = Modifier.size(IconSize.xs),
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Text(
+                text = location,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/**
+ * 完成狀態標籤
+ */
+@Composable
+private fun CompletedBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(CornerRadius.xs)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Icon(
+                Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(IconSize.xs),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "已完成",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+/**
+ * 封面照片顯示
+ */
 @Composable
 fun CoverPhotoDisplay(
-    photoPath: String,
+    photo: Photo,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        ),
+        shape = RoundedCornerShape(CornerRadius.sm)
     ) {
-        Box(
+        LocalImage(
+            photo = photo,
+            contentDescription = "封面照片",
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            // TODO: 實際載入圖片
-            // 暫時顯示佔位符
-            Icon(
-                Icons.Default.Image,
-                contentDescription = "封面照片",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+            useThumbnail = true
+        )
     }
 }
 
-
+/**
+ * 格式化時間顯示
+ */
+private fun formatTime(time: kotlinx.datetime.LocalTime): String {
+    val hour = time.hour.toString().padStart(2, '0')
+    val minute = time.minute.toString().padStart(2, '0')
+    return "$hour:$minute"
+}
