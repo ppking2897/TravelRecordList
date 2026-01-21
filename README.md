@@ -1,63 +1,109 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web.
+# Travel Itinerary App
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Kotlin Multiplatform 旅遊行程記事應用程式
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Overview
 
-### Build and Run Android Application
+| 項目 | 內容 |
+|------|------|
+| **類型** | Kotlin Multiplatform (KMP) + Compose Multiplatform |
+| **平台** | Android, iOS, Web (JS/WASM) |
+| **架構** | MVI (Model-View-Intent) + Clean Architecture |
+| **DI** | Koin 4.0.1 |
+| **語言** | Kotlin 2.2.20 |
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## Features
 
-### Build and Run Web Application
+- 行程管理 (CRUD)
+- 行程項目管理 (時間、地點、活動)
+- 照片管理 (新增、刪除、封面設定)
+- 標籤 (Hashtag) 功能
+- 路線生成與匯出
+- 旅遊歷史瀏覽
+- 草稿自動儲存
+- 離線同步支援
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-    ```
+## Project Structure
 
-### Build and Run iOS Application
+```
+composeApp/src/
+├── commonMain/kotlin/com/example/myapplication/
+│   ├── data/           # 資料層 (Model, Repository, Storage)
+│   ├── domain/         # 業務邏輯層 (Use Cases)
+│   ├── ui/             # 展示層 (MVI, Screen, Component)
+│   └── di/             # 依賴注入
+├── androidMain/        # Android 平台實作
+├── iosMain/            # iOS 平台實作
+└── commonTest/         # 共用測試
+```
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Build & Run
 
----
+### Android
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+```bash
+# macOS/Linux
+./gradlew :composeApp:assembleDebug
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+# Windows
+.\gradlew.bat :composeApp:assembleDebug
+```
+
+### Web (WASM)
+
+```bash
+# macOS/Linux
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+
+# Windows
+.\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
+```
+
+### iOS
+
+開啟 `/iosApp` 目錄於 Xcode 並執行。
+
+### Tests
+
+```bash
+./gradlew :composeApp:allTests
+```
+
+## Architecture
+
+### MVI Pattern
+
+```
+User Action → Intent → ViewModel → State Update → Recompose
+                         ↓
+                      Event (Navigation/Toast)
+```
+
+### Layers
+
+| 層級 | 職責 | 目錄 |
+|------|------|------|
+| Data | 資料模型、Repository、Storage | `data/` |
+| Domain | Use Cases (業務邏輯) | `domain/usecase/` |
+| Presentation | ViewModel、Screen、Component | `ui/` |
+
+## Documentation
+
+- **專案詳細文檔**: `.claude/project.md`
+- **Kiro Spec-Driven**: `.kiro/`
+- **Gemini Skills**: `.gemini/`
+- **開發歷程歸檔**: `docs/archive/`
+
+## Tech Stack
+
+- Kotlin 2.2.20
+- Compose Multiplatform 1.9.1
+- Koin 4.0.1
+- kotlinx-datetime 0.7.1
+- kotlinx-serialization 1.7.3
+- Kotest 5.9.1 (Testing)
+- Peekaboo (Image Picker)
+
+## License
+
+Private Project
