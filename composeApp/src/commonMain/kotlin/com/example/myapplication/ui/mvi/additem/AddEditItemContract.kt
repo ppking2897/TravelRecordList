@@ -28,13 +28,15 @@ data class AddEditItemState(
     val dateError: String? = null,
     val error: String? = null,
     val isLoading: Boolean = false,
-    val hasDateRange: Boolean = false
+    val hasDateRange: Boolean = false,
+    val photos: List<String> = emptyList()
 ) : UiState
 
 /**
  * AddEditItem Intent
  */
 sealed class AddEditItemIntent : UiIntent {
+    data class LoadItinerary(val itineraryId: String) : AddEditItemIntent()
     data class Initialize(val itinerary: Itinerary) : AddEditItemIntent()
     data class UpdateActivity(val activity: String) : AddEditItemIntent()
     data class UpdateLocationName(val name: String) : AddEditItemIntent()
@@ -43,6 +45,9 @@ sealed class AddEditItemIntent : UiIntent {
     data class UpdateDate(val date: LocalDate?) : AddEditItemIntent()
     data class UpdateArrivalTime(val time: LocalTime?) : AddEditItemIntent()
     data class UpdateDepartureTime(val time: LocalTime?) : AddEditItemIntent()
+    data class AddPhoto(val path: String) : AddEditItemIntent()
+    data class AddPhotoByContent(val content: ByteArray) : AddEditItemIntent()
+    data class RemovePhoto(val path: String) : AddEditItemIntent()
     object Save : AddEditItemIntent()
 }
 

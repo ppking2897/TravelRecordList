@@ -2,26 +2,35 @@
 
 package com.example.myapplication.ui.mvi.additem
 
+import com.example.myapplication.data.model.Itinerary
 import com.example.myapplication.data.model.Location
+import com.example.myapplication.data.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.AddItineraryItemUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
+import com.example.myapplication.data.storage.ImageStorageService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * AddEditItem 畫面的 ViewModel
  * 
  * 負責處理行程項目新增相關的業務邏輯
  */
+@OptIn(ExperimentalUuidApi::class)
 class AddEditItemViewModel(
-    private val addItemUseCase: AddItineraryItemUseCase
+    private val addItemUseCase: AddItineraryItemUseCase,
+    private val itineraryRepository: ItineraryRepository,
+    private val imageStorageService: ImageStorageService
 ) : BaseViewModel<AddEditItemState, AddEditItemIntent, AddEditItemEvent>(
     initialState = AddEditItemState()
 ) {
     
     override suspend fun processIntent(intent: AddEditItemIntent) {
         when (intent) {
+            is AddEditItemIntent.LoadItinerary -> loadItinerary(intent.itineraryId)
             is AddEditItemIntent.Initialize -> initialize(intent.itinerary)
             is AddEditItemIntent.UpdateActivity -> updateActivity(intent.activity)
             is AddEditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
@@ -30,17 +39,36 @@ class AddEditItemViewModel(
             is AddEditItemIntent.UpdateDate -> updateDate(intent.date)
             is AddEditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
             is AddEditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
+            is AddEditItemIntent.AddPhoto -> addPhoto(intent.path)
+            is AddEditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
+            is AddEditItemIntent.RemovePhoto -> removePhoto(intent.path)
             is AddEditItemIntent.Save -> save()
         }
+    }
+
+    private suspend fun loadItinerary(id: String) {
+        updateState { copy(isLoading = true, error = null) }
+        itineraryRepository.getItinerary(id)
+            .onSuccess { itinerary ->
+                if (itinerary != null) {
+                    initialize(itinerary)
+                } else {
+                    updateState { copy(isLoading = false, error = "找不到行程") }
+                }
+            }
+            .onFailure { e ->
+                updateState { copy(isLoading = false, error = e.message) }
+            }
     }
     
     /**
      * 初始化（設定行程資訊）
      */
-    private fun initialize(itinerary: com.example.myapplication.data.model.Itinerary) {
+    private fun initialize(itinerary: Itinerary) {
         val hasDateRange = itinerary.startDate != null && itinerary.endDate != null
         updateState {
             copy(
+                isLoading = false,
                 itinerary = itinerary,
                 hasDateRange = hasDateRange
             )
@@ -112,6 +140,41 @@ class AddEditItemViewModel(
     }
     
     /**
+     * 新增照片
+     */
+    private fun addPhoto(path: String) {
+        updateState {
+            copy(photos = photos + path)
+        }
+    }
+
+    /**
+     * 從內容新增照片
+     */
+    private suspend fun addPhotoByContent(content: ByteArray) {
+        // 使用隨機 UUID 作為暫時的 itemId
+        val tempId = Uuid.random().toString()
+        imageStorageService.saveImage(content, tempId)
+            .onSuccess { path ->
+                updateState {
+                    copy(photos = photos + path)
+                }
+            }
+            .onFailure {
+                // Handle save error if needed
+            }
+    }
+    
+    /**
+     * 移除照片
+     */
+    private fun removePhoto(path: String) {
+        updateState {
+            copy(photos = photos - path)
+        }
+    }
+    
+    /**
      * 儲存項目
      */
     private suspend fun save() {
@@ -155,6 +218,7 @@ class AddEditItemViewModel(
             location = location,
             activity = snapshot.activity,
             notes = snapshot.notes,
+            photoPaths = snapshot.photos,
             currentTimestamp = Clock.System.now()
         )
             .onSuccess {

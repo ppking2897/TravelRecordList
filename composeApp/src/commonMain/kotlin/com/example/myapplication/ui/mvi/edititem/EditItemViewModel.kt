@@ -5,25 +5,35 @@ package com.example.myapplication.ui.mvi.edititem
 import com.example.myapplication.data.model.Itinerary
 import com.example.myapplication.data.model.ItineraryItem
 import com.example.myapplication.data.model.Location
+import com.example.myapplication.data.repository.ItineraryItemRepository
+import com.example.myapplication.data.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.UpdateItineraryItemUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
+import com.example.myapplication.data.storage.ImageStorageService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * EditItem 畫面的 ViewModel
  * 
  * 負責處理行程項目編輯相關的業務邏輯
  */
+@OptIn(ExperimentalUuidApi::class)
 class EditItemViewModel(
-    private val updateItemUseCase: UpdateItineraryItemUseCase
+    private val updateItemUseCase: UpdateItineraryItemUseCase,
+    private val itemRepository: ItineraryItemRepository,
+    private val itineraryRepository: ItineraryRepository,
+    private val imageStorageService: ImageStorageService
 ) : BaseViewModel<EditItemState, EditItemIntent, EditItemEvent>(
     initialState = EditItemState()
 ) {
     
     override suspend fun processIntent(intent: EditItemIntent) {
         when (intent) {
+            is EditItemIntent.LoadItem -> loadItem(intent.itemId)
             is EditItemIntent.Initialize -> initialize(intent.item, intent.itinerary)
             is EditItemIntent.UpdateActivity -> updateActivity(intent.activity)
             is EditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
@@ -32,8 +42,38 @@ class EditItemViewModel(
             is EditItemIntent.UpdateDate -> updateDate(intent.date)
             is EditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
             is EditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
+            is EditItemIntent.AddPhoto -> addPhoto(intent.path)
+            is EditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
+            is EditItemIntent.RemovePhoto -> removePhoto(intent.path)
             is EditItemIntent.Save -> save()
         }
+    }
+
+    private suspend fun loadItem(itemId: String) {
+        updateState { copy(isLoading = true, error = null) }
+        
+        itemRepository.getItem(itemId)
+            .onSuccess { item ->
+                if (item != null) {
+                    // 載入項目成功後，載入所屬行程以獲取日期範圍
+                    itineraryRepository.getItinerary(item.itineraryId)
+                        .onSuccess { itinerary ->
+                            if (itinerary != null) {
+                                initialize(item, itinerary)
+                            } else {
+                                updateState { copy(isLoading = false, error = "找不到所屬行程") }
+                            }
+                        }
+                        .onFailure { e ->
+                            updateState { copy(isLoading = false, error = e.message) }
+                        }
+                } else {
+                    updateState { copy(isLoading = false, error = "找不到項目") }
+                }
+            }
+            .onFailure { e ->
+                updateState { copy(isLoading = false, error = e.message) }
+            }
     }
     
     /**
@@ -43,6 +83,7 @@ class EditItemViewModel(
         val hasDateRange = itinerary.startDate != null && itinerary.endDate != null
         updateState {
             copy(
+                isLoading = false,
                 item = item,
                 itinerary = itinerary,
                 activity = item.activity,
@@ -52,7 +93,8 @@ class EditItemViewModel(
                 selectedDate = item.date,
                 arrivalTime = item.arrivalTime,
                 departureTime = item.departureTime,
-                hasDateRange = hasDateRange
+                hasDateRange = hasDateRange,
+                photos = item.photos.map { it.filePath }
             )
         }
     }
@@ -120,6 +162,40 @@ class EditItemViewModel(
     private fun updateDepartureTime(time: LocalTime?) {
         updateState { copy(departureTime = time) }
     }
+
+    /**
+     * 新增照片
+     */
+    private fun addPhoto(path: String) {
+        updateState {
+            copy(photos = photos + path)
+        }
+    }
+
+    /**
+     * 從內容新增照片
+     */
+    private suspend fun addPhotoByContent(content: ByteArray) {
+        val itemId = currentState.item?.id ?: Uuid.random().toString()
+        imageStorageService.saveImage(content, itemId)
+            .onSuccess { path ->
+                updateState {
+                    copy(photos = photos + path)
+                }
+            }
+            .onFailure {
+                // Handle save error if needed
+            }
+    }
+
+    /**
+     * 移除照片
+     */
+    private fun removePhoto(path: String) {
+        updateState {
+            copy(photos = photos - path)
+        }
+    }
     
     /**
      * 儲存項目
@@ -156,6 +232,21 @@ class EditItemViewModel(
             longitude = snapshot.item.location.longitude,
             address = snapshot.locationAddress.ifBlank { null }
         )
+
+        // 建立照片物件
+        val currentTimestamp = Clock.System.now()
+        val photos = snapshot.photos.mapIndexed { index, path ->
+            com.example.myapplication.data.model.Photo(
+                id = snapshot.item.photos.find { it.filePath == path }?.id ?: Uuid.random().toString(),
+                itemId = snapshot.item.id,
+                fileName = path.substringAfterLast('/'),
+                filePath = path,
+                order = index,
+                fileSize = 0L,
+                uploadedAt = currentTimestamp,
+                modifiedAt = currentTimestamp
+            )
+        }
         
         val updatedItem = snapshot.item.copy(
             date = snapshot.selectedDate,
@@ -163,12 +254,13 @@ class EditItemViewModel(
             departureTime = snapshot.departureTime,
             location = location,
             activity = snapshot.activity,
-            notes = snapshot.notes
+            notes = snapshot.notes,
+            photos = photos
         )
         
         updateItemUseCase(
             item = updatedItem,
-            currentTimestamp = Clock.System.now()
+            currentTimestamp = currentTimestamp
         )
             .onSuccess {
                 updateState { copy(isLoading = false) }
