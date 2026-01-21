@@ -31,7 +31,26 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class DeleteItinerary(val id: String) : ItineraryDetailIntent()
     object GenerateRoute : ItineraryDetailIntent()
     data class ToggleItemExpansion(val itemId: String) : ItineraryDetailIntent()
-    data class AddPhoto(val itemId: String, val imageData: ByteArray) : ItineraryDetailIntent()
+    data class AddPhoto(val itemId: String, val imageData: ByteArray) : ItineraryDetailIntent() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as AddPhoto
+
+            if (itemId != other.itemId) return false
+            if (!imageData.contentEquals(other.imageData)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = itemId.hashCode()
+            result = 31 * result + imageData.contentHashCode()
+            return result
+        }
+    }
+
     data class DeletePhoto(val photoId: String) : ItineraryDetailIntent()
     data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
     data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
@@ -48,6 +67,4 @@ sealed class ItineraryDetailEvent : UiEvent {
     data class ShowError(val message: String) : ItineraryDetailEvent()
     data class ShowPhotoViewer(val photoId: String) : ItineraryDetailEvent()
     data class ShowImagePicker(val itemId: String) : ItineraryDetailEvent()
-    data class PhotoAdded(val itemId: String) : ItineraryDetailEvent()
-    data class PhotoDeleted(val photoId: String) : ItineraryDetailEvent()
 }

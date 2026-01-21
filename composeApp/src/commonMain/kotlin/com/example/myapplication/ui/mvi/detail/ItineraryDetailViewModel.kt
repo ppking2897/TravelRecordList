@@ -4,7 +4,12 @@ import com.example.myapplication.data.repository.ItineraryItemRepository
 import com.example.myapplication.data.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.*
 import com.example.myapplication.ui.mvi.BaseViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.model.ItineraryItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -18,6 +23,7 @@ class ItineraryDetailViewModel(
     private val filterItemsByDateUseCase: FilterItemsByDateUseCase,
     private val createRouteUseCase: CreateRouteFromItineraryUseCase,
     private val addPhotoUseCase: AddPhotoUseCase,
+    private val generateThumbnailUseCase: GenerateThumbnailUseCase,
     private val deletePhotoUseCase: DeletePhotoUseCase,
     private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
     private val filterByHashtagUseCase: FilterByHashtagUseCase
@@ -106,20 +112,31 @@ class ItineraryDetailViewModel(
     }
     
     private suspend fun toggleItemCompletion(itemId: String) {
+        // 先在 UI 上立即更新（Optimistic Update）
+        val currentItem = currentState.groupedItems
+            .flatMap { it.items }
+            .find { it.id == itemId }
+
+        if (currentItem != null) {
+            val optimisticUpdate = currentItem.copy(
+                isCompleted = !currentItem.isCompleted,
+                completedAt = if (!currentItem.isCompleted) Clock.System.now() else null
+            )
+            updateItemInState(itemId) { optimisticUpdate }
+        }
+
+        // 然後同步到 Repository
         itemRepository.getItem(itemId)
             .onSuccess { item ->
                 if (item != null) {
                     val updated = item.copy(
                         isCompleted = !item.isCompleted,
-                        completedAt = if (!item.isCompleted) kotlin.time.Clock.System.now() else null
+                        completedAt = if (!item.isCompleted) Clock.System.now() else null
                     )
-                    updateItemUseCase(updated, kotlin.time.Clock.System.now())
-                        .onSuccess {
-                            currentState.itinerary?.let { itinerary ->
-                                handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
-                            }
-                        }
+                    updateItemUseCase(updated, Clock.System.now())
                         .onFailure { exception ->
+                            // 失敗時回滾 UI 狀態
+                            refreshItemInState(itemId)
                             sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "更新失敗"))
                         }
                 }
@@ -172,39 +189,79 @@ class ItineraryDetailViewModel(
             )
         }
     }
-    
+
+    /**
+     * 只更新 State 中特定的 item，避免重新載入整個列表
+     * 這樣可以減少不必要的 recomposition，提升效能
+     */
+    private fun updateItemInState(itemId: String, updater: (ItineraryItem) -> ItineraryItem) {
+        updateState {
+            copy(
+                groupedItems = groupedItems.map { group ->
+                    group.copy(
+                        items = group.items.map { item ->
+                            if (item.id == itemId) updater(item) else item
+                        }
+                    )
+                }
+            )
+        }
+    }
+
+    /**
+     * 從 Repository 重新取得特定 item 並更新 State
+     */
+    private suspend fun refreshItemInState(itemId: String) {
+        itemRepository.getItem(itemId)
+            .onSuccess { updatedItem ->
+                if (updatedItem != null) {
+                    updateItemInState(itemId) { updatedItem }
+                }
+            }
+    }
+
     private suspend fun addPhoto(itemId: String, imageData: ByteArray) {
         addPhotoUseCase(itemId, imageData)
             .onSuccess { photo ->
-                sendEvent(ItineraryDetailEvent.PhotoAdded(itemId))
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                // 只更新特定 item，不重新載入整個列表
+                refreshItemInState(itemId)
+
+                // 背景生成縮圖
+                viewModelScope.launch(Dispatchers.Default) {
+                    generateThumbnailUseCase(photo)
+                        .onSuccess {
+                            // 縮圖生成成功，只更新特定 item
+                            refreshItemInState(itemId)
+                        }
                 }
             }
             .onFailure { exception ->
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "新增照片失敗"))
             }
     }
-    
+
     private suspend fun deletePhoto(photoId: String) {
+        // 先找出這張照片屬於哪個 item
+        val itemId = currentState.groupedItems
+            .flatMap { it.items }
+            .find { item -> item.photos.any { it.id == photoId } }
+            ?.id
+
         deletePhotoUseCase(photoId)
             .onSuccess {
-                sendEvent(ItineraryDetailEvent.PhotoDeleted(photoId))
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
-                }
+                // 只更新特定 item
+                itemId?.let { refreshItemInState(it) }
             }
             .onFailure { exception ->
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "刪除照片失敗"))
             }
     }
-    
+
     private suspend fun setCoverPhoto(itemId: String, photoId: String) {
         setCoverPhotoUseCase(itemId, photoId)
             .onSuccess {
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
-                }
+                // 只更新特定 item
+                refreshItemInState(itemId)
             }
             .onFailure { exception ->
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "設定封面失敗"))
