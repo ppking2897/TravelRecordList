@@ -1,8 +1,10 @@
 package com.example.myapplication.presentation.itinerary_detail
 
-import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.interactor.ItemInteractor
+import com.example.myapplication.domain.interactor.PhotoInteractor
 import com.example.myapplication.domain.repository.ItineraryRepository
-import com.example.myapplication.domain.usecase.*
+import com.example.myapplication.domain.usecase.CreateRouteFromItineraryUseCase
+import com.example.myapplication.domain.usecase.DeleteItineraryUseCase
 import com.example.myapplication.presentation.mvi.BaseViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.entity.ItineraryItem
@@ -12,25 +14,24 @@ import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+/**
+ * ItineraryDetail 畫面的 ViewModel（MVI 架構）
+ *
+ * 使用 Interactor 模式簡化依賴：
+ * - ItemInteractor: 處理項目相關操作（CRUD、篩選、分組）
+ * - PhotoInteractor: 處理照片相關操作（新增、刪除、封面、縮圖）
+ */
 @ExperimentalTime
 class ItineraryDetailViewModel(
     private val itineraryRepository: ItineraryRepository,
-    private val itemRepository: ItineraryItemRepository,
-    private val updateItemUseCase: UpdateItineraryItemUseCase,
-    private val deleteItemUseCase: DeleteItineraryItemUseCase,
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
-    private val groupItemsByDateUseCase: GroupItemsByDateUseCase,
-    private val filterItemsByDateUseCase: FilterItemsByDateUseCase,
     private val createRouteUseCase: CreateRouteFromItineraryUseCase,
-    private val addPhotoUseCase: AddPhotoUseCase,
-    private val generateThumbnailUseCase: GenerateThumbnailUseCase,
-    private val deletePhotoUseCase: DeletePhotoUseCase,
-    private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
-    private val filterByHashtagUseCase: FilterByHashtagUseCase
+    private val itemInteractor: ItemInteractor,
+    private val photoInteractor: PhotoInteractor
 ) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
-    
+
     override suspend fun processIntent(intent: ItineraryDetailIntent) {
         when (intent) {
             is ItineraryDetailIntent.LoadItinerary -> loadItinerary(intent.id)
@@ -46,24 +47,26 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
         }
     }
-    
+
     private suspend fun loadItinerary(id: String) {
         updateState { copy(isLoading = true, error = null) }
-        
+
         itineraryRepository.getItinerary(id)
             .onSuccess { itinerary ->
                 if (itinerary != null) {
                     val dateRange = if (itinerary.startDate != null && itinerary.endDate != null) {
                         itinerary.startDate..itinerary.endDate
                     } else null
-                    
-                    itemRepository.getItemsByItinerary(id)
+
+                    itemInteractor.getItemsByItinerary(id)
                         .onSuccess { items ->
-                            val grouped = groupItemsByDateUseCase(items)
+                            val grouped = itemInteractor.groupByDate(items)
                             updateState {
                                 copy(
                                     itinerary = itinerary,
-                                    groupedItems = grouped.map { ItemsByDate(it.date, it.items) },
+                                    groupedItems = grouped.map { (date, items) ->
+                                        ItemsByDate(date, items)
+                                    },
                                     dateRange = dateRange,
                                     isLoading = false
                                 )
@@ -91,26 +94,26 @@ class ItineraryDetailViewModel(
                 }
             }
     }
-    
+
     private suspend fun selectDate(date: LocalDate?) {
         updateState { copy(selectedDate = date) }
-        
+
         currentState.itinerary?.let { itinerary ->
-            itemRepository.getItemsByItinerary(itinerary.id)
+            itemInteractor.getItemsByItinerary(itinerary.id)
                 .onSuccess { items ->
                     val filtered = if (date != null) {
-                        filterItemsByDateUseCase(items, date)
+                        itemInteractor.filterByDate(items, date)
                     } else {
                         items
                     }
-                    val grouped = groupItemsByDateUseCase(filtered)
+                    val grouped = itemInteractor.groupByDate(filtered)
                     updateState {
-                        copy(groupedItems = grouped.map { ItemsByDate(it.date, it.items) })
+                        copy(groupedItems = grouped.map { (d, i) -> ItemsByDate(d, i) })
                     }
                 }
         }
     }
-    
+
     private suspend fun toggleItemCompletion(itemId: String) {
         // 先在 UI 上立即更新（Optimistic Update）
         val currentItem = currentState.groupedItems
@@ -123,28 +126,19 @@ class ItineraryDetailViewModel(
                 completedAt = if (!currentItem.isCompleted) Clock.System.now() else null
             )
             updateItemInState(itemId) { optimisticUpdate }
-        }
 
-        // 然後同步到 Repository
-        itemRepository.getItem(itemId)
-            .onSuccess { item ->
-                if (item != null) {
-                    val updated = item.copy(
-                        isCompleted = !item.isCompleted,
-                        completedAt = if (!item.isCompleted) Clock.System.now() else null
-                    )
-                    updateItemUseCase(updated, Clock.System.now())
-                        .onFailure { exception ->
-                            // 失敗時回滾 UI 狀態
-                            refreshItemInState(itemId)
-                            sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "更新失敗"))
-                        }
+            // 使用 Interactor 更新
+            itemInteractor.toggleCompletion(currentItem)
+                .onFailure { exception ->
+                    // 失敗時回滾 UI 狀態
+                    updateItemInState(itemId) { currentItem }
+                    sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "更新失敗"))
                 }
-            }
+        }
     }
-    
+
     private suspend fun deleteItem(itemId: String) {
-        deleteItemUseCase(itemId)
+        itemInteractor.deleteItem(itemId)
             .onSuccess {
                 currentState.itinerary?.let { itinerary ->
                     handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
@@ -154,7 +148,7 @@ class ItineraryDetailViewModel(
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "刪除失敗"))
             }
     }
-    
+
     private suspend fun deleteItinerary(id: String) {
         deleteItineraryUseCase(id)
             .onSuccess {
@@ -164,7 +158,7 @@ class ItineraryDetailViewModel(
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "刪除失敗"))
             }
     }
-    
+
     private suspend fun generateRoute() {
         currentState.itinerary?.let { itinerary ->
             createRouteUseCase(itinerary.id)
@@ -176,7 +170,7 @@ class ItineraryDetailViewModel(
                 }
         }
     }
-    
+
     private fun toggleItemExpansion(itemId: String) {
         val expandedIds = currentState.expandedItemIds
         updateState {
@@ -192,7 +186,6 @@ class ItineraryDetailViewModel(
 
     /**
      * 只更新 State 中特定的 item，避免重新載入整個列表
-     * 這樣可以減少不必要的 recomposition，提升效能
      */
     private fun updateItemInState(itemId: String, updater: (ItineraryItem) -> ItineraryItem) {
         updateState {
@@ -212,23 +205,26 @@ class ItineraryDetailViewModel(
      * 從 Repository 重新取得特定 item 並更新 State
      */
     private suspend fun refreshItemInState(itemId: String) {
-        itemRepository.getItem(itemId)
-            .onSuccess { updatedItem ->
-                if (updatedItem != null) {
-                    updateItemInState(itemId) { updatedItem }
+        currentState.itinerary?.let { itinerary ->
+            itemInteractor.getItemsByItinerary(itinerary.id)
+                .onSuccess { items ->
+                    val updatedItem = items.find { it.id == itemId }
+                    if (updatedItem != null) {
+                        updateItemInState(itemId) { updatedItem }
+                    }
                 }
-            }
+        }
     }
 
     private suspend fun addPhoto(itemId: String, imageData: ByteArray) {
-        addPhotoUseCase(itemId, imageData)
+        photoInteractor.addPhoto(itemId, imageData)
             .onSuccess { photo ->
                 // 只更新特定 item，不重新載入整個列表
                 refreshItemInState(itemId)
 
                 // 背景生成縮圖
                 viewModelScope.launch(Dispatchers.Default) {
-                    generateThumbnailUseCase(photo)
+                    photoInteractor.generateThumbnail(photo)
                         .onSuccess {
                             // 縮圖生成成功，只更新特定 item
                             refreshItemInState(itemId)
@@ -247,7 +243,7 @@ class ItineraryDetailViewModel(
             .find { item -> item.photos.any { it.id == photoId } }
             ?.id
 
-        deletePhotoUseCase(photoId)
+        photoInteractor.deletePhoto(photoId)
             .onSuccess {
                 // 只更新特定 item
                 itemId?.let { refreshItemInState(it) }
@@ -258,7 +254,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun setCoverPhoto(itemId: String, photoId: String) {
-        setCoverPhotoUseCase(itemId, photoId)
+        photoInteractor.setCoverPhoto(itemId, photoId)
             .onSuccess {
                 // 只更新特定 item
                 refreshItemInState(itemId)
@@ -267,26 +263,26 @@ class ItineraryDetailViewModel(
                 sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "設定封面失敗"))
             }
     }
-    
+
     private suspend fun filterByHashtag(hashtag: String?) {
         updateState { copy(selectedHashtag = hashtag) }
-        
+
         currentState.itinerary?.let { itinerary ->
-            itemRepository.getItemsByItinerary(itinerary.id)
+            itemInteractor.getItemsByItinerary(itinerary.id)
                 .onSuccess { items ->
                     val filtered = if (hashtag != null) {
-                        filterByHashtagUseCase(items, hashtag)
+                        itemInteractor.filterByHashtag(items, hashtag)
                     } else {
                         items
                     }
-                    
+
                     val dateFiltered = currentState.selectedDate?.let { date ->
-                        filterItemsByDateUseCase(filtered, date)
+                        itemInteractor.filterByDate(filtered, date)
                     } ?: filtered
-                    
-                    val grouped = groupItemsByDateUseCase(dateFiltered)
+
+                    val grouped = itemInteractor.groupByDate(dateFiltered)
                     updateState {
-                        copy(groupedItems = grouped.map { ItemsByDate(it.date, it.items) })
+                        copy(groupedItems = grouped.map { (d, i) -> ItemsByDate(d, i) })
                     }
                 }
         }

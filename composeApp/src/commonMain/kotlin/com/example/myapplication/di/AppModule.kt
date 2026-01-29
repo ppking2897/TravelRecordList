@@ -3,6 +3,8 @@ package com.example.myapplication.di
 import com.example.myapplication.data.repository.*
 import com.example.myapplication.domain.repository.*
 import com.example.myapplication.data.sync.SyncManager
+import com.example.myapplication.domain.interactor.ItemInteractor
+import com.example.myapplication.domain.interactor.PhotoInteractor
 import com.example.myapplication.domain.usecase.*
 import com.example.myapplication.presentation.add_edit_itinerary.AddEditItineraryViewModel
 import com.example.myapplication.presentation.add_edit_item.AddEditItemViewModel
@@ -58,25 +60,37 @@ val appModule = module {
     factory { SaveDraftUseCase(get()) }
     factory { LoadDraftUseCase(get()) }
 
+    // Interactors
+    factory {
+        ItemInteractor(
+            itemRepository = get(),
+            updateItemUseCase = get(),
+            deleteItemUseCase = get(),
+            groupItemsByDateUseCase = get(),
+            filterItemsByDateUseCase = get(),
+            filterByHashtagUseCase = get()
+        )
+    }
+    factory {
+        PhotoInteractor(
+            addPhotoUseCase = get(),
+            deletePhotoUseCase = get(),
+            setCoverPhotoUseCase = get(),
+            generateThumbnailUseCase = get()
+        )
+    }
+
     // MVI ViewModels
     viewModel { RouteViewViewModel(get()) }
     viewModel { TravelHistoryViewModelMVI(get(), get()) }
     viewModel { ItineraryListViewModelMVI(get(), get()) }
     viewModel {
         ItineraryDetailViewModelMVI(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
+            itineraryRepository = get(),
+            deleteItineraryUseCase = get(),
+            createRouteUseCase = get(),
+            itemInteractor = get(),
+            photoInteractor = get()
         )
     }
     viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get()) }
