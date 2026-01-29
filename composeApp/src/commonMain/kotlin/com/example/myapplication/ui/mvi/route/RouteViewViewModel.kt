@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.mvi.route
 
-import com.example.myapplication.data.repository.RouteRepository
+import com.example.myapplication.domain.repository.RouteRepository
 import com.example.myapplication.ui.mvi.BaseViewModel
 
 /**

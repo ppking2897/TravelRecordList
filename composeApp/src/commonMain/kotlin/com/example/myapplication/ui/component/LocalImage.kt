@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.SubcomposeAsyncImage
-import com.example.myapplication.data.model.Photo
+import com.example.myapplication.domain.entity.Photo
 import java.io.File
 
 /**

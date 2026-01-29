@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Photo
-import com.example.myapplication.data.repository.PhotoRepository
+import com.example.myapplication.domain.entity.Photo
+import com.example.myapplication.domain.repository.PhotoRepository
 
 /**
  * 新增照片 Use Case

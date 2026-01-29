@@ -16,7 +16,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.myapplication.data.model.Photo
+import com.example.myapplication.domain.entity.Photo
 
 /**
  * 照片預覽 Dialog

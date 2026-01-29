@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.data.model.Photo
+import com.example.myapplication.domain.entity.Photo
 
 /**
  * 照片網格元件 (含預覽功能)

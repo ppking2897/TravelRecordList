@@ -1,10 +1,11 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Location
-import com.example.myapplication.data.model.Validation
-import com.example.myapplication.data.repository.ItineraryItemRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.entity.Location
+import com.example.myapplication.domain.entity.Photo
+import com.example.myapplication.domain.validation.Validation
+import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.uuid.ExperimentalUuidApi
@@ -54,7 +55,7 @@ class AddItineraryItemUseCase(
             
             // 建立照片物件
             val photos = photoPaths.mapIndexed { index, path ->
-                com.example.myapplication.data.model.Photo(
+                Photo(
                     id = Uuid.random().toString(),
                     itemId = itemId,
                     fileName = path.substringAfterLast('/'),

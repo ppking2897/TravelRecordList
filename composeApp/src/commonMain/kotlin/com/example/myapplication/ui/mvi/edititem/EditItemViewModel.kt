@@ -2,11 +2,12 @@
 
 package com.example.myapplication.ui.mvi.edititem
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Location
-import com.example.myapplication.data.repository.ItineraryItemRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.entity.Location
+import com.example.myapplication.domain.entity.Photo
+import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.UpdateItineraryItemUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
 import com.example.myapplication.data.storage.ImageStorageService
@@ -236,7 +237,7 @@ class EditItemViewModel(
         // 建立照片物件
         val currentTimestamp = Clock.System.now()
         val photos = snapshot.photos.mapIndexed { index, path ->
-            com.example.myapplication.data.model.Photo(
+            Photo(
                 id = snapshot.item.photos.find { it.filePath == path }?.id ?: Uuid.random().toString(),
                 itemId = snapshot.item.id,
                 fileName = path.substringAfterLast('/'),

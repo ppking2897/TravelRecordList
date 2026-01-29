@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
-import com.example.myapplication.data.model.Itinerary
+import com.example.myapplication.domain.entity.Itinerary
 import com.example.myapplication.ui.component.DateDropdown
 import com.example.myapplication.ui.component.LocalImage
 import com.example.myapplication.ui.component.SimplePhotoPreviewDialog

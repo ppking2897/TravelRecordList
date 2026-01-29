@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Hashtag
-import com.example.myapplication.data.repository.HashtagRepository
+import com.example.myapplication.domain.entity.Hashtag
+import com.example.myapplication.domain.repository.HashtagRepository
 
 /**
  * 提取標籤 Use Case

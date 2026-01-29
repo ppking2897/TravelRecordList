@@ -9,12 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.ui.theme.CardStyle
 import com.example.myapplication.ui.theme.IconSize
 import com.example.myapplication.ui.theme.ListStyle
 import com.example.myapplication.ui.theme.Spacing
-import com.example.myapplication.data.model.Location
+import com.example.myapplication.domain.entity.Location
 import com.example.myapplication.ui.mvi.history.TravelHistoryEvent
 import com.example.myapplication.ui.mvi.history.TravelHistoryIntent
 import com.example.myapplication.ui.mvi.history.TravelHistoryViewModel

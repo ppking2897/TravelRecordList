@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Photo
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.entity.Photo
 import com.example.myapplication.ui.theme.CardStyle
 import com.example.myapplication.ui.theme.ComponentSize
 import com.example.myapplication.ui.theme.CornerRadius

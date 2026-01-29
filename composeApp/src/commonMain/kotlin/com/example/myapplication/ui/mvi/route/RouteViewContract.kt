@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.mvi.route
 
-import com.example.myapplication.data.model.Route
+import com.example.myapplication.domain.entity.Route
 import com.example.myapplication.ui.mvi.UiEvent
 import com.example.myapplication.ui.mvi.UiIntent
 import com.example.myapplication.ui.mvi.UiState

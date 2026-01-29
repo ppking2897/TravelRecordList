@@ -1,9 +1,9 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Validation
-import com.example.myapplication.data.repository.ItineraryItemRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.validation.Validation
+import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 
 /**
  * 更新行程項目的 Use Case

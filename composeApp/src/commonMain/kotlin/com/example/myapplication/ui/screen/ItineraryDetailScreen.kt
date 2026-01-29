@@ -9,11 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.myapplication.data.model.Itinerary
+import com.example.myapplication.domain.entity.Itinerary
 import com.example.myapplication.ui.theme.ListStyle
 import com.example.myapplication.ui.theme.Spacing
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Location
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.entity.Location
 import com.example.myapplication.domain.usecase.ItemsByDate
 import com.example.myapplication.ui.component.DateTabsRow
 import com.example.myapplication.ui.component.DeleteConfirmDialog

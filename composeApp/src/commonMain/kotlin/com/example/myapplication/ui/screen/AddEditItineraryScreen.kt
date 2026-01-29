@@ -10,10 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.data.model.DraftType
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.repository.DraftRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.DraftType
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.repository.DraftRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.CreateItineraryUseCase
 import com.example.myapplication.domain.usecase.LoadDraftUseCase
 import com.example.myapplication.domain.usecase.SaveDraftUseCase

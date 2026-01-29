@@ -1,6 +1,7 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.*
+import com.example.myapplication.domain.repository.*
 import com.example.myapplication.data.sync.SyncManager
 import com.example.myapplication.domain.usecase.*
 import com.example.myapplication.ui.mvi.addedit.AddEditItineraryViewModel

@@ -1,8 +1,8 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Draft
-import com.example.myapplication.data.model.DraftType
-import com.example.myapplication.data.repository.DraftRepository
+import com.example.myapplication.domain.entity.Draft
+import com.example.myapplication.domain.entity.DraftType
+import com.example.myapplication.domain.repository.DraftRepository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

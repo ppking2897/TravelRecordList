@@ -6,8 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.myapplication.data.repository.DraftRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.repository.DraftRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.*
 import com.example.myapplication.ui.navigation.Screen
 import com.example.myapplication.ui.screen.*

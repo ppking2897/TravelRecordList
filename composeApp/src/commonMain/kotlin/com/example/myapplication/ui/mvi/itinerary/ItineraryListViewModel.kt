@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.mvi.itinerary
 
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.SearchItinerariesUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
 

@@ -1,6 +1,6 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.repository.PhotoRepository
+import com.example.myapplication.domain.repository.PhotoRepository
 
 /**
  * 重新排序照片 Use Case

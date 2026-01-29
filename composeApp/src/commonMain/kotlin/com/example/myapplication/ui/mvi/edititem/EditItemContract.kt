@@ -1,7 +1,7 @@
 package com.example.myapplication.ui.mvi.edititem
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.ui.mvi.UiEvent
 import com.example.myapplication.ui.mvi.UiIntent
 import com.example.myapplication.ui.mvi.UiState

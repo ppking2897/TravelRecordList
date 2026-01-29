@@ -1,6 +1,6 @@
 package com.example.myapplication.ui.mvi.history
 
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.ui.mvi.UiEvent
 import com.example.myapplication.ui.mvi.UiIntent
 import com.example.myapplication.ui.mvi.UiState

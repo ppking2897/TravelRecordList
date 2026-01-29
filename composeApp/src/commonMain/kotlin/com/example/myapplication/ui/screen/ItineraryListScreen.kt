@@ -61,8 +61,8 @@ import com.example.myapplication.ui.theme.IconSize
 import com.example.myapplication.ui.theme.ListStyle
 import com.example.myapplication.ui.theme.Spacing
 import androidx.lifecycle.compose.LifecycleEventEffect
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.ui.component.DeleteConfirmDialog
 import com.example.myapplication.ui.mvi.itinerary.ItineraryListEvent
 import com.example.myapplication.ui.mvi.itinerary.ItineraryListIntent

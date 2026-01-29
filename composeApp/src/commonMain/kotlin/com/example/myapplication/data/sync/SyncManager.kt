@@ -1,7 +1,7 @@
 package com.example.myapplication.data.sync
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.data.storage.JsonSerializer
 import com.example.myapplication.data.storage.StorageService
 import kotlinx.datetime.Clock

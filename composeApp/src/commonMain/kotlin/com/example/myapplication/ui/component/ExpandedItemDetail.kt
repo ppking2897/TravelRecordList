@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.ItineraryItem
 
 /**
  * 展開的行程項目詳細內容

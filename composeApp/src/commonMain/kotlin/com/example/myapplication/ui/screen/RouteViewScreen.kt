@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.data.model.Location
-import com.example.myapplication.data.model.Route
-import com.example.myapplication.data.model.RouteLocation
+import com.example.myapplication.domain.entity.Location
+import com.example.myapplication.domain.entity.Route
+import com.example.myapplication.domain.entity.RouteLocation
 import com.example.myapplication.ui.mvi.route.RouteViewEvent
 import com.example.myapplication.ui.mvi.route.RouteViewIntent
 import com.example.myapplication.ui.mvi.route.RouteViewViewModel

@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
 package com.example.myapplication.domain.entity
 
 import kotlinx.datetime.Instant

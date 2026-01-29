@@ -1,11 +1,11 @@
 package com.example.myapplication.ui.mvi.detail
 
-import com.example.myapplication.data.repository.ItineraryItemRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.*
 import com.example.myapplication.ui.mvi.BaseViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.ItineraryItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate

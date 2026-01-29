@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.mvi.history
 
-import com.example.myapplication.data.repository.ItineraryItemRepository
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.repository.ItineraryItemRepository
 import com.example.myapplication.domain.usecase.GetTravelHistoryUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
 import kotlinx.datetime.LocalDate
@@ -84,7 +85,7 @@ class TravelHistoryViewModel(
                 // 對每個地點的項目按日期排序
                 val sorted = grouped.mapValues { (_, locationItems) ->
                     locationItems.sortedWith(
-                        compareBy<com.example.myapplication.data.model.ItineraryItem> { it.date }
+                        compareBy<ItineraryItem> { it.date }
                             .thenBy { it.primaryTime() }
                     )
                 }

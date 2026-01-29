@@ -2,9 +2,9 @@
 
 package com.example.myapplication.ui.mvi.additem
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.Location
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.entity.Location
+import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.AddItineraryItemUseCase
 import com.example.myapplication.ui.mvi.BaseViewModel
 import com.example.myapplication.data.storage.ImageStorageService

@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.repository.ItineraryRepository
 
 /**
  * 搜尋行程的 Use Case
