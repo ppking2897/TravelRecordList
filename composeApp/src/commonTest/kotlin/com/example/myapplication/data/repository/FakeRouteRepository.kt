@@ -1,6 +1,7 @@
 package com.example.myapplication.data.repository
 
-import com.example.myapplication.data.model.Route
+import com.example.myapplication.domain.entity.Route
+import com.example.myapplication.domain.repository.RouteRepository
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

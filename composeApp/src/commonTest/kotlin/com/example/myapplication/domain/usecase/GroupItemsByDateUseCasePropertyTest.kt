@@ -1,8 +1,10 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.model.Location
-import com.example.myapplication.data.model.localDate
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.test.itineraryItem
+import com.example.myapplication.domain.entity.Location
+import com.example.myapplication.test.location
+import com.example.myapplication.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
