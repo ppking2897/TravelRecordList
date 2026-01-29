@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.repository.ItineraryItemRepository
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.repository.ItineraryItemRepository
+import com.example.myapplication.domain.repository.ItineraryRepository
 
 /**
  * 刪除行程的 Use Case

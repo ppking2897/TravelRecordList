@@ -1,8 +1,8 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Itinerary
-import com.example.myapplication.data.model.Validation
-import com.example.myapplication.data.repository.ItineraryRepository
+import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.validation.Validation
+import com.example.myapplication.domain.repository.ItineraryRepository
 import kotlinx.datetime.LocalDate
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

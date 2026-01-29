@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.ItineraryItem
-import com.example.myapplication.data.repository.HashtagRepository
+import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.domain.repository.HashtagRepository
 
 /**
  * 根據標籤篩選 Use Case

@@ -1,6 +1,6 @@
 package com.example.myapplication.util
 
-import com.example.myapplication.data.model.localDate
+import com.example.myapplication.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize

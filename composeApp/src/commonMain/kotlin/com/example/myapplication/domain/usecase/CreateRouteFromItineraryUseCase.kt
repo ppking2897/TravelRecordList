@@ -1,7 +1,7 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.Route
-import com.example.myapplication.data.repository.RouteRepository
+import com.example.myapplication.domain.entity.Route
+import com.example.myapplication.domain.repository.RouteRepository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

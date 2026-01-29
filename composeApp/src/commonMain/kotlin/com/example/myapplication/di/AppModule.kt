@@ -1,15 +1,18 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.*
+import com.example.myapplication.domain.repository.*
 import com.example.myapplication.data.sync.SyncManager
+import com.example.myapplication.domain.interactor.ItemInteractor
+import com.example.myapplication.domain.interactor.PhotoInteractor
 import com.example.myapplication.domain.usecase.*
-import com.example.myapplication.ui.mvi.addedit.AddEditItineraryViewModel
-import com.example.myapplication.ui.mvi.additem.AddEditItemViewModel
-import com.example.myapplication.ui.mvi.detail.ItineraryDetailViewModel as ItineraryDetailViewModelMVI
-import com.example.myapplication.ui.mvi.edititem.EditItemViewModel
-import com.example.myapplication.ui.mvi.history.TravelHistoryViewModel as TravelHistoryViewModelMVI
-import com.example.myapplication.ui.mvi.itinerary.ItineraryListViewModel as ItineraryListViewModelMVI
-import com.example.myapplication.ui.mvi.route.RouteViewViewModel
+import com.example.myapplication.presentation.add_edit_itinerary.AddEditItineraryViewModel
+import com.example.myapplication.presentation.add_edit_item.AddEditItemViewModel
+import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailViewModel as ItineraryDetailViewModelMVI
+import com.example.myapplication.presentation.edit_item.EditItemViewModel
+import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel as TravelHistoryViewModelMVI
+import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel as ItineraryListViewModelMVI
+import com.example.myapplication.presentation.route_view.RouteViewViewModel
 import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -57,25 +60,37 @@ val appModule = module {
     factory { SaveDraftUseCase(get()) }
     factory { LoadDraftUseCase(get()) }
 
+    // Interactors
+    factory {
+        ItemInteractor(
+            itemRepository = get(),
+            updateItemUseCase = get(),
+            deleteItemUseCase = get(),
+            groupItemsByDateUseCase = get(),
+            filterItemsByDateUseCase = get(),
+            filterByHashtagUseCase = get()
+        )
+    }
+    factory {
+        PhotoInteractor(
+            addPhotoUseCase = get(),
+            deletePhotoUseCase = get(),
+            setCoverPhotoUseCase = get(),
+            generateThumbnailUseCase = get()
+        )
+    }
+
     // MVI ViewModels
     viewModel { RouteViewViewModel(get()) }
     viewModel { TravelHistoryViewModelMVI(get(), get()) }
     viewModel { ItineraryListViewModelMVI(get(), get()) }
     viewModel {
         ItineraryDetailViewModelMVI(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
+            itineraryRepository = get(),
+            deleteItineraryUseCase = get(),
+            createRouteUseCase = get(),
+            itemInteractor = get(),
+            photoInteractor = get()
         )
     }
     viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get()) }

@@ -1,6 +1,6 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.model.ItineraryItem
+import com.example.myapplication.domain.entity.ItineraryItem
 import kotlinx.datetime.LocalDate
 
 /**
