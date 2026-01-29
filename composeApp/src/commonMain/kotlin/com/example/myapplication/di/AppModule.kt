@@ -4,13 +4,13 @@ import com.example.myapplication.data.repository.*
 import com.example.myapplication.domain.repository.*
 import com.example.myapplication.data.sync.SyncManager
 import com.example.myapplication.domain.usecase.*
-import com.example.myapplication.ui.mvi.addedit.AddEditItineraryViewModel
-import com.example.myapplication.ui.mvi.additem.AddEditItemViewModel
-import com.example.myapplication.ui.mvi.detail.ItineraryDetailViewModel as ItineraryDetailViewModelMVI
-import com.example.myapplication.ui.mvi.edititem.EditItemViewModel
-import com.example.myapplication.ui.mvi.history.TravelHistoryViewModel as TravelHistoryViewModelMVI
-import com.example.myapplication.ui.mvi.itinerary.ItineraryListViewModel as ItineraryListViewModelMVI
-import com.example.myapplication.ui.mvi.route.RouteViewViewModel
+import com.example.myapplication.presentation.add_edit_itinerary.AddEditItineraryViewModel
+import com.example.myapplication.presentation.add_edit_item.AddEditItemViewModel
+import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailViewModel as ItineraryDetailViewModelMVI
+import com.example.myapplication.presentation.edit_item.EditItemViewModel
+import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel as TravelHistoryViewModelMVI
+import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel as ItineraryListViewModelMVI
+import com.example.myapplication.presentation.route_view.RouteViewViewModel
 import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
