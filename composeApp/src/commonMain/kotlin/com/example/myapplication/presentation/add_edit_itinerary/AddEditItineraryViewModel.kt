@@ -2,6 +2,7 @@
 
 package com.example.myapplication.presentation.add_edit_itinerary
 
+import com.example.myapplication.data.storage.ImageStorageService
 import com.example.myapplication.domain.entity.DraftType
 import com.example.myapplication.domain.repository.DraftRepository
 import com.example.myapplication.domain.repository.ItineraryRepository
@@ -25,7 +26,8 @@ class AddEditItineraryViewModel(
     private val itineraryRepository: ItineraryRepository,
     private val saveDraftUseCase: SaveDraftUseCase,
     private val loadDraftUseCase: LoadDraftUseCase,
-    private val draftRepository: DraftRepository
+    private val draftRepository: DraftRepository,
+    private val imageStorageService: ImageStorageService
 ) : BaseViewModel<AddEditItineraryState, AddEditItineraryIntent, AddEditItineraryEvent>(
     initialState = AddEditItineraryState()
 ) {
@@ -38,6 +40,8 @@ class AddEditItineraryViewModel(
             is AddEditItineraryIntent.UpdateDescription -> updateDescription(intent.description)
             is AddEditItineraryIntent.UpdateStartDate -> updateStartDate(intent.date)
             is AddEditItineraryIntent.UpdateEndDate -> updateEndDate(intent.date)
+            is AddEditItineraryIntent.SetCoverPhoto -> setCoverPhoto(intent.imageData)
+            is AddEditItineraryIntent.RemoveCoverPhoto -> removeCoverPhoto()
             is AddEditItineraryIntent.Save -> save()
             is AddEditItineraryIntent.SaveDraft -> saveDraft()
         }
@@ -59,6 +63,7 @@ class AddEditItineraryViewModel(
                             description = itinerary.description,
                             startDate = itinerary.startDate,
                             endDate = itinerary.endDate,
+                            coverPhotoPath = itinerary.coverPhotoPath,
                             isLoading = false
                         )
                     }
@@ -148,7 +153,44 @@ class AddEditItineraryViewModel(
             )
         }
     }
-    
+
+    /**
+     * 設定封面照片
+     */
+    private suspend fun setCoverPhoto(imageData: ByteArray) {
+        updateState { copy(isLoading = true) }
+
+        // 使用唯一的 ID 前綴來區分行程封面照片
+        val coverId = "itinerary_cover_${Clock.System.now().toEpochMilliseconds()}"
+
+        imageStorageService.saveImage(imageData, coverId)
+            .onSuccess { path ->
+                // 刪除舊的封面照片（如果有）
+                currentState.coverPhotoPath?.let { oldPath ->
+                    imageStorageService.deleteImage(oldPath)
+                }
+                updateState { copy(coverPhotoPath = path, isLoading = false) }
+            }
+            .onFailure { exception ->
+                updateState {
+                    copy(
+                        isLoading = false,
+                        error = exception.message ?: "儲存封面照片失敗"
+                    )
+                }
+            }
+    }
+
+    /**
+     * 移除封面照片
+     */
+    private suspend fun removeCoverPhoto() {
+        val coverPath = currentState.coverPhotoPath ?: return
+
+        imageStorageService.deleteImage(coverPath)
+        updateState { copy(coverPhotoPath = null) }
+    }
+
     /**
      * 儲存行程
      */
@@ -177,7 +219,8 @@ class AddEditItineraryViewModel(
                 title = snapshot.title,
                 description = snapshot.description,
                 startDate = snapshot.startDate,
-                endDate = snapshot.endDate
+                endDate = snapshot.endDate,
+                coverPhotoPath = snapshot.coverPhotoPath
             )
             
             updateItineraryUseCase(updatedItinerary, currentTimestamp)
@@ -201,7 +244,8 @@ class AddEditItineraryViewModel(
                 description = snapshot.description,
                 startDate = snapshot.startDate,
                 endDate = snapshot.endDate,
-                currentTimestamp = currentTimestamp
+                currentTimestamp = currentTimestamp,
+                coverPhotoPath = snapshot.coverPhotoPath
             )
                 .onSuccess { itinerary ->
                     // 清除草稿

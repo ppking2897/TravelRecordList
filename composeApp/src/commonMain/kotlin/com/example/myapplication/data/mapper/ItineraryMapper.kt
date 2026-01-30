@@ -13,6 +13,7 @@ object ItineraryMapper {
         description = dto.description,
         startDate = dto.startDate,
         endDate = dto.endDate,
+        coverPhotoPath = dto.coverPhotoPath,
         items = dto.items.map { it.toEntity() },
         createdAt = dto.createdAt,
         modifiedAt = dto.modifiedAt
@@ -24,6 +25,7 @@ object ItineraryMapper {
         description = entity.description,
         startDate = entity.startDate,
         endDate = entity.endDate,
+        coverPhotoPath = entity.coverPhotoPath,
         items = entity.items.map { it.toDto() },
         createdAt = entity.createdAt,
         modifiedAt = entity.modifiedAt

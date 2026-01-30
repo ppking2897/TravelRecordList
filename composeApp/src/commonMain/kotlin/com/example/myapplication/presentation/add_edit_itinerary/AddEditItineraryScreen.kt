@@ -4,12 +4,15 @@ package com.example.myapplication.presentation.add_edit_itinerary
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.data.storage.ImageStorageService
 import com.example.myapplication.domain.entity.DraftType
 import com.example.myapplication.domain.entity.Itinerary
 import com.example.myapplication.domain.repository.DraftRepository
@@ -18,6 +21,9 @@ import com.example.myapplication.domain.usecase.CreateItineraryUseCase
 import com.example.myapplication.domain.usecase.LoadDraftUseCase
 import com.example.myapplication.domain.usecase.SaveDraftUseCase
 import com.example.myapplication.domain.usecase.UpdateItineraryUseCase
+import com.example.myapplication.presentation.components.CoverPhotoSection
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -37,6 +43,7 @@ fun AddEditItineraryScreen(
     saveDraftUseCase: SaveDraftUseCase? = null,
     loadDraftUseCase: LoadDraftUseCase? = null,
     draftRepository: DraftRepository? = null,
+    imageStorageService: ImageStorageService? = null,
     onNavigateBack: () -> Unit,
     onSaveSuccess: (String) -> Unit
 ) {
@@ -45,6 +52,7 @@ fun AddEditItineraryScreen(
     var description by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf<LocalDate?>(null) }
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
+    var coverPhotoPath by remember { mutableStateOf<String?>(null) }
     var currentItinerary by remember { mutableStateOf<Itinerary?>(null) }
     var showDraftSaved by remember { mutableStateOf(false) }
 
@@ -84,6 +92,7 @@ fun AddEditItineraryScreen(
                     description = it.description
                     startDate = it.startDate
                     endDate = it.endDate
+                    coverPhotoPath = it.coverPhotoPath
                 }
             }
         }
@@ -120,6 +129,31 @@ fun AddEditItineraryScreen(
 
     val scope = rememberCoroutineScope()
 
+    // 封面照片選擇器
+    val coverImagePicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = { byteArrays ->
+            val imageData = byteArrays.firstOrNull()
+            if (imageData != null && imageStorageService != null) {
+                scope.launch {
+                    val coverId = "itinerary_cover_${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
+                    imageStorageService.saveImage(imageData, coverId)
+                        .onSuccess { path ->
+                            // 刪除舊封面（如果有）
+                            coverPhotoPath?.let { oldPath ->
+                                imageStorageService.deleteImage(oldPath)
+                            }
+                            coverPhotoPath = path
+                        }
+                        .onFailure { exception ->
+                            error = exception.message ?: "儲存封面照片失敗"
+                        }
+                }
+            }
+        }
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -136,9 +170,26 @@ fun AddEditItineraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // 封面照片區塊
+            if (imageStorageService != null) {
+                CoverPhotoSection(
+                    coverPhotoPath = coverPhotoPath,
+                    onSelectPhoto = { coverImagePicker.launch() },
+                    onRemovePhoto = {
+                        scope.launch {
+                            coverPhotoPath?.let { path ->
+                                imageStorageService.deleteImage(path)
+                            }
+                            coverPhotoPath = null
+                        }
+                    }
+                )
+            }
+
             OutlinedTextField(
                 value = title,
                 onValueChange = {
@@ -233,7 +284,8 @@ fun AddEditItineraryScreen(
                                 title = title,
                                 description = description,
                                 startDate = startDate,
-                                endDate = endDate
+                                endDate = endDate,
+                                coverPhotoPath = coverPhotoPath
                             )
                             updateItineraryUseCase(
                                 itinerary = updatedItinerary,
@@ -250,7 +302,8 @@ fun AddEditItineraryScreen(
                                 description = description,
                                 startDate = startDate,
                                 endDate = endDate,
-                                currentTimestamp = kotlin.time.Clock.System.now()
+                                currentTimestamp = kotlin.time.Clock.System.now(),
+                                coverPhotoPath = coverPhotoPath
                             ).onSuccess { itinerary ->
                                 // 清除草稿
                                 if (!isEditMode && draftRepository != null) {

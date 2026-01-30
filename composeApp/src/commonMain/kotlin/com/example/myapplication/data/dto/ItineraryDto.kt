@@ -16,6 +16,7 @@ data class ItineraryDto(
     val description: String = "",
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
+    val coverPhotoPath: String? = null,
     val items: List<ItineraryItemDto> = emptyList(),
     @Contextual val createdAt: Instant,
     @Contextual val modifiedAt: Instant

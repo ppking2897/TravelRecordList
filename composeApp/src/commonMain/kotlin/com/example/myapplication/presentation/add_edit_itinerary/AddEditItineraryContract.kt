@@ -19,6 +19,7 @@ data class AddEditItineraryState(
     val description: String = "",
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
+    val coverPhotoPath: String? = null,
     val titleError: String? = null,
     val dateError: String? = null,
     val error: String? = null,
@@ -37,6 +38,8 @@ sealed class AddEditItineraryIntent : UiIntent {
     data class UpdateDescription(val description: String) : AddEditItineraryIntent()
     data class UpdateStartDate(val date: LocalDate?) : AddEditItineraryIntent()
     data class UpdateEndDate(val date: LocalDate?) : AddEditItineraryIntent()
+    data class SetCoverPhoto(val imageData: ByteArray) : AddEditItineraryIntent()
+    object RemoveCoverPhoto : AddEditItineraryIntent()
     object Save : AddEditItineraryIntent()
     object SaveDraft : AddEditItineraryIntent()
 }

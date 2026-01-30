@@ -19,13 +19,14 @@ class CreateItineraryUseCase(
         description: String,
         startDate: LocalDate?,
         endDate: LocalDate?,
-        currentTimestamp: kotlinx.datetime.Instant
+        currentTimestamp: kotlinx.datetime.Instant,
+        coverPhotoPath: String? = null
     ): Result<Itinerary> {
         return try {
             // 驗證輸入
             Validation.validateTitle(title).getOrElse { return Result.failure(it) }
             Validation.validateDateRange(startDate, endDate).getOrElse { return Result.failure(it) }
-            
+
             // 建立 itinerary
             val itinerary = Itinerary(
                 id = Uuid.random().toString(),
@@ -33,6 +34,7 @@ class CreateItineraryUseCase(
                 description = description,
                 startDate = startDate,
                 endDate = endDate,
+                coverPhotoPath = coverPhotoPath,
                 items = emptyList(),
                 createdAt = currentTimestamp,
                 modifiedAt = currentTimestamp

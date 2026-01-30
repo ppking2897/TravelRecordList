@@ -47,11 +47,46 @@ class PhotoRepositoryImpl(
                 modifiedAt = now
             )
 
-            updateItemPhotos(itemId) { photos ->
-                photos + photo
-            }.getOrThrow()
+            // 新增照片並自動設為封面（如果是第一張照片）
+            updateItemPhotosWithAutocover(itemId, photo).getOrThrow()
 
             Result.success(photo)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * 新增照片並自動設為封面（如果是第一張照片）
+     */
+    private suspend fun updateItemPhotosWithAutocover(
+        itemId: String,
+        newPhoto: Photo
+    ): Result<Unit> {
+        return try {
+            val (itinerary, item) = findItemById(itemId).getOrThrow()
+
+            val updatedPhotos = item.photos + newPhoto
+
+            // 如果這是第一張照片，自動設為封面
+            val updatedCoverPhotoId = if (item.coverPhotoId == null && item.photos.isEmpty()) {
+                newPhoto.id
+            } else {
+                item.coverPhotoId
+            }
+
+            val updatedItem = item.copy(
+                photos = updatedPhotos,
+                coverPhotoId = updatedCoverPhotoId
+            )
+
+            val updatedItinerary = itinerary.copy(
+                items = itinerary.items.map { if (it.id == itemId) updatedItem else it }
+            )
+            itineraryRepository.updateItinerary(updatedItinerary).getOrThrow()
+            itineraryItemRepository.updateItem(updatedItem).getOrThrow()
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

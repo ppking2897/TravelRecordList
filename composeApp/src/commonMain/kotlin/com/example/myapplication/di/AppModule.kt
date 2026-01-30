@@ -119,7 +119,7 @@ val appModule = module {
             batchUpdateItemsUseCase = get()
         )
     }
-    viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AddEditItemViewModel(get(), get(), get()) }
     viewModel { EditItemViewModel(get(), get(), get(), get()) }
 }

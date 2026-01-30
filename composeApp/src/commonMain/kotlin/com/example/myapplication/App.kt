@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.myapplication.data.storage.ImageStorageService
 import com.example.myapplication.domain.repository.DraftRepository
 import com.example.myapplication.domain.repository.ItineraryRepository
 import com.example.myapplication.domain.usecase.*
@@ -66,6 +67,7 @@ fun TravelApp() {
                 saveDraftUseCase = koinInject(),
                 loadDraftUseCase = koinInject(),
                 draftRepository = koinInject(),
+                imageStorageService = koinInject(),
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { id ->
                     navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
@@ -89,11 +91,11 @@ fun TravelApp() {
                 saveDraftUseCase = koinInject(),
                 loadDraftUseCase = koinInject(),
                 draftRepository = koinInject(),
+                imageStorageService = koinInject(),
                 onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { id ->
-                    navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
-                        popUpTo(Screen.ItineraryList.route)
-                    }
+                onSaveSuccess = { _ ->
+                    // 編輯完成後返回上一頁（列表或詳情頁）
+                    navController.popBackStack()
                 }
             )
         }

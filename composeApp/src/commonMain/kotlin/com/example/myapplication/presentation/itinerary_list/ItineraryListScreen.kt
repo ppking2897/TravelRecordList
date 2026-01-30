@@ -51,19 +51,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.Lifecycle
 import com.example.myapplication.presentation.theme.CardStyle
-import com.example.myapplication.presentation.theme.CornerRadius
 import com.example.myapplication.presentation.theme.IconSize
 import com.example.myapplication.presentation.theme.ListStyle
 import com.example.myapplication.presentation.theme.Spacing
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.myapplication.domain.entity.Itinerary
 import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.presentation.components.DefaultCoverPlaceholder
 import com.example.myapplication.presentation.components.DeleteConfirmDialog
+import com.example.myapplication.presentation.components.LocalImage
 import com.example.myapplication.presentation.itinerary_list.ItineraryListEvent
 import com.example.myapplication.presentation.itinerary_list.ItineraryListIntent
 import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel
@@ -74,7 +74,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.absoluteValue
 
 /**
  * 行程列表畫面（MVI 架構）
@@ -393,7 +392,18 @@ private fun ItineraryGridCard(
         Column {
             // 封面圖片區域（含位置標籤）
             Box(modifier = Modifier.fillMaxWidth().height(Spacing.xxxl * 2.5f)) {
-                GradientPlaceholder(gradientId = itinerary.id.hashCode())
+                // 顯示封面照片或預設佔位圖
+                if (itinerary.coverPhotoPath != null) {
+                    LocalImage(
+                        filePath = itinerary.coverPhotoPath,
+                        contentDescription = "封面照片",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    DefaultCoverPlaceholder(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
 
                 extractMainLocation(itinerary.items)?.let { location ->
                     LocationBadge(
@@ -433,32 +443,6 @@ private fun ItineraryGridCard(
     }
 }
 
-/**
- * 漸層色佔位符
- */
-@Composable
-private fun GradientPlaceholder(
-    gradientId: Int,
-    modifier: Modifier = Modifier
-) {
-    val gradients = listOf(
-        MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.secondaryContainer,
-        MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.primaryContainer,
-        MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.tertiaryContainer,
-        MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.primaryContainer,
-        MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.surfaceVariant
-    )
-
-    val (startColor, endColor) = gradients[gradientId.absoluteValue % gradients.size]
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(colors = listOf(startColor, endColor))
-            )
-    )
-}
 
 /**
  * 位置標籤組件

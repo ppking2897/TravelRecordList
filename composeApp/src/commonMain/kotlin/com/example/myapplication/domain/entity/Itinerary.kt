@@ -12,6 +12,7 @@ import kotlinx.datetime.LocalDate
  * @property description 描述
  * @property startDate 開始日期（可選）
  * @property endDate 結束日期（可選）
+ * @property coverPhotoPath 封面照片路徑（可選）
  * @property items 行程項目列表
  * @property createdAt 建立時間戳記
  * @property modifiedAt 修改時間戳記
@@ -22,6 +23,7 @@ data class Itinerary(
     val description: String = "",
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
+    val coverPhotoPath: String? = null,
     val items: List<ItineraryItem> = emptyList(),
     val createdAt: Instant,
     val modifiedAt: Instant
