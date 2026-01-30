@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
@@ -148,12 +148,14 @@ fun LocationSearchField(
             DropdownMenu(
                 expanded = showDropdown && suggestions.isNotEmpty(),
                 onDismissRequest = { showDropdown = false },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 300.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                LazyColumn {
-                    items(suggestions) { suggestion ->
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 300.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    suggestions.forEachIndexed { index, suggestion ->
                         LocationSuggestionItem(
                             suggestion = suggestion,
                             onClick = {
@@ -163,7 +165,7 @@ fun LocationSearchField(
                                 searchQuery = suggestion.name
                             },
                         )
-                        if (suggestion != suggestions.last()) {
+                        if (index < suggestions.lastIndex) {
                             HorizontalDivider()
                         }
                     }
