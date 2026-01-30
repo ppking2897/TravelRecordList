@@ -192,6 +192,24 @@ class ItineraryItemRepositoryImpl(
         }
     }
 
+    override suspend fun reorderItems(itineraryId: String, itemIds: List<String>): Result<Unit> {
+        return try {
+            // 更新索引以保持新順序
+            // 注意：此實作保存項目的排序順序
+            // 在實際應用中可能需要為每個項目添加 sortOrder 欄位
+            val allIds = getItemIds()
+            val otherIds = allIds.filter { it !in itemIds }
+            val newOrder = itemIds + otherIds
+
+            val jsonData = JsonSerializer.serializeStringList(newOrder)
+            storageService.save(ITEM_INDEX_KEY, jsonData)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private suspend fun getAllItems(): List<ItineraryItem> {
         val ids = getItemIds()
         val items = mutableListOf<ItineraryItem>()

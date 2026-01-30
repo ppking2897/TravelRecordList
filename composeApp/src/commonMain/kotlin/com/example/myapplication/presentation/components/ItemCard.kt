@@ -29,8 +29,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.domain.entity.Photo
@@ -64,7 +67,13 @@ fun ItemCard(
     onExpandToggle: ((String) -> Unit)? = null,
     onAddPhoto: ((String) -> Unit)? = null,
     onSetCoverPhoto: ((String, String) -> Unit)? = null,
-    onDeletePhoto: ((String) -> Unit)? = null
+    onDeletePhoto: ((String) -> Unit)? = null,
+    // 拖曳排序相關
+    isDragging: Boolean = false,
+    // 批量選擇相關
+    isSelectionMode: Boolean = false,
+    isSelected: Boolean = false,
+    onSelectionToggle: () -> Unit = {}
 ) {
     val expanded = isExpanded
     var showMoreMenu by remember { mutableStateOf(false) }
@@ -81,38 +90,75 @@ fun ItemCard(
         label = "cardBackground"
     )
 
-    val cardBorderColor = if (item.isCompleted) {
+    val cardBorderColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else if (item.isCompleted) {
         if (isLightTheme) CompletedStateColors.lightBorder else CompletedStateColors.darkBorder
     } else {
         MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
     }
 
-    Row(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        // ========== 左側時間軸區域 ==========
-        TimelineSection(
-            arrivalTime = item.arrivalTime,
-            departureTime = item.departureTime,
-            isCompleted = item.isCompleted,
-            isLastItem = isLastItem
-        )
+    // 拖曳時的視覺效果
+    val dragModifier = if (isDragging) {
+        Modifier
+            .shadow(8.dp, RoundedCornerShape(CornerRadius.md))
+            .alpha(0.9f)
+    } else {
+        Modifier
+    }
 
-        Spacer(modifier = Modifier.width(Spacing.md))
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(dragModifier),
+        verticalAlignment = Alignment.Top
+    ) {
+        // ========== 選擇模式時顯示 Checkbox ==========
+        if (isSelectionMode) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onSelectionToggle() },
+                modifier = Modifier.padding(top = Spacing.sm),
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+
+        // ========== 左側時間軸區域 ==========
+        if (!isSelectionMode) {
+            TimelineSection(
+                arrivalTime = item.arrivalTime,
+                departureTime = item.departureTime,
+                isCompleted = item.isCompleted,
+                isLastItem = isLastItem
+            )
+
+            Spacer(modifier = Modifier.width(Spacing.md))
+        }
 
         // ========== 右側內容卡片 ==========
         Card(
             modifier = Modifier
                 .weight(1f)
-                .clickable(enabled = onExpandToggle != null) {
-                    onExpandToggle?.invoke(item.id)
+                .clickable(enabled = if (isSelectionMode) true else onExpandToggle != null) {
+                    if (isSelectionMode) {
+                        onSelectionToggle()
+                    } else {
+                        onExpandToggle?.invoke(item.id)
+                    }
                 },
             colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = if (item.isCompleted) CardStyle.listCardElevation / 2 else CardStyle.listCardElevation
+                defaultElevation = if (isDragging) CardStyle.detailCardElevation
+                    else if (item.isCompleted) CardStyle.listCardElevation / 2
+                    else CardStyle.listCardElevation
             ),
             shape = RoundedCornerShape(CornerRadius.md),
-            border = if (item.isCompleted) BorderStroke(TimelineDimensions.lineWidth / 2, cardBorderColor) else null
+            border = if (isSelected) BorderStroke(2.dp, cardBorderColor)
+                else if (item.isCompleted) BorderStroke(TimelineDimensions.lineWidth / 2, cardBorderColor)
+                else null
         ) {
             Column(
                 modifier = Modifier
