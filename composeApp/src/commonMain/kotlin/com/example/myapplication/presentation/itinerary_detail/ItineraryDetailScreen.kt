@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -235,7 +238,9 @@ private fun ItineraryDetailScreenContent(
     // 拖曳排序狀態
     var dragOffsetY by remember { mutableStateOf(0f) }
     var draggingItemIndex by remember { mutableStateOf<Int?>(null) }
+    var itemHeights by remember { mutableStateOf(mapOf<String, Int>()) }
     val lazyListState = rememberLazyListState()
+    val haptic = LocalHapticFeedback.current
 
     // 計算所有 items 的扁平化列表（用於拖曳時計算位置）
     val flattenedItems = remember(groupedItems) {
@@ -437,10 +442,15 @@ private fun ItineraryDetailScreenContent(
 
                                 Box(
                                     modifier = dragModifier
+                                        .animateItem()
+                                        .onGloballyPositioned { coordinates ->
+                                            itemHeights = itemHeights + (item.id to coordinates.size.height)
+                                        }
                                         .pointerInput(item.id) {
                                             detectDragGesturesAfterLongPress(
                                                 onDragStart = {
                                                     if (!isSelectionMode) {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                         draggingItemIndex = itemGlobalIndex
                                                         onStartDrag(item.id)
                                                     }
@@ -450,10 +460,14 @@ private fun ItineraryDetailScreenContent(
                                                     dragOffsetY += dragAmount.y
                                                 },
                                                 onDragEnd = {
-                                                    // 計算目標位置
+                                                    // 計算目標位置（使用動態高度）
                                                     draggingItemIndex?.let { fromIndex ->
-                                                        val itemHeight = 120f // 預估 item 高度（dp 轉 px 的近似值）
-                                                        val moveBy = (dragOffsetY / itemHeight).toInt()
+                                                        val averageHeight = if (itemHeights.isNotEmpty()) {
+                                                            itemHeights.values.average().toFloat()
+                                                        } else {
+                                                            120f // fallback
+                                                        }
+                                                        val moveBy = (dragOffsetY / averageHeight).toInt()
                                                         val toIndex = (fromIndex + moveBy).coerceIn(0, flattenedItems.size - 1)
 
                                                         if (fromIndex != toIndex) {
