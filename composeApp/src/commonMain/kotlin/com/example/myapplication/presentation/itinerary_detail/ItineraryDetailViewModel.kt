@@ -7,7 +7,6 @@ import com.example.myapplication.domain.usecase.BatchDeleteItemsUseCase
 import com.example.myapplication.domain.usecase.BatchUpdateItemsUseCase
 import com.example.myapplication.domain.usecase.CreateRouteFromItineraryUseCase
 import com.example.myapplication.domain.usecase.DeleteItineraryUseCase
-import com.example.myapplication.domain.usecase.ReorderItineraryItemsUseCase
 import com.example.myapplication.presentation.mvi.BaseViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.entity.ItineraryItem
@@ -33,7 +32,6 @@ class ItineraryDetailViewModel(
     private val createRouteUseCase: CreateRouteFromItineraryUseCase,
     private val itemInteractor: ItemInteractor,
     private val photoInteractor: PhotoInteractor,
-    private val reorderItemsUseCase: ReorderItineraryItemsUseCase,
     private val batchDeleteItemsUseCase: BatchDeleteItemsUseCase,
     private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase
 ) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
@@ -54,10 +52,6 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
             is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
             is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
-            // 拖曳排序相關
-            is ItineraryDetailIntent.StartDrag -> startDrag(intent.itemId)
-            is ItineraryDetailIntent.EndDrag -> endDrag()
-            is ItineraryDetailIntent.ReorderItems -> reorderItems(intent.fromIndex, intent.toIndex)
             // 批量操作相關
             is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
             is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
@@ -324,48 +318,6 @@ class ItineraryDetailViewModel(
         }
 
         sendEvent(ItineraryDetailEvent.NavigateToQuickAddItem(clampedDate))
-    }
-
-    // ========== 拖曳排序相關方法 ==========
-
-    private fun startDrag(itemId: String) {
-        updateState {
-            copy(isDragging = true, draggedItemId = itemId)
-        }
-    }
-
-    private fun endDrag() {
-        updateState {
-            copy(isDragging = false, draggedItemId = null)
-        }
-    }
-
-    private suspend fun reorderItems(fromIndex: Int, toIndex: Int) {
-        if (fromIndex == toIndex) return
-
-        val allItems = currentState.groupedItems.flatMap { it.items }.toMutableList()
-        if (fromIndex < 0 || fromIndex >= allItems.size || toIndex < 0 || toIndex >= allItems.size) return
-
-        // 移動項目
-        val item = allItems.removeAt(fromIndex)
-        allItems.add(toIndex, item)
-
-        // 更新本地狀態（Optimistic Update）
-        val newGrouped = itemInteractor.groupByDate(allItems)
-        updateState {
-            copy(groupedItems = newGrouped.map { (d, i) -> ItemsByDate(d, i) })
-        }
-
-        // 呼叫 UseCase 更新後端
-        currentState.itinerary?.let { itinerary ->
-            val itemIds = allItems.map { it.id }
-            reorderItemsUseCase(itinerary.id, itemIds)
-                .onFailure { exception ->
-                    // 失敗時重新載入
-                    sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "排序失敗"))
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
-                }
-        }
     }
 
     // ========== 批量操作相關方法 ==========

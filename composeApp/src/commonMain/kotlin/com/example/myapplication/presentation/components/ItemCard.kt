@@ -68,8 +68,6 @@ fun ItemCard(
     onAddPhoto: ((String) -> Unit)? = null,
     onSetCoverPhoto: ((String, String) -> Unit)? = null,
     onDeletePhoto: ((String) -> Unit)? = null,
-    // 拖曳排序相關
-    isDragging: Boolean = false,
     // 批量選擇相關
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -98,19 +96,8 @@ fun ItemCard(
         MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
     }
 
-    // 拖曳時的視覺效果
-    val dragModifier = if (isDragging) {
-        Modifier
-            .shadow(8.dp, RoundedCornerShape(CornerRadius.md))
-            .alpha(0.9f)
-    } else {
-        Modifier
-    }
-
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(dragModifier),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
         // ========== 選擇模式時顯示 Checkbox ==========
@@ -151,8 +138,7 @@ fun ItemCard(
                 },
             colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = if (isDragging) CardStyle.detailCardElevation
-                    else if (item.isCompleted) CardStyle.listCardElevation / 2
+                defaultElevation = if (item.isCompleted) CardStyle.listCardElevation / 2
                     else CardStyle.listCardElevation
             ),
             shape = RoundedCornerShape(CornerRadius.md),

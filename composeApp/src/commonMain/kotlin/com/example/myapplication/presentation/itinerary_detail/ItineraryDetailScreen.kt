@@ -1,19 +1,12 @@
 package com.example.myapplication.presentation.itinerary_detail
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -68,8 +61,6 @@ fun ItineraryDetailScreen(
     val error = state.error
     val isSelectionMode = state.isSelectionMode
     val selectedItemIds = state.selectedItemIds
-    val isDragging = state.isDragging
-    val draggedItemId = state.draggedItemId
 
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
@@ -115,12 +106,6 @@ fun ItineraryDetailScreen(
         expandedItemIds = state.expandedItemIds,
         isLoading = isLoading,
         error = error,
-        // 拖曳排序相關
-        isDragging = isDragging,
-        draggedItemId = draggedItemId,
-        onStartDrag = { viewModel.handleIntent(ItineraryDetailIntent.StartDrag(it)) },
-        onEndDrag = { viewModel.handleIntent(ItineraryDetailIntent.EndDrag) },
-        onReorderItems = { from, to -> viewModel.handleIntent(ItineraryDetailIntent.ReorderItems(from, to)) },
         // 批量操作相關
         isSelectionMode = isSelectionMode,
         selectedItemIds = selectedItemIds,
@@ -202,12 +187,6 @@ private fun ItineraryDetailScreenContent(
     expandedItemIds: Set<String>,
     isLoading: Boolean,
     error: String?,
-    // 拖曳排序相關
-    isDragging: Boolean = false,
-    draggedItemId: String? = null,
-    onStartDrag: (String) -> Unit = {},
-    onEndDrag: () -> Unit = {},
-    onReorderItems: (Int, Int) -> Unit = { _, _ -> },
     // 批量操作相關
     isSelectionMode: Boolean = false,
     selectedItemIds: Set<String> = emptySet(),
@@ -234,18 +213,7 @@ private fun ItineraryDetailScreenContent(
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     val isLightTheme = !isSystemInDarkTheme()
-
-    // 拖曳排序狀態
-    var dragOffsetY by remember { mutableStateOf(0f) }
-    var draggingItemIndex by remember { mutableStateOf<Int?>(null) }
-    var itemHeights by remember { mutableStateOf(mapOf<String, Int>()) }
     val lazyListState = rememberLazyListState()
-    val haptic = LocalHapticFeedback.current
-
-    // 計算所有 items 的扁平化列表（用於拖曳時計算位置）
-    val flattenedItems = remember(groupedItems) {
-        groupedItems.flatMap { it.items }
-    }
 
     // 使用 SurfaceLevel 漸層背景
     val backgroundGradient = if (isLightTheme) {
@@ -424,70 +392,7 @@ private fun ItineraryDetailScreenContent(
                                 val isLastGroup = group == groupedItems.last()
                                 val isLastItem = isLastInGroup && isLastGroup
 
-                                // 計算此 item 在扁平化列表中的 index
-                                val itemGlobalIndex = flattenedItems.indexOf(item)
-                                val isBeingDragged = isDragging && draggedItemId == item.id
-
-                                // 拖曳視覺效果修飾符
-                                val dragModifier = if (isBeingDragged) {
-                                    Modifier
-                                        .zIndex(1f)
-                                        .graphicsLayer {
-                                            translationY = dragOffsetY
-                                            alpha = 0.9f
-                                        }
-                                } else {
-                                    Modifier
-                                }
-
-                                Box(
-                                    modifier = dragModifier
-                                        .animateItem()
-                                        .onGloballyPositioned { coordinates ->
-                                            itemHeights = itemHeights + (item.id to coordinates.size.height)
-                                        }
-                                        .pointerInput(item.id) {
-                                            detectDragGesturesAfterLongPress(
-                                                onDragStart = {
-                                                    if (!isSelectionMode) {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        draggingItemIndex = itemGlobalIndex
-                                                        onStartDrag(item.id)
-                                                    }
-                                                },
-                                                onDrag = { change, dragAmount ->
-                                                    change.consume()
-                                                    dragOffsetY += dragAmount.y
-                                                },
-                                                onDragEnd = {
-                                                    // 計算目標位置（使用動態高度）
-                                                    draggingItemIndex?.let { fromIndex ->
-                                                        val averageHeight = if (itemHeights.isNotEmpty()) {
-                                                            itemHeights.values.average().toFloat()
-                                                        } else {
-                                                            120f // fallback
-                                                        }
-                                                        val moveBy = (dragOffsetY / averageHeight).toInt()
-                                                        val toIndex = (fromIndex + moveBy).coerceIn(0, flattenedItems.size - 1)
-
-                                                        if (fromIndex != toIndex) {
-                                                            onReorderItems(fromIndex, toIndex)
-                                                        }
-                                                    }
-
-                                                    // 重置狀態
-                                                    dragOffsetY = 0f
-                                                    draggingItemIndex = null
-                                                    onEndDrag()
-                                                },
-                                                onDragCancel = {
-                                                    dragOffsetY = 0f
-                                                    draggingItemIndex = null
-                                                    onEndDrag()
-                                                }
-                                            )
-                                        }
-                                ) {
+                                Box(modifier = Modifier.animateItem()) {
                                     ItemCard(
                                         item = item,
                                         isExpanded = expandedItemIds.contains(item.id),
@@ -499,8 +404,6 @@ private fun ItineraryDetailScreenContent(
                                         onAddPhoto = onAddPhoto,
                                         onSetCoverPhoto = onSetCoverPhoto,
                                         onDeletePhoto = onDeletePhoto,
-                                        // 拖曳排序相關
-                                        isDragging = isBeingDragged,
                                         // 批量選擇相關
                                         isSelectionMode = isSelectionMode,
                                         isSelected = selectedItemIds.contains(item.id),

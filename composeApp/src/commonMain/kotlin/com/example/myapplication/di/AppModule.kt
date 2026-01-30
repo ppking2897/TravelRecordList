@@ -80,8 +80,7 @@ val appModule = module {
     factory { FilterItemsByDateUseCase() }
     factory { SaveDraftUseCase(get()) }
     factory { LoadDraftUseCase(get()) }
-    // 拖曳排序與批量操作 Use Cases
-    factory { ReorderItineraryItemsUseCase(get()) }
+    // 批量操作 Use Cases
     factory { BatchDeleteItemsUseCase(get()) }
     factory { BatchUpdateItemsUseCase(get()) }
 
@@ -116,7 +115,6 @@ val appModule = module {
             createRouteUseCase = get(),
             itemInteractor = get(),
             photoInteractor = get(),
-            reorderItemsUseCase = get(),
             batchDeleteItemsUseCase = get(),
             batchUpdateItemsUseCase = get()
         )

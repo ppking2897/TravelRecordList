@@ -21,9 +21,6 @@ data class ItineraryDetailState(
     val selectedHashtag: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    // 拖曳排序相關狀態
-    val isDragging: Boolean = false,
-    val draggedItemId: String? = null,
     // 批量操作相關狀態
     val isSelectionMode: Boolean = false,
     val selectedItemIds: Set<String> = emptySet()
@@ -61,11 +58,6 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
     data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
     data class QuickAddItem(val afterDayIndex: Int) : ItineraryDetailIntent()
-
-    // 拖曳排序相關 Intent
-    data class StartDrag(val itemId: String) : ItineraryDetailIntent()
-    object EndDrag : ItineraryDetailIntent()
-    data class ReorderItems(val fromIndex: Int, val toIndex: Int) : ItineraryDetailIntent()
 
     // 批量操作相關 Intent
     object ToggleSelectionMode : ItineraryDetailIntent()
