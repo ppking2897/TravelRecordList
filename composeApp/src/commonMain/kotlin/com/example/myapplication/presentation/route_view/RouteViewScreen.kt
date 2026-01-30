@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -86,7 +87,7 @@ private fun RouteInfoCard(route: Route) {
                 style = MaterialTheme.typography.headlineSmall
             )
             
-            Divider()
+            HorizontalDivider()
             
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -148,7 +149,7 @@ private fun RouteLocationCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (!isFirst) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(2.dp)
                             .height(16.dp),
@@ -173,7 +174,7 @@ private fun RouteLocationCard(
                 }
                 
                 if (!isLast) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .width(2.dp)
                             .height(16.dp),
@@ -369,7 +370,7 @@ private fun RouteViewScreenContent(
                 title = { Text(route?.title ?: "路線詳情") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 },
                 actions = {

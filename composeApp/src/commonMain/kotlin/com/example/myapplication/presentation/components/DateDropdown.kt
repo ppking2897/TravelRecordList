@@ -2,6 +2,7 @@ package com.example.myapplication.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.myapplication.util.toDateList
@@ -33,7 +34,7 @@ fun DateDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(),
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true),
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
         )
         
