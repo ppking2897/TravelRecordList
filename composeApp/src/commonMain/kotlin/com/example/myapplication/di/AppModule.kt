@@ -1,7 +1,9 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.*
+import com.example.myapplication.data.service.NominatimLocationService
 import com.example.myapplication.domain.repository.*
+import com.example.myapplication.domain.service.LocationSearchService
 import com.example.myapplication.data.sync.SyncManager
 import com.example.myapplication.domain.interactor.ItemInteractor
 import com.example.myapplication.domain.interactor.PhotoInteractor
@@ -13,6 +15,10 @@ import com.example.myapplication.presentation.edit_item.EditItemViewModel
 import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel as TravelHistoryViewModelMVI
 import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel as ItineraryListViewModelMVI
 import com.example.myapplication.presentation.route_view.RouteViewViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -27,6 +33,21 @@ import org.koin.dsl.module
  */
 @ExperimentalTime
 val appModule = module {
+    // HTTP Client for API calls
+    single {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                })
+            }
+        }
+    }
+
+    // Location Search Service
+    single<LocationSearchService> { NominatimLocationService(get()) }
+
     // Sync
     single { SyncManager(get()) }
 

@@ -20,10 +20,13 @@ import androidx.compose.ui.unit.dp
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.service.LocationSearchService
 import com.example.myapplication.presentation.components.DateDropdown
 import com.example.myapplication.presentation.components.LocalImage
+import com.example.myapplication.presentation.components.LocationSearchField
 import com.example.myapplication.presentation.components.SimplePhotoPreviewDialog
 import com.example.myapplication.presentation.components.TimePickerDialog
+import org.koin.compose.koinInject
 import com.example.myapplication.presentation.add_edit_item.AddEditItemEvent
 import com.example.myapplication.presentation.add_edit_item.AddEditItemIntent
 import com.example.myapplication.presentation.add_edit_item.AddEditItemState
@@ -40,14 +43,15 @@ fun AddEditItemScreen(
     itineraryId: String,
     onNavigateBack: () -> Unit,
     onSaveSuccess: () -> Unit,
-    viewModel: AddEditItemViewModel = koinViewModel()
+    viewModel: AddEditItemViewModel = koinViewModel(),
+    locationSearchService: LocationSearchService = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
-    
+
     LaunchedEffect(itineraryId) {
         viewModel.handleIntent(AddEditItemIntent.LoadItinerary(itineraryId))
     }
-    
+
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
             when (event) {
@@ -58,11 +62,12 @@ fun AddEditItemScreen(
             }
         }
     }
-    
+
     AddEditItemScreenContent(
         state = state,
         onIntent = { viewModel.handleIntent(it) },
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        locationSearchService = locationSearchService
     )
 }
 
@@ -72,7 +77,8 @@ fun AddEditItemScreen(
 fun AddEditItemScreenContent(
     state: AddEditItemState,
     onIntent: (AddEditItemIntent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    locationSearchService: LocationSearchService? = null
 ) {
     var showArrivalTimePicker by remember { mutableStateOf(false) }
     var showDepartureTimePicker by remember { mutableStateOf(false) }
@@ -117,20 +123,35 @@ fun AddEditItemScreenContent(
                 supportingText = state.activityError?.let { { Text(it) } }
             )
             
-            OutlinedTextField(
+            // 智慧地址輸入
+            LocationSearchField(
                 value = state.locationName,
                 onValueChange = { onIntent(AddEditItemIntent.UpdateLocationName(it)) },
-                label = { Text("地點名稱 *") },
+                onLocationSelected = { suggestion ->
+                    onIntent(AddEditItemIntent.SelectLocation(suggestion))
+                },
+                locationSearchService = locationSearchService,
                 modifier = Modifier.fillMaxWidth(),
-                isError = state.locationError != null,
-                supportingText = state.locationError?.let { { Text(it) } }
+                label = "地點名稱 *",
+                placeholder = "輸入地點名稱搜尋..."
             )
-            
+            if (state.locationError != null) {
+                Text(
+                    text = state.locationError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            // 地址顯示（選擇地點後自動填入，或可手動輸入）
             OutlinedTextField(
                 value = state.locationAddress,
                 onValueChange = { onIntent(AddEditItemIntent.UpdateLocationAddress(it)) },
                 label = { Text("地點地址") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = if (state.locationLatitude != null) {
+                    { Text("座標: ${state.locationLatitude}, ${state.locationLongitude}") }
+                } else null
             )
             
             // 日期選擇
@@ -330,7 +351,7 @@ private fun AddEditItemScreenPreview() {
                     hasDateRange = true,
                     itinerary = Itinerary(
                         id = "1",
-                        title = "Test", 
+                        title = "Test",
                         startDate = kotlinx.datetime.LocalDate(2024, 1, 1),
                         endDate = kotlinx.datetime.LocalDate(2024, 1, 5),
                         createdAt = kotlin.time.Clock.System.now(),
@@ -338,7 +359,8 @@ private fun AddEditItemScreenPreview() {
                     )
                 ),
                 onIntent = {},
-                onNavigateBack = {}
+                onNavigateBack = {},
+                locationSearchService = null // Preview 不需要實際搜尋服務
             )
         }
     }

@@ -35,6 +35,7 @@ class AddEditItemViewModel(
             is AddEditItemIntent.UpdateActivity -> updateActivity(intent.activity)
             is AddEditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
             is AddEditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
+            is AddEditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
             is AddEditItemIntent.UpdateNotes -> updateNotes(intent.notes)
             is AddEditItemIntent.UpdateDate -> updateDate(intent.date)
             is AddEditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
@@ -105,7 +106,35 @@ class AddEditItemViewModel(
     private fun updateLocationAddress(address: String) {
         updateState { copy(locationAddress = address) }
     }
-    
+
+    /**
+     * 選擇地點（從搜尋建議中選擇）
+     */
+    private fun selectLocation(suggestion: com.example.myapplication.domain.service.LocationSuggestion?) {
+        if (suggestion == null) {
+            // 清除已選擇的地點座標（但保留手動輸入的名稱）
+            updateState {
+                copy(
+                    locationLatitude = null,
+                    locationLongitude = null,
+                    locationPlaceId = null
+                )
+            }
+        } else {
+            // 選擇地點後自動填入所有資訊
+            updateState {
+                copy(
+                    locationName = suggestion.name,
+                    locationAddress = suggestion.address,
+                    locationLatitude = suggestion.latitude,
+                    locationLongitude = suggestion.longitude,
+                    locationPlaceId = suggestion.placeId,
+                    locationError = null
+                )
+            }
+        }
+    }
+
     /**
      * 更新備註
      */
@@ -205,8 +234,8 @@ class AddEditItemViewModel(
         
         val location = Location(
             name = snapshot.locationName,
-            latitude = null,
-            longitude = null,
+            latitude = snapshot.locationLatitude,
+            longitude = snapshot.locationLongitude,
             address = snapshot.locationAddress.ifBlank { null }
         )
         

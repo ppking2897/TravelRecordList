@@ -1,6 +1,7 @@
 package com.example.myapplication.presentation.add_edit_item
 
 import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.service.LocationSuggestion
 import com.example.myapplication.presentation.mvi.UiEvent
 import com.example.myapplication.presentation.mvi.UiIntent
 import com.example.myapplication.presentation.mvi.UiState
@@ -19,6 +20,9 @@ data class AddEditItemState(
     val activity: String = "",
     val locationName: String = "",
     val locationAddress: String = "",
+    val locationLatitude: Double? = null,
+    val locationLongitude: Double? = null,
+    val locationPlaceId: String? = null,
     val notes: String = "",
     val selectedDate: LocalDate? = null,
     val arrivalTime: LocalTime? = null,
@@ -41,6 +45,7 @@ sealed class AddEditItemIntent : UiIntent {
     data class UpdateActivity(val activity: String) : AddEditItemIntent()
     data class UpdateLocationName(val name: String) : AddEditItemIntent()
     data class UpdateLocationAddress(val address: String) : AddEditItemIntent()
+    data class SelectLocation(val suggestion: LocationSuggestion?) : AddEditItemIntent()
     data class UpdateNotes(val notes: String) : AddEditItemIntent()
     data class UpdateDate(val date: LocalDate?) : AddEditItemIntent()
     data class UpdateArrivalTime(val time: LocalTime?) : AddEditItemIntent()
