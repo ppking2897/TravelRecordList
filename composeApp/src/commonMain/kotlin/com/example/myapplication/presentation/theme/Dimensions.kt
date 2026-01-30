@@ -202,6 +202,37 @@ object ListStyle {
 }
 
 // ============================================================================
+// 時間軸尺寸 (Timeline Dimensions)
+// ============================================================================
+
+/**
+ * 時間軸元件專用尺寸
+ * 用於 TimelineNavigator 和相關時間軸元件
+ */
+object TimelineDimensions {
+    /** 時間軸節點大小 */
+    val nodeSize: Dp = 16.dp
+
+    /** 連接線寬度 */
+    val lineWidth: Dp = 2.dp
+
+    /** 節點間距 */
+    val nodeSpacing: Dp = 48.dp
+
+    /** 水平內距 */
+    val horizontalPadding: Dp = 16.dp
+
+    /** 垂直內距 */
+    val verticalPadding: Dp = 8.dp
+
+    /** 節點選中時的大小 */
+    val nodeSelectedSize: Dp = 20.dp
+
+    /** 標籤與節點的間距 */
+    val labelSpacing: Dp = 4.dp
+}
+
+// ============================================================================
 // Composition Local (供 Theme 使用)
 // ============================================================================
 
@@ -212,7 +243,8 @@ data class AppDimensions(
     val elevation: Elevation = Elevation,
     val componentSize: ComponentSize = ComponentSize,
     val cardStyle: CardStyle = CardStyle,
-    val listStyle: ListStyle = ListStyle
+    val listStyle: ListStyle = ListStyle,
+    val timelineDimensions: TimelineDimensions = TimelineDimensions,
 )
 
 val LocalAppDimensions = staticCompositionLocalOf { AppDimensions() }
