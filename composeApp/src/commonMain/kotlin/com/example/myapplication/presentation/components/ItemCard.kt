@@ -4,9 +4,23 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,11 +34,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.domain.entity.Photo
+import com.example.myapplication.presentation.theme.AppGradients
 import com.example.myapplication.presentation.theme.CardStyle
+import com.example.myapplication.presentation.theme.CompletedStateColors
 import com.example.myapplication.presentation.theme.ComponentSize
 import com.example.myapplication.presentation.theme.CornerRadius
 import com.example.myapplication.presentation.theme.IconSize
 import com.example.myapplication.presentation.theme.Spacing
+import com.example.myapplication.presentation.theme.TimelineDimensions
 
 /**
  * 時間軸風格的行程項目卡片
@@ -51,16 +68,24 @@ fun ItemCard(
 ) {
     val expanded = isExpanded
     var showMoreMenu by remember { mutableStateOf(false) }
+    val isLightTheme = !isSystemInDarkTheme()
 
-    // 動畫顏色
+    // 動畫顏色 - 使用 CompletedStateColors
     val cardBackgroundColor by animateColorAsState(
         targetValue = if (item.isCompleted) {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            if (isLightTheme) CompletedStateColors.lightBackground
+            else CompletedStateColors.darkBackground
         } else {
             MaterialTheme.colorScheme.surface
         },
         label = "cardBackground"
     )
+
+    val cardBorderColor = if (item.isCompleted) {
+        if (isLightTheme) CompletedStateColors.lightBorder else CompletedStateColors.darkBorder
+    } else {
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    }
 
     Row(
         modifier = modifier.fillMaxWidth()
@@ -86,7 +111,8 @@ fun ItemCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = if (item.isCompleted) CardStyle.listCardElevation / 2 else CardStyle.listCardElevation
             ),
-            shape = RoundedCornerShape(CornerRadius.md)
+            shape = RoundedCornerShape(CornerRadius.md),
+            border = if (item.isCompleted) BorderStroke(TimelineDimensions.lineWidth / 2, cardBorderColor) else null
         ) {
             Column(
                 modifier = Modifier
@@ -263,6 +289,7 @@ fun ItemCard(
 
 /**
  * 時間軸區域
+ * 使用 TimelineDimensions 統一尺寸，使用 CompletedStateColors 區分完成狀態
  */
 @Composable
 private fun TimelineSection(
@@ -273,14 +300,24 @@ private fun TimelineSection(
     modifier: Modifier = Modifier
 ) {
     val primaryTime = arrivalTime ?: departureTime
+    val isLightTheme = !isSystemInDarkTheme()
+
+    // 使用 CompletedStateColors 區分完成狀態
     val timelineColor = if (isCompleted) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        if (isLightTheme) CompletedStateColors.lightIcon else CompletedStateColors.darkIcon
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+    val timeTextColor = if (isCompleted) {
+        if (isLightTheme) CompletedStateColors.lightText.copy(alpha = 0.6f)
+        else CompletedStateColors.darkText.copy(alpha = 0.6f)
     } else {
         MaterialTheme.colorScheme.primary
     }
 
     Column(
-        modifier = modifier.width(Spacing.xxxl + Spacing.sm),
+        modifier = modifier.width(TimelineDimensions.nodeSpacing + TimelineDimensions.horizontalPadding / 2),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 時間顯示
@@ -288,20 +325,16 @@ private fun TimelineSection(
             Text(
                 text = formatTime(primaryTime),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isCompleted) {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
+                color = timeTextColor
             )
 
-            Spacer(modifier = Modifier.height(Spacing.xs))
+            Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
         }
 
-        // 時間軸圓點
+        // 時間軸圓點 - 使用 TimelineDimensions.nodeSize
         Box(
             modifier = Modifier
-                .size(IconSize.xs)
+                .size(TimelineDimensions.nodeSize)
                 .background(timelineColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -309,17 +342,18 @@ private fun TimelineSection(
                 Icon(
                     Icons.Default.Check,
                     contentDescription = null,
-                    modifier = Modifier.size(IconSize.xs - Spacing.xs),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    modifier = Modifier.size(TimelineDimensions.nodeSize - Spacing.xs),
+                    tint = if (isLightTheme) CompletedStateColors.lightBackground
+                    else CompletedStateColors.darkBackground
                 )
             }
         }
 
-        // 時間軸連接線
+        // 時間軸連接線 - 使用 TimelineDimensions.lineWidth
         if (!isLastItem) {
             Box(
                 modifier = Modifier
-                    .width(Spacing.xs / 2)
+                    .width(TimelineDimensions.lineWidth)
                     .weight(1f)
                     .background(timelineColor.copy(alpha = 0.3f))
             )
@@ -364,12 +398,19 @@ private fun LocationChip(
 
 /**
  * 完成狀態標籤
+ * 使用 CompletedStateColors 定義的完成狀態色彩
  */
 @Composable
 private fun CompletedBadge(modifier: Modifier = Modifier) {
+    val isLightTheme = !isSystemInDarkTheme()
+    val backgroundColor = if (isLightTheme) CompletedStateColors.lightBackground
+        else CompletedStateColors.darkBackground
+    val contentColor = if (isLightTheme) CompletedStateColors.lightContent
+        else CompletedStateColors.darkContent
+
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = backgroundColor,
         shape = RoundedCornerShape(CornerRadius.xs)
     ) {
         Row(
@@ -381,12 +422,12 @@ private fun CompletedBadge(modifier: Modifier = Modifier) {
                 Icons.Default.CheckCircle,
                 contentDescription = null,
                 modifier = Modifier.size(IconSize.xs),
-                tint = MaterialTheme.colorScheme.primary
+                tint = contentColor
             )
             Text(
                 text = "已完成",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = contentColor
             )
         }
     }
@@ -394,11 +435,14 @@ private fun CompletedBadge(modifier: Modifier = Modifier) {
 
 /**
  * 封面照片顯示
+ * 使用 AppGradients.cardOverlayGradient 作為底部遮罩
  */
 @Composable
 fun CoverPhotoDisplay(
     photo: Photo,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showOverlay: Boolean = false,
+    overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     Card(
         modifier = modifier,
@@ -407,12 +451,32 @@ fun CoverPhotoDisplay(
         ),
         shape = RoundedCornerShape(CornerRadius.sm)
     ) {
-        LocalImage(
-            photo = photo,
-            contentDescription = "封面照片",
-            modifier = Modifier.fillMaxSize(),
-            useThumbnail = true
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            LocalImage(
+                photo = photo,
+                contentDescription = "封面照片",
+                modifier = Modifier.fillMaxSize(),
+                useThumbnail = true
+            )
+
+            // 底部漸層遮罩 - 使用 AppGradients.cardOverlayGradient
+            if (showOverlay) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.5f)
+                        .align(Alignment.BottomCenter)
+                        .background(AppGradients.cardOverlayGradient)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(Spacing.sm),
+                    content = overlayContent
+                )
+            }
+        }
     }
 }
 
