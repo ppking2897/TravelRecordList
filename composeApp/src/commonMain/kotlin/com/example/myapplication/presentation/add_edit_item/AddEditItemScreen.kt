@@ -43,6 +43,7 @@ fun AddEditItemScreen(
     itineraryId: String,
     onNavigateBack: () -> Unit,
     onSaveSuccess: () -> Unit,
+    defaultDate: LocalDate? = null,
     viewModel: AddEditItemViewModel = koinViewModel(),
     locationSearchService: LocationSearchService = koinInject()
 ) {
@@ -50,6 +51,13 @@ fun AddEditItemScreen(
 
     LaunchedEffect(itineraryId) {
         viewModel.handleIntent(AddEditItemIntent.LoadItinerary(itineraryId))
+    }
+
+    // 如果有預設日期，在 itinerary 載入後設定
+    LaunchedEffect(defaultDate, state.itinerary) {
+        if (defaultDate != null && state.itinerary != null && state.selectedDate == null) {
+            viewModel.handleIntent(AddEditItemIntent.UpdateDate(defaultDate))
+        }
     }
 
     LaunchedEffect(Unit) {

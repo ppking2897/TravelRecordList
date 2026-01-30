@@ -9,6 +9,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,6 +62,7 @@ fun TimelineNavigator(
     groupedItems: List<ItemsByDate>,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate?) -> Unit,
+    onQuickAdd: (afterDayIndex: Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val dates = dateRange.toDateList()
@@ -107,6 +112,13 @@ fun TimelineNavigator(
                 val isFirst = index == 0
                 val isLast = index == nodes.lastIndex
 
+                // 在非第一個節點前顯示快速新增按鈕
+                if (!isFirst) {
+                    QuickAddButton(
+                        onClick = { onQuickAdd(index - 1) }
+                    )
+                }
+
                 TimelineNodeItem(
                     node = node,
                     isSelected = isSelected,
@@ -116,6 +128,30 @@ fun TimelineNavigator(
                 )
             }
         }
+    }
+}
+
+/**
+ * 快速新增按鈕
+ *
+ * 顯示在日期節點之間的「+」按鈕
+ *
+ * @param onClick 點擊回調
+ */
+@Composable
+private fun QuickAddButton(
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(TimelineDimensions.nodeSize)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "快速新增項目",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(TimelineDimensions.nodeSize - 4.dp)
+        )
     }
 }
 

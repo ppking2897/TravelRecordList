@@ -54,11 +54,13 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class DeletePhoto(val photoId: String) : ItineraryDetailIntent()
     data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
     data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
+    data class QuickAddItem(val afterDayIndex: Int) : ItineraryDetailIntent()
 }
 
 sealed class ItineraryDetailEvent : UiEvent {
     object NavigateBack : ItineraryDetailEvent()
     object NavigateToAddItem : ItineraryDetailEvent()
+    data class NavigateToQuickAddItem(val defaultDate: LocalDate) : ItineraryDetailEvent()
     data class NavigateToEditItem(val itemId: String) : ItineraryDetailEvent()
     object NavigateToEditItinerary : ItineraryDetailEvent()
     data class ShowDeleteItemConfirm(val item: ItineraryItem) : ItineraryDetailEvent()

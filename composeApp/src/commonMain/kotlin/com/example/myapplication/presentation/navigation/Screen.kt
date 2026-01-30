@@ -15,6 +15,9 @@ sealed class Screen(val route: String) {
     object AddItem : Screen("add_item/{itineraryId}") {
         fun createRoute(itineraryId: String) = "add_item/$itineraryId"
     }
+    object QuickAddItem : Screen("quick_add_item/{itineraryId}/{defaultDate}") {
+        fun createRoute(itineraryId: String, defaultDate: String) = "quick_add_item/$itineraryId/$defaultDate"
+    }
     object EditItem : Screen("edit_item/{itemId}") {
         fun createRoute(itemId: String) = "edit_item/$itemId"
     }

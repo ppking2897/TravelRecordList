@@ -113,6 +113,9 @@ fun TravelApp() {
                 onAddItemClick = {
                     navController.navigate(Screen.AddItem.createRoute(itineraryId))
                 },
+                onQuickAddItemClick = { defaultDate ->
+                    navController.navigate(Screen.QuickAddItem.createRoute(itineraryId, defaultDate.toString()))
+                },
                 onEditItemClick = { itemId ->
                     navController.navigate(Screen.EditItem.createRoute(itemId))
                 },
@@ -134,6 +137,25 @@ fun TravelApp() {
                 itineraryId = itineraryId,
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() }
+            )
+        }
+
+        // 快速新增項目（帶預設日期）
+        composable(
+            route = Screen.QuickAddItem.route,
+            arguments = listOf(
+                navArgument("itineraryId") { type = NavType.StringType },
+                navArgument("defaultDate") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
+            val defaultDateString = backStackEntry.arguments?.getString("defaultDate") ?: return@composable
+            val defaultDate = kotlinx.datetime.LocalDate.parse(defaultDateString)
+            AddEditItemScreen(
+                itineraryId = itineraryId,
+                onNavigateBack = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() },
+                defaultDate = defaultDate
             )
         }
 

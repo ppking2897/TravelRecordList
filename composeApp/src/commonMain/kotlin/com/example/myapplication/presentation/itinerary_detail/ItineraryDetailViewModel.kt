@@ -10,7 +10,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.entity.ItineraryItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -45,6 +47,7 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
             is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
             is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
+            is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
         }
     }
 
@@ -286,5 +289,23 @@ class ItineraryDetailViewModel(
                     }
                 }
         }
+    }
+
+    private suspend fun quickAddItem(afterDayIndex: Int) {
+        val dateRange = currentState.dateRange ?: return
+        val startDate = dateRange.start
+
+        // 計算預設日期：afterDayIndex 代表「第 N 天之後」，所以新項目預設為「第 N+1 天」
+        // afterDayIndex 是 0-indexed，所以 afterDayIndex = 0 表示 Day 1 之後，即 Day 2
+        val defaultDate = startDate.plus(kotlinx.datetime.DatePeriod(days = afterDayIndex + 1))
+
+        // 確保日期不超出範圍
+        val clampedDate = if (defaultDate > dateRange.endInclusive) {
+            dateRange.endInclusive
+        } else {
+            defaultDate
+        }
+
+        sendEvent(ItineraryDetailEvent.NavigateToQuickAddItem(clampedDate))
     }
 }

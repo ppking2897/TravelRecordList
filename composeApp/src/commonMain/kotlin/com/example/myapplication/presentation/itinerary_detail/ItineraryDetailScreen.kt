@@ -42,6 +42,7 @@ fun ItineraryDetailScreen(
     itineraryId: String,
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
+    onQuickAddItemClick: (LocalDate) -> Unit,
     onEditItemClick: (String) -> Unit,
     onEditItineraryClick: () -> Unit,
     onDeleteItineraryClick: () -> Unit,
@@ -82,6 +83,7 @@ fun ItineraryDetailScreen(
         viewModel.event.collect { event ->
             when (event) {
                 is ItineraryDetailEvent.NavigateBack -> onNavigateBack()
+                is ItineraryDetailEvent.NavigateToQuickAddItem -> onQuickAddItemClick(event.defaultDate)
                 is ItineraryDetailEvent.ShowError -> { /* Handle Error */ }
                 is ItineraryDetailEvent.NavigateToRoute -> { /* Handle Route Navigation if needed here or in UI */ }
                 else -> {}
@@ -99,6 +101,9 @@ fun ItineraryDetailScreen(
         error = error,
         onNavigateBack = onNavigateBack,
         onAddItemClick = onAddItemClick,
+        onQuickAdd = { afterDayIndex ->
+            viewModel.handleIntent(ItineraryDetailIntent.QuickAddItem(afterDayIndex))
+        },
         onEditItemClick = onEditItemClick,
         onEditItineraryClick = onEditItineraryClick,
         onDeleteItineraryClick = { viewModel.handleIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId)) },
@@ -153,6 +158,7 @@ private fun ItineraryDetailScreenContent(
     error: String?,
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
+    onQuickAdd: (afterDayIndex: Int) -> Unit,
     onEditItemClick: (String) -> Unit,
     onEditItineraryClick: () -> Unit,
     onDeleteItineraryClick: () -> Unit,
@@ -254,7 +260,8 @@ private fun ItineraryDetailScreenContent(
                         dateRange = range,
                         groupedItems = groupedItems,
                         selectedDate = selectedDate,
-                        onDateSelected = onSelectDate
+                        onDateSelected = onSelectDate,
+                        onQuickAdd = onQuickAdd
                     )
                 }
                 
@@ -370,6 +377,7 @@ private fun ItineraryDetailScreenPreview() {
                 error = null,
                 onNavigateBack = {},
                 onAddItemClick = {},
+                onQuickAdd = {},
                 onEditItemClick = {},
                 onEditItineraryClick = {},
                 onDeleteItineraryClick = {},
