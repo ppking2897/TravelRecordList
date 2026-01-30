@@ -15,10 +15,10 @@ import com.example.myapplication.presentation.theme.Spacing
 import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.domain.entity.Location
 import com.example.myapplication.domain.usecase.ItemsByDate
-import com.example.myapplication.presentation.components.DateTabsRow
 import com.example.myapplication.presentation.components.DeleteConfirmDialog
 import com.example.myapplication.presentation.components.EmptyState
 import com.example.myapplication.presentation.components.ItemCard
+import com.example.myapplication.presentation.components.TimelineNavigator
 import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailEvent
 import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailIntent
 import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailViewModel
@@ -231,14 +231,14 @@ private fun ItineraryDetailScreenContent(
             Column(
                 modifier = Modifier.fillMaxSize().padding(paddingValues)
             ) {
-                // 日期 Tabs
+                // 時間軸導覽
                 dateRange?.let { range ->
-                    DateTabsRow(
+                    TimelineNavigator(
                         dateRange = range,
+                        groupedItems = groupedItems,
                         selectedDate = selectedDate,
                         onDateSelected = onSelectDate
                     )
-                    HorizontalDivider()
                 }
                 
                 // 內容
