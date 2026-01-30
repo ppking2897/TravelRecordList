@@ -35,6 +35,35 @@ Glob: **/*Itinerary*.kt
 
 **只搜尋路徑，不讀取內容**（省 token）
 
+### Step 2.5: （可選）用 Grep 查看關鍵結構
+
+如果不熟悉現有程式碼結構，用 Grep + context 參數查看關鍵定義，**不需讀取整個檔案**：
+
+```bash
+# 查看 State 結構（-A = After，顯示匹配行之後 N 行）
+Grep: "data class.*State" -A 15
+
+# 查看 Intent 定義
+Grep: "sealed class.*Intent" -A 20
+
+# 查看現有函數簽名（-C = Context，顯示前後各 N 行）
+Grep: "private.*fun " -C 1
+
+# 查看 Repository 介面方法
+Grep: "suspend fun " --path=*Repository.kt -A 1
+```
+
+**參數說明**：
+| 參數 | 意思 | 用途 |
+|-----|------|------|
+| `-A 10` | After - 之後 10 行 | 看定義內容 |
+| `-B 5` | Before - 之前 5 行 | 看註解說明 |
+| `-C 3` | Context - 前後各 3 行 | 看上下文 |
+
+**Token 比較**：
+- 讀整個 ViewModel（400 行）：~800 tokens
+- Grep 關鍵結構：~50 tokens
+
 ### Step 3: 整理檔案清單
 
 將找到的檔案分類：
@@ -116,7 +145,18 @@ Glob: **/*Itinerary*.kt
 
 ## 注意事項
 
-- 只搜尋路徑，不預先讀取檔案內容
-- 優先使用 Glob 而非 Grep（更快）
-- 如果不確定檔案位置，可以用模糊搜尋確認
+- **Glob 找路徑**：找檔案位置，不讀內容
+- **Grep 看結構**：需要了解現有定義時，用 `-A`/`-B`/`-C` 只看關鍵部分
+- **不要用 Read 讀整個檔案**：除非檔案很小（如 Contract.kt）
 - 產生的 prompt 應該具體到「哪個檔案的哪個部分要改什麼」
+
+## Token 消耗參考
+
+| 操作 | Token 消耗 |
+|-----|-----------|
+| Glob 找 10 個檔案路徑 | ~30 tokens |
+| Grep 關鍵結構 | ~50 tokens |
+| Read 整個 ViewModel | ~800 tokens |
+| Read 整個 Screen | ~1000 tokens |
+
+**目標**：規劃階段總消耗 < 100 tokens
