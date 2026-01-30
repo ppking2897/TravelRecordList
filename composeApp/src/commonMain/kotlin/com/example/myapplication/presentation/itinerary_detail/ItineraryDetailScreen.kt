@@ -1,5 +1,7 @@
 package com.example.myapplication.presentation.itinerary_detail
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.presentation.theme.AppGradients
 import com.example.myapplication.presentation.theme.ListStyle
 import com.example.myapplication.presentation.theme.Spacing
 import com.example.myapplication.domain.entity.ItineraryItem
@@ -163,7 +166,15 @@ private fun ItineraryDetailScreenContent(
     onDeletePhoto: (String) -> Unit
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
-    
+    val isLightTheme = !isSystemInDarkTheme()
+
+    // 使用 SurfaceLevel 漸層背景
+    val backgroundGradient = if (isLightTheme) {
+        AppGradients.warmBackgroundGradient
+    } else {
+        AppGradients.darkBackgroundGradient
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -222,14 +233,20 @@ private fun ItineraryDetailScreenContent(
     ) { paddingValues ->
         if (isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundGradient)
+                    .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundGradient)
+                    .padding(paddingValues)
             ) {
                 // 時間軸導覽
                 dateRange?.let { range ->
