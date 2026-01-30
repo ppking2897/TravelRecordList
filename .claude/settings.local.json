@@ -18,5 +18,29 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[提醒] 如有修改程式碼，請執行 /check-architecture 檢查架構'"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[提醒] Agent 完成工作，請執行 /check-architecture 檢查架構'"
+          }
+        ]
+      }
+    ]
   }
 }
