@@ -20,7 +20,13 @@ data class ItineraryDetailState(
     val expandedItemIds: Set<String> = emptySet(),
     val selectedHashtag: String? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    // 拖曳排序相關狀態
+    val isDragging: Boolean = false,
+    val draggedItemId: String? = null,
+    // 批量操作相關狀態
+    val isSelectionMode: Boolean = false,
+    val selectedItemIds: Set<String> = emptySet()
 ) : UiState
 
 sealed class ItineraryDetailIntent : UiIntent {
@@ -54,6 +60,19 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class DeletePhoto(val photoId: String) : ItineraryDetailIntent()
     data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
     data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
+
+    // 拖曳排序相關 Intent
+    data class StartDrag(val itemId: String) : ItineraryDetailIntent()
+    object EndDrag : ItineraryDetailIntent()
+    data class ReorderItems(val fromIndex: Int, val toIndex: Int) : ItineraryDetailIntent()
+
+    // 批量操作相關 Intent
+    object ToggleSelectionMode : ItineraryDetailIntent()
+    data class ToggleItemSelection(val itemId: String) : ItineraryDetailIntent()
+    object SelectAll : ItineraryDetailIntent()
+    object ClearSelection : ItineraryDetailIntent()
+    object BatchDelete : ItineraryDetailIntent()
+    object BatchMarkComplete : ItineraryDetailIntent()
 }
 
 sealed class ItineraryDetailEvent : UiEvent {
@@ -67,4 +86,6 @@ sealed class ItineraryDetailEvent : UiEvent {
     data class ShowError(val message: String) : ItineraryDetailEvent()
     data class ShowPhotoViewer(val photoId: String) : ItineraryDetailEvent()
     data class ShowImagePicker(val itemId: String) : ItineraryDetailEvent()
+    data class ShowBatchDeleteConfirm(val count: Int) : ItineraryDetailEvent()
+    data class ShowBatchOperationResult(val message: String) : ItineraryDetailEvent()
 }

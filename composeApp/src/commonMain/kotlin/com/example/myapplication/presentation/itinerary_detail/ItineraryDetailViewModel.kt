@@ -3,8 +3,11 @@ package com.example.myapplication.presentation.itinerary_detail
 import com.example.myapplication.domain.interactor.ItemInteractor
 import com.example.myapplication.domain.interactor.PhotoInteractor
 import com.example.myapplication.domain.repository.ItineraryRepository
+import com.example.myapplication.domain.usecase.BatchDeleteItemsUseCase
+import com.example.myapplication.domain.usecase.BatchUpdateItemsUseCase
 import com.example.myapplication.domain.usecase.CreateRouteFromItineraryUseCase
 import com.example.myapplication.domain.usecase.DeleteItineraryUseCase
+import com.example.myapplication.domain.usecase.ReorderItineraryItemsUseCase
 import com.example.myapplication.presentation.mvi.BaseViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.entity.ItineraryItem
@@ -27,7 +30,10 @@ class ItineraryDetailViewModel(
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
     private val createRouteUseCase: CreateRouteFromItineraryUseCase,
     private val itemInteractor: ItemInteractor,
-    private val photoInteractor: PhotoInteractor
+    private val photoInteractor: PhotoInteractor,
+    private val reorderItemsUseCase: ReorderItineraryItemsUseCase,
+    private val batchDeleteItemsUseCase: BatchDeleteItemsUseCase,
+    private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase
 ) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
@@ -45,6 +51,17 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
             is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
             is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
+            // 拖曳排序相關
+            is ItineraryDetailIntent.StartDrag -> startDrag(intent.itemId)
+            is ItineraryDetailIntent.EndDrag -> endDrag()
+            is ItineraryDetailIntent.ReorderItems -> reorderItems(intent.fromIndex, intent.toIndex)
+            // 批量操作相關
+            is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
+            is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
+            is ItineraryDetailIntent.SelectAll -> selectAll()
+            is ItineraryDetailIntent.ClearSelection -> clearSelection()
+            is ItineraryDetailIntent.BatchDelete -> batchDelete()
+            is ItineraryDetailIntent.BatchMarkComplete -> batchMarkComplete()
         }
     }
 
@@ -286,5 +303,133 @@ class ItineraryDetailViewModel(
                     }
                 }
         }
+    }
+
+    // ========== 拖曳排序相關方法 ==========
+
+    private fun startDrag(itemId: String) {
+        updateState {
+            copy(isDragging = true, draggedItemId = itemId)
+        }
+    }
+
+    private fun endDrag() {
+        updateState {
+            copy(isDragging = false, draggedItemId = null)
+        }
+    }
+
+    private suspend fun reorderItems(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex) return
+
+        val allItems = currentState.groupedItems.flatMap { it.items }.toMutableList()
+        if (fromIndex < 0 || fromIndex >= allItems.size || toIndex < 0 || toIndex >= allItems.size) return
+
+        // 移動項目
+        val item = allItems.removeAt(fromIndex)
+        allItems.add(toIndex, item)
+
+        // 更新本地狀態（Optimistic Update）
+        val newGrouped = itemInteractor.groupByDate(allItems)
+        updateState {
+            copy(groupedItems = newGrouped.map { (d, i) -> ItemsByDate(d, i) })
+        }
+
+        // 呼叫 UseCase 更新後端
+        currentState.itinerary?.let { itinerary ->
+            val itemIds = allItems.map { it.id }
+            reorderItemsUseCase(itinerary.id, itemIds)
+                .onFailure { exception ->
+                    // 失敗時重新載入
+                    sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "排序失敗"))
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+        }
+    }
+
+    // ========== 批量操作相關方法 ==========
+
+    private fun toggleSelectionMode() {
+        updateState {
+            copy(
+                isSelectionMode = !isSelectionMode,
+                selectedItemIds = if (isSelectionMode) emptySet() else selectedItemIds
+            )
+        }
+    }
+
+    private fun toggleItemSelection(itemId: String) {
+        updateState {
+            val newSelection = if (itemId in selectedItemIds) {
+                selectedItemIds - itemId
+            } else {
+                selectedItemIds + itemId
+            }
+            copy(selectedItemIds = newSelection)
+        }
+    }
+
+    private fun selectAll() {
+        val allItemIds = currentState.groupedItems
+            .flatMap { it.items }
+            .map { it.id }
+            .toSet()
+        updateState {
+            copy(selectedItemIds = allItemIds)
+        }
+    }
+
+    private fun clearSelection() {
+        updateState {
+            copy(selectedItemIds = emptySet())
+        }
+    }
+
+    private suspend fun batchDelete() {
+        val selectedIds = currentState.selectedItemIds.toList()
+        if (selectedIds.isEmpty()) return
+
+        batchDeleteItemsUseCase(selectedIds)
+            .onSuccess { deletedCount ->
+                // 清除選擇狀態
+                updateState {
+                    copy(
+                        isSelectionMode = false,
+                        selectedItemIds = emptySet()
+                    )
+                }
+                // 重新載入列表
+                currentState.itinerary?.let { itinerary ->
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+                sendEvent(ItineraryDetailEvent.ShowBatchOperationResult("已刪除 $deletedCount 個項目"))
+            }
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "批量刪除失敗"))
+            }
+    }
+
+    private suspend fun batchMarkComplete() {
+        val selectedIds = currentState.selectedItemIds.toList()
+        if (selectedIds.isEmpty()) return
+
+        batchUpdateItemsUseCase.markComplete(selectedIds)
+            .onSuccess { updatedCount ->
+                // 清除選擇狀態
+                updateState {
+                    copy(
+                        isSelectionMode = false,
+                        selectedItemIds = emptySet()
+                    )
+                }
+                // 重新載入列表
+                currentState.itinerary?.let { itinerary ->
+                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                }
+                sendEvent(ItineraryDetailEvent.ShowBatchOperationResult("已標記 $updatedCount 個項目為完成"))
+            }
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "批量更新失敗"))
+            }
     }
 }

@@ -18,6 +18,7 @@ import com.example.myapplication.presentation.theme.Spacing
 import com.example.myapplication.domain.entity.ItineraryItem
 import com.example.myapplication.domain.entity.Location
 import com.example.myapplication.domain.usecase.ItemsByDate
+import com.example.myapplication.presentation.components.AnimatedBatchActionBar
 import com.example.myapplication.presentation.components.DeleteConfirmDialog
 import com.example.myapplication.presentation.components.EmptyState
 import com.example.myapplication.presentation.components.ItemCard
@@ -54,9 +55,14 @@ fun ItineraryDetailScreen(
     val dateRange = state.dateRange
     val isLoading = state.isLoading
     val error = state.error
-    
+    val isSelectionMode = state.isSelectionMode
+    val selectedItemIds = state.selectedItemIds
+    val isDragging = state.isDragging
+    val draggedItemId = state.draggedItemId
+
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
+    var showBatchDeleteDialog by remember { mutableStateOf(false) }
     var selectedItemIdForPhoto by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
@@ -97,6 +103,12 @@ fun ItineraryDetailScreen(
         expandedItemIds = state.expandedItemIds,
         isLoading = isLoading,
         error = error,
+        // 拖曳排序相關
+        isDragging = isDragging,
+        draggedItemId = draggedItemId,
+        // 批量操作相關
+        isSelectionMode = isSelectionMode,
+        selectedItemIds = selectedItemIds,
         onNavigateBack = onNavigateBack,
         onAddItemClick = onAddItemClick,
         onEditItemClick = onEditItemClick,
@@ -119,7 +131,13 @@ fun ItineraryDetailScreen(
         },
         onDeletePhoto = { photoId ->
             viewModel.handleIntent(ItineraryDetailIntent.DeletePhoto(photoId))
-        }
+        },
+        // 批量操作 callbacks
+        onToggleSelectionMode = { viewModel.handleIntent(ItineraryDetailIntent.ToggleSelectionMode) },
+        onToggleItemSelection = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
+        onBatchDelete = { showBatchDeleteDialog = true },
+        onBatchMarkComplete = { viewModel.handleIntent(ItineraryDetailIntent.BatchMarkComplete) },
+        onCancelSelection = { viewModel.handleIntent(ItineraryDetailIntent.ClearSelection) }
     )
     
     // 刪除項目確認 Dialog
@@ -138,6 +156,21 @@ fun ItineraryDetailScreen(
             }
         )
     }
+
+    // 批量刪除確認 Dialog
+    if (showBatchDeleteDialog) {
+        DeleteConfirmDialog(
+            title = "確認批量刪除",
+            message = "確定要刪除所選的 ${selectedItemIds.size} 個項目嗎？此操作無法復原。",
+            onConfirm = {
+                viewModel.handleIntent(ItineraryDetailIntent.BatchDelete)
+                showBatchDeleteDialog = false
+            },
+            onDismiss = {
+                showBatchDeleteDialog = false
+            }
+        )
+    }
 }
 
 @ExperimentalTime
@@ -151,6 +184,12 @@ private fun ItineraryDetailScreenContent(
     expandedItemIds: Set<String>,
     isLoading: Boolean,
     error: String?,
+    // 拖曳排序相關
+    isDragging: Boolean = false,
+    draggedItemId: String? = null,
+    // 批量操作相關
+    isSelectionMode: Boolean = false,
+    selectedItemIds: Set<String> = emptySet(),
     onNavigateBack: () -> Unit,
     onAddItemClick: () -> Unit,
     onEditItemClick: (String) -> Unit,
@@ -163,7 +202,13 @@ private fun ItineraryDetailScreenContent(
     onDeleteItem: (String) -> Unit,
     onAddPhoto: (String) -> Unit,
     onSetCoverPhoto: (String, String) -> Unit,
-    onDeletePhoto: (String) -> Unit
+    onDeletePhoto: (String) -> Unit,
+    // 批量操作 callbacks
+    onToggleSelectionMode: () -> Unit = {},
+    onToggleItemSelection: (String) -> Unit = {},
+    onBatchDelete: () -> Unit = {},
+    onBatchMarkComplete: () -> Unit = {},
+    onCancelSelection: () -> Unit = {}
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     val isLightTheme = !isSystemInDarkTheme()
@@ -178,57 +223,94 @@ private fun ItineraryDetailScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(itinerary?.title ?: "行程詳情") },
+                title = {
+                    if (isSelectionMode) {
+                        Text("已選擇 ${selectedItemIds.size} 項")
+                    } else {
+                        Text(itinerary?.title ?: "行程詳情")
+                    }
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                    if (isSelectionMode) {
+                        IconButton(onClick = {
+                            onCancelSelection()
+                            onToggleSelectionMode()
+                        }) {
+                            Icon(Icons.Default.Close, contentDescription = "取消選擇")
+                        }
+                    } else {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = onGenerateRouteClick) {
-                        Icon(Icons.Default.Share, contentDescription = "生成路線")
-                    }
-                    Box {
-                        IconButton(onClick = { showMoreMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "更多選項")
+                    if (!isSelectionMode) {
+                        // 選擇模式按鈕
+                        IconButton(onClick = onToggleSelectionMode) {
+                            Icon(Icons.Default.Checklist, contentDescription = "選擇模式")
                         }
-                        DropdownMenu(
-                            expanded = showMoreMenu,
-                            onDismissRequest = { showMoreMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("編輯行程") },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onEditItineraryClick()
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Default.Edit, contentDescription = null)
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("刪除行程") },
-                                onClick = {
-                                    showMoreMenu = false
-                                    onDeleteItineraryClick()
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            )
+                        IconButton(onClick = onGenerateRouteClick) {
+                            Icon(Icons.Default.Share, contentDescription = "生成路線")
+                        }
+                        Box {
+                            IconButton(onClick = { showMoreMenu = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "更多選項")
+                            }
+                            DropdownMenu(
+                                expanded = showMoreMenu,
+                                onDismissRequest = { showMoreMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("編輯行程") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        onEditItineraryClick()
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Edit, contentDescription = null)
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("刪除行程") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        onDeleteItineraryClick()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddItemClick) {
-                Icon(Icons.Default.Add, contentDescription = "新增項目")
+            // 選擇模式下隱藏 FAB
+            if (!isSelectionMode) {
+                FloatingActionButton(onClick = onAddItemClick) {
+                    Icon(Icons.Default.Add, contentDescription = "新增項目")
+                }
             }
+        },
+        bottomBar = {
+            // 選擇模式下顯示批量操作工具列
+            AnimatedBatchActionBar(
+                visible = isSelectionMode,
+                selectedCount = selectedItemIds.size,
+                onDelete = onBatchDelete,
+                onMarkComplete = onBatchMarkComplete,
+                onCancel = {
+                    onCancelSelection()
+                    onToggleSelectionMode()
+                }
+            )
         }
     ) { paddingValues ->
         if (isLoading) {
@@ -310,10 +392,16 @@ private fun ItineraryDetailScreenContent(
                                     onToggleComplete = onToggleItemCompletion,
                                     onDelete = onDeleteItem,
                                     onEdit = onEditItemClick,
-                                    onExpandToggle = onToggleItemExpansion,
+                                    onExpandToggle = if (isSelectionMode) null else onToggleItemExpansion,
                                     onAddPhoto = onAddPhoto,
                                     onSetCoverPhoto = onSetCoverPhoto,
-                                    onDeletePhoto = onDeletePhoto
+                                    onDeletePhoto = onDeletePhoto,
+                                    // 拖曳排序相關
+                                    isDragging = isDragging && draggedItemId == item.id,
+                                    // 批量選擇相關
+                                    isSelectionMode = isSelectionMode,
+                                    isSelected = selectedItemIds.contains(item.id),
+                                    onSelectionToggle = { onToggleItemSelection(item.id) }
                                 )
                             }
                         }
