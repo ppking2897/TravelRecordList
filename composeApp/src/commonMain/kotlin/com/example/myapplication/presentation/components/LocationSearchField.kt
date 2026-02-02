@@ -1,24 +1,21 @@
 package com.example.myapplication.presentation.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.domain.service.LocationSearchService
@@ -48,6 +44,7 @@ import kotlinx.coroutines.delay
  * @param placeholder 輸入框提示文字
  * @param debounceMs 輸入防抖延遲（毫秒）
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationSearchField(
     value: String,
@@ -57,155 +54,138 @@ fun LocationSearchField(
     modifier: Modifier = Modifier,
     label: String = "地點名稱",
     placeholder: String = "輸入地點名稱搜尋...",
-    debounceMs: Long = 500L,
+    debounceMs: Long = 800L,
 ) {
     var suggestions by remember { mutableStateOf<List<LocationSuggestion>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
-    var showDropdown by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
     // Debounced search
     LaunchedEffect(value) {
+        // 空白或無服務時清空
         if (value.isBlank() || locationSearchService == null) {
             suggestions = emptyList()
-            showDropdown = false
+            expanded = false
+            isLoading = false
             return@LaunchedEffect
         }
 
-        // 只有當輸入與上次搜尋不同時才搜尋
+        // 與上次搜尋相同時不重複搜尋
         if (value == searchQuery) return@LaunchedEffect
 
-        isLoading = true
+        // 先等待使用者停止輸入
         delay(debounceMs)
+
+        // delay 後才顯示 loading，避免閃爍
+        isLoading = true
 
         locationSearchService.searchByName(value)
             .onSuccess { results ->
                 suggestions = results
-                showDropdown = results.isNotEmpty()
+                expanded = results.isNotEmpty()
                 searchQuery = value
             }
             .onFailure {
                 suggestions = emptyList()
-                showDropdown = false
+                expanded = false
             }
 
         isLoading = false
     }
 
-    Box(modifier = modifier) {
-        Column {
-            OutlinedTextField(
-                value = value,
-                onValueChange = { newValue ->
-                    onValueChange(newValue)
-                    // 清除已選擇的地點
-                    if (newValue != value) {
-                        onLocationSelected(null)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(label) },
-                placeholder = { Text(placeholder) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                    )
-                },
-                trailingIcon = {
-                    when {
-                        isLoading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.padding(8.dp),
-                                strokeWidth = 2.dp,
-                            )
-                        }
-                        value.isNotEmpty() -> {
-                            IconButton(onClick = {
-                                onValueChange("")
-                                onLocationSelected(null)
-                                suggestions = emptyList()
-                                showDropdown = false
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "清除",
-                                )
-                            }
-                        }
-                        else -> {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                            )
-                        }
-                    }
-                },
-                singleLine = true,
-            )
-
-            // 搜尋建議下拉選單
-            DropdownMenu(
-                expanded = showDropdown && suggestions.isNotEmpty(),
-                onDismissRequest = { showDropdown = false },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .heightIn(max = 300.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    suggestions.forEachIndexed { index, suggestion ->
-                        LocationSuggestionItem(
-                            suggestion = suggestion,
-                            onClick = {
-                                onValueChange(suggestion.name)
-                                onLocationSelected(suggestion)
-                                showDropdown = false
-                                searchQuery = suggestion.name
-                            },
+    ExposedDropdownMenuBox(
+        expanded = expanded && suggestions.isNotEmpty(),
+        onExpandedChange = { /* 由搜尋結果控制展開 */ },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = { newValue ->
+                onValueChange(newValue)
+                // 清除已選擇的地點
+                if (newValue != value) {
+                    onLocationSelected(null)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryEditable),
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                )
+            },
+            trailingIcon = {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(8.dp),
+                            strokeWidth = 2.dp,
                         )
-                        if (index < suggestions.lastIndex) {
-                            HorizontalDivider()
+                    }
+                    value.isNotEmpty() -> {
+                        IconButton(onClick = {
+                            onValueChange("")
+                            onLocationSelected(null)
+                            suggestions = emptyList()
+                            expanded = false
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "清除",
+                            )
                         }
+                    }
+                    else -> {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                        )
                     }
                 }
+            },
+            singleLine = true,
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded && suggestions.isNotEmpty(),
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.heightIn(max = 300.dp),
+        ) {
+            suggestions.forEach { suggestion ->
+                DropdownMenuItem(
+                    text = {
+                        Column {
+                            Text(
+                                text = suggestion.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                text = suggestion.address,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
+                    onClick = {
+                        onValueChange(suggestion.name)
+                        onLocationSelected(suggestion)
+                        expanded = false
+                        searchQuery = suggestion.name
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                )
             }
         }
     }
-}
-
-/**
- * 地點建議項目
- */
-@Composable
-private fun LocationSuggestionItem(
-    suggestion: LocationSuggestion,
-    onClick: () -> Unit,
-) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        headlineContent = {
-            Text(
-                text = suggestion.name,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        },
-        supportingContent = {
-            Text(
-                text = suggestion.address,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        leadingContent = {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        },
-    )
 }

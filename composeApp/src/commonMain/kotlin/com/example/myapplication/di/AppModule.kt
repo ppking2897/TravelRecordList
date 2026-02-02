@@ -1,7 +1,7 @@
 package com.example.myapplication.di
 
 import com.example.myapplication.data.repository.*
-import com.example.myapplication.data.service.NominatimLocationService
+import com.example.myapplication.data.service.GooglePlacesService
 import com.example.myapplication.domain.repository.*
 import com.example.myapplication.domain.service.LocationSearchService
 import com.example.myapplication.data.sync.SyncManager
@@ -15,6 +15,7 @@ import com.example.myapplication.presentation.edit_item.EditItemViewModel
 import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel as TravelHistoryViewModelMVI
 import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel as ItineraryListViewModelMVI
 import com.example.myapplication.presentation.route_view.RouteViewViewModel
+import com.example.myapplication.presentation.itinerary_map.ItineraryMapViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
@@ -45,8 +46,8 @@ val appModule = module {
         }
     }
 
-    // Location Search Service
-    single<LocationSearchService> { NominatimLocationService(get()) }
+    // Location Search Service (Google Places API)
+    single<LocationSearchService> { GooglePlacesService(get()) }
 
     // Sync
     single { SyncManager(get()) }
@@ -83,6 +84,9 @@ val appModule = module {
     // 批量操作 Use Cases
     factory { BatchDeleteItemsUseCase(get()) }
     factory { BatchUpdateItemsUseCase(get()) }
+
+    // 地圖 Use Cases
+    factory { GetMapMarkersUseCase(get()) }
 
     // Interactors
     factory {
@@ -122,4 +126,5 @@ val appModule = module {
     viewModel { AddEditItineraryViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AddEditItemViewModel(get(), get(), get()) }
     viewModel { EditItemViewModel(get(), get(), get(), get()) }
+    viewModel { ItineraryMapViewModel(get(), get()) }
 }

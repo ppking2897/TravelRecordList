@@ -1,6 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -48,6 +49,8 @@ kotlin {
             implementation(libs.koin.android)
             implementation("androidx.datastore:datastore-preferences:1.1.1")
             implementation(libs.ktor.client.okhttp)
+            // TODO: Phase 2 - 啟用 MapLibre Compose 完整地圖功能
+            // implementation(libs.maplibre.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -82,6 +85,14 @@ kotlin {
     }
 }
 
+// 讀取 local.properties 中的 API Key
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
 android {
     namespace = "com.example.myapplication"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -92,6 +103,17 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        // Google Places API Key (從 local.properties 讀取)
+        buildConfigField(
+            "String",
+            "GOOGLE_PLACES_API_KEY",
+            "\"${localProperties.getProperty("GOOGLE_PLACES_API_KEY", "")}\""
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
     packaging {
         resources {
