@@ -39,6 +39,7 @@ class EditItemViewModel(
             is EditItemIntent.UpdateActivity -> updateActivity(intent.activity)
             is EditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
             is EditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
+            is EditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
             is EditItemIntent.UpdateNotes -> updateNotes(intent.notes)
             is EditItemIntent.UpdateDate -> updateDate(intent.date)
             is EditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
@@ -90,6 +91,8 @@ class EditItemViewModel(
                 activity = item.activity,
                 locationName = item.location.name,
                 locationAddress = item.location.address ?: "",
+                locationLatitude = item.location.latitude,
+                locationLongitude = item.location.longitude,
                 notes = item.notes,
                 selectedDate = item.date,
                 arrivalTime = item.arrivalTime,
@@ -130,7 +133,35 @@ class EditItemViewModel(
     private fun updateLocationAddress(address: String) {
         updateState { copy(locationAddress = address) }
     }
-    
+
+    /**
+     * 選擇地點（從搜尋建議中選擇）
+     */
+    private fun selectLocation(suggestion: com.example.myapplication.domain.service.LocationSuggestion?) {
+        if (suggestion == null) {
+            // 清除已選擇的地點座標（但保留手動輸入的名稱）
+            updateState {
+                copy(
+                    locationLatitude = null,
+                    locationLongitude = null,
+                    locationPlaceId = null
+                )
+            }
+        } else {
+            // 選擇地點後自動填入所有資訊
+            updateState {
+                copy(
+                    locationName = suggestion.name,
+                    locationAddress = suggestion.address,
+                    locationLatitude = suggestion.latitude,
+                    locationLongitude = suggestion.longitude,
+                    locationPlaceId = suggestion.placeId,
+                    locationError = null
+                )
+            }
+        }
+    }
+
     /**
      * 更新備註
      */
@@ -229,8 +260,8 @@ class EditItemViewModel(
         
         val location = Location(
             name = snapshot.locationName,
-            latitude = snapshot.item.location.latitude,
-            longitude = snapshot.item.location.longitude,
+            latitude = snapshot.locationLatitude,
+            longitude = snapshot.locationLongitude,
             address = snapshot.locationAddress.ifBlank { null }
         )
 

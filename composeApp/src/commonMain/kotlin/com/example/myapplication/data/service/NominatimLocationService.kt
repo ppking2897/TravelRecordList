@@ -35,9 +35,11 @@ class NominatimLocationService(
         return runCatching {
             val response: List<NominatimSearchResult> = httpClient.get("$BASE_URL/search") {
                 header("User-Agent", USER_AGENT)
+                header("Accept-Language", "ja,zh-TW,zh,en")
                 parameter("q", query)
                 parameter("format", "json")
                 parameter("addressdetails", "1")
+                parameter("namedetails", "1")
                 parameter("limit", "10")
             }.body()
 
@@ -81,6 +83,8 @@ private data class NominatimSearchResult(
     val name: String? = null,
     @SerialName("address")
     val address: NominatimAddress? = null,
+    @SerialName("namedetails")
+    val namedetails: NominatimNameDetails? = null,
 ) {
     fun toLocationSuggestion(): LocationSuggestion {
         val osmIdString = if (osmType != null && osmId != null) {
@@ -89,9 +93,15 @@ private data class NominatimSearchResult(
             placeId.toString()
         }
 
+        // 優先使用日文名稱，其次是原始名稱，最後從地址或顯示名稱中提取
+        val bestName = namedetails?.extractBestName()
+            ?: name
+            ?: address?.extractName()
+            ?: displayName.split(",").first()
+
         return LocationSuggestion(
             placeId = osmIdString,
-            name = name ?: address?.extractName() ?: displayName.split(",").first(),
+            name = bestName,
             address = displayName,
             latitude = latitude.toDoubleOrNull(),
             longitude = longitude.toDoubleOrNull(),
@@ -105,9 +115,14 @@ private data class NominatimSearchResult(
             placeId.toString()
         }
 
+        val bestName = namedetails?.extractBestName()
+            ?: name
+            ?: address?.extractName()
+            ?: displayName.split(",").first()
+
         return LocationDetails(
             placeId = osmIdString,
-            name = name ?: address?.extractName() ?: displayName.split(",").first(),
+            name = bestName,
             address = displayName,
             latitude = latitude.toDoubleOrNull() ?: 0.0,
             longitude = longitude.toDoubleOrNull() ?: 0.0,
@@ -136,5 +151,32 @@ private data class NominatimAddress(
 ) {
     fun extractName(): String? {
         return amenity ?: building ?: shop ?: tourism
+    }
+}
+
+/**
+ * Nominatim 名稱詳情結構
+ *
+ * 包含各種語言的地名，優先使用日文名稱以提高搜尋準確度
+ */
+@Serializable
+private data class NominatimNameDetails(
+    val name: String? = null,
+    @SerialName("name:ja")
+    val nameJa: String? = null,
+    @SerialName("name:ja-Hira")
+    val nameJaHira: String? = null,
+    @SerialName("name:zh")
+    val nameZh: String? = null,
+    @SerialName("name:zh-TW")
+    val nameZhTw: String? = null,
+    @SerialName("name:en")
+    val nameEn: String? = null,
+) {
+    /**
+     * 提取最佳名稱，優先順序：日文 > 繁體中文 > 中文 > 原始名稱 > 英文
+     */
+    fun extractBestName(): String? {
+        return nameJa ?: nameZhTw ?: nameZh ?: name ?: nameEn
     }
 }

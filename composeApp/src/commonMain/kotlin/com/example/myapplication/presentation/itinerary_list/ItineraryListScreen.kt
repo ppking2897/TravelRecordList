@@ -212,8 +212,6 @@ private fun ItineraryListScreenContent(
     onHistoryClick: () -> Unit,
     onRefresh: () -> Unit
 ) {
-    var actionMenuItinerary by remember { mutableStateOf<Itinerary?>(null) }
-    var showActionMenu by remember { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
 
     Scaffold(
@@ -303,27 +301,12 @@ private fun ItineraryListScreenContent(
                     ItineraryGridWithGroups(
                         itineraries = itineraries,
                         onItineraryClick = onItineraryClick,
-                        onItineraryLongPress = { itinerary ->
-                            actionMenuItinerary = itinerary
-                            showActionMenu = true
-                        }
+                        onEditClick = onEditClick,
+                        onDeleteClick = onDeleteClick
                     )
                 }
             }
         }
-    }
-
-    // 操作選單
-    actionMenuItinerary?.let { itinerary ->
-        ItineraryActionMenu(
-            expanded = showActionMenu,
-            onDismiss = {
-                showActionMenu = false
-                actionMenuItinerary = null
-            },
-            onEdit = { onEditClick(itinerary.id) },
-            onDelete = { onDeleteClick(itinerary) }
-        )
     }
 }
 
@@ -338,7 +321,8 @@ private fun ItineraryListScreenContent(
 private fun ItineraryGridWithGroups(
     itineraries: List<Itinerary>,
     onItineraryClick: (String) -> Unit,
-    onItineraryLongPress: (Itinerary) -> Unit,
+    onEditClick: (String) -> Unit,
+    onDeleteClick: (Itinerary) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val groupedItineraries = remember(itineraries) { groupByCreationYear(itineraries) }
@@ -361,7 +345,8 @@ private fun ItineraryGridWithGroups(
                 ItineraryGridCard(
                     itinerary = itinerary,
                     onClick = { onItineraryClick(itinerary.id) },
-                    onLongPress = { onItineraryLongPress(itinerary) }
+                    onEdit = { onEditClick(itinerary.id) },
+                    onDelete = { onDeleteClick(itinerary) }
                 )
             }
         }
@@ -376,69 +361,100 @@ private fun ItineraryGridWithGroups(
 private fun ItineraryGridCard(
     itinerary: Itinerary,
     onClick: () -> Unit,
-    onLongPress: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongPress),
-        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column {
-            // 封面圖片區域（含位置標籤）
-            Box(modifier = Modifier.fillMaxWidth().height(Spacing.xxxl * 2.5f)) {
-                // 顯示封面照片或預設佔位圖
-                if (itinerary.coverPhotoPath != null) {
-                    LocalImage(
-                        filePath = itinerary.coverPhotoPath,
-                        contentDescription = "封面照片",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    DefaultCoverPlaceholder(
-                        modifier = Modifier.fillMaxSize()
-                    )
+    var showMenu by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = { showMenu = true }
+                ),
+            elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column {
+                // 封面圖片區域（含位置標籤）
+                Box(modifier = Modifier.fillMaxWidth().height(Spacing.xxxl * 2.5f)) {
+                    // 顯示封面照片或預設佔位圖
+                    if (itinerary.coverPhotoPath != null) {
+                        LocalImage(
+                            filePath = itinerary.coverPhotoPath,
+                            contentDescription = "封面照片",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        DefaultCoverPlaceholder(
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    extractMainLocation(itinerary.items)?.let { location ->
+                        LocationBadge(
+                            location = location,
+                            modifier = Modifier.align(Alignment.TopStart).padding(Spacing.sm)
+                        )
+                    }
                 }
 
-                extractMainLocation(itinerary.items)?.let { location ->
-                    LocationBadge(
-                        location = location,
-                        modifier = Modifier.align(Alignment.TopStart).padding(Spacing.sm)
-                    )
-                }
-            }
-
-            // 內容區域
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(CardStyle.compactContentPadding),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-            ) {
-                Text(
-                    text = itinerary.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
+                // 內容區域
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(CardStyle.compactContentPadding),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                ) {
                     Text(
-                        text = dateText,
+                        text = itinerary.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
+                        Text(
+                            text = dateText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Text(
+                        text = "建立於 ${formatCreatedDate(itinerary.createdAt)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                Text(
-                    text = "建立於 ${formatCreatedDate(itinerary.createdAt)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
+        }
+
+        // 操作選單 - 放在 Box 內，會相對於卡片定位
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("編輯") },
+                onClick = { showMenu = false; onEdit() },
+                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+            )
+            DropdownMenuItem(
+                text = { Text("刪除") },
+                onClick = { showMenu = false; onDelete() },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            )
         }
     }
 }
@@ -514,39 +530,6 @@ private fun YearGroupHeader(
     }
 }
 
-/**
- * 操作選單
- */
-@Composable
-private fun ItineraryActionMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        modifier = modifier
-    ) {
-        DropdownMenuItem(
-            text = { Text("編輯") },
-            onClick = { onDismiss(); onEdit() },
-            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
-        )
-        DropdownMenuItem(
-            text = { Text("刪除") },
-            onClick = { onDismiss(); onDelete() },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Delete, contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        )
-    }
-}
 
 /**
  * 空狀態組件（網格版本）

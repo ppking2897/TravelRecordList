@@ -22,6 +22,8 @@ import com.example.myapplication.presentation.edit_item.EditItemScreen
 import com.example.myapplication.presentation.travel_history.TravelHistoryScreen
 import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel
 import com.example.myapplication.presentation.route_view.RouteViewScreen
+import com.example.myapplication.presentation.itinerary_map.ItineraryMapScreen
+import com.example.myapplication.presentation.itinerary_map.ItineraryMapViewModel
 import kotlin.time.ExperimentalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
@@ -125,7 +127,10 @@ fun TravelApp() {
                     navController.navigate(Screen.EditItinerary.createRoute(itineraryId))
                 },
                 onDeleteItineraryClick = {},
-                onGenerateRouteClick = {}
+                onGenerateRouteClick = {},
+                onMapClick = {
+                    navController.navigate(Screen.ItineraryMap.createRoute(itineraryId))
+                }
             )
         }
 
@@ -195,6 +200,23 @@ fun TravelApp() {
                 onExportSuccess = { json ->
                     // TODO: 實作匯出功能
                     println("Export JSON: $json")
+                }
+            )
+        }
+
+        // 行程地圖
+        composable(
+            route = Screen.ItineraryMap.route,
+            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
+            val viewModel: ItineraryMapViewModel = koinViewModel()
+            ItineraryMapScreen(
+                viewModel = viewModel,
+                itineraryId = itineraryId,
+                onNavigateBack = { navController.popBackStack() },
+                onEditItemClick = { itemId ->
+                    navController.navigate(Screen.EditItem.createRoute(itemId))
                 }
             )
         }

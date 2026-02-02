@@ -50,7 +50,8 @@ fun ItineraryDetailScreen(
     onEditItemClick: (String) -> Unit,
     onEditItineraryClick: () -> Unit,
     onDeleteItineraryClick: () -> Unit,
-    onGenerateRouteClick: () -> Unit
+    onGenerateRouteClick: () -> Unit,
+    onMapClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
     val itinerary = state.itinerary
@@ -140,7 +141,8 @@ fun ItineraryDetailScreen(
         onToggleItemSelection = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
         onBatchDelete = { showBatchDeleteDialog = true },
         onBatchMarkComplete = { viewModel.handleIntent(ItineraryDetailIntent.BatchMarkComplete) },
-        onCancelSelection = { viewModel.handleIntent(ItineraryDetailIntent.ClearSelection) }
+        onCancelSelection = { viewModel.handleIntent(ItineraryDetailIntent.ClearSelection) },
+        onMapClick = onMapClick
     )
     
     // 刪除項目確認 Dialog
@@ -209,7 +211,8 @@ private fun ItineraryDetailScreenContent(
     onToggleItemSelection: (String) -> Unit = {},
     onBatchDelete: () -> Unit = {},
     onBatchMarkComplete: () -> Unit = {},
-    onCancelSelection: () -> Unit = {}
+    onCancelSelection: () -> Unit = {},
+    onMapClick: () -> Unit = {}
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     val isLightTheme = !isSystemInDarkTheme()
@@ -248,6 +251,10 @@ private fun ItineraryDetailScreenContent(
                 },
                 actions = {
                     if (!isSelectionMode) {
+                        // 地圖按鈕
+                        IconButton(onClick = onMapClick) {
+                            Icon(Icons.Default.Map, contentDescription = "地圖檢視")
+                        }
                         // 選擇模式按鈕
                         IconButton(onClick = onToggleSelectionMode) {
                             Icon(Icons.Default.Checklist, contentDescription = "選擇模式")

@@ -46,8 +46,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.domain.entity.Itinerary
+import com.example.myapplication.domain.service.LocationSearchService
 import com.example.myapplication.presentation.components.DateDropdown
 import com.example.myapplication.presentation.components.LocalImage
+import com.example.myapplication.presentation.components.LocationSearchField
 import com.example.myapplication.presentation.components.SimplePhotoPreviewDialog
 import com.example.myapplication.presentation.components.TimePickerDialog
 import com.example.myapplication.presentation.edit_item.EditItemEvent
@@ -57,6 +59,7 @@ import com.example.myapplication.presentation.edit_item.EditItemViewModel
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
 
@@ -66,7 +69,8 @@ fun EditItemScreen(
     itemId: String,
     onNavigateBack: () -> Unit,
     onSaveSuccess: () -> Unit,
-    viewModel: EditItemViewModel = koinViewModel()
+    viewModel: EditItemViewModel = koinViewModel(),
+    locationSearchService: LocationSearchService = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -88,7 +92,8 @@ fun EditItemScreen(
     EditItemScreenContent(
         state = state,
         onIntent = { viewModel.handleIntent(it) },
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        locationSearchService = locationSearchService
     )
 }
 
@@ -98,7 +103,8 @@ fun EditItemScreen(
 fun EditItemScreenContent(
     state: EditItemState,
     onIntent: (EditItemIntent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    locationSearchService: LocationSearchService? = null
 ) {
     var showArrivalTimePicker by remember { mutableStateOf(false) }
     var showDepartureTimePicker by remember { mutableStateOf(false) }
@@ -143,20 +149,35 @@ fun EditItemScreenContent(
                 supportingText = state.activityError?.let { { Text(it) } }
             )
 
-            OutlinedTextField(
+            // 智慧地址輸入
+            LocationSearchField(
                 value = state.locationName,
                 onValueChange = { onIntent(EditItemIntent.UpdateLocationName(it)) },
-                label = { Text("地點名稱 *") },
+                onLocationSelected = { suggestion ->
+                    onIntent(EditItemIntent.SelectLocation(suggestion))
+                },
+                locationSearchService = locationSearchService,
                 modifier = Modifier.fillMaxWidth(),
-                isError = state.locationError != null,
-                supportingText = state.locationError?.let { { Text(it) } }
+                label = "地點名稱 *",
+                placeholder = "輸入地點名稱搜尋..."
             )
+            if (state.locationError != null) {
+                Text(
+                    text = state.locationError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
+            // 地址顯示（選擇地點後自動填入，或可手動輸入）
             OutlinedTextField(
                 value = state.locationAddress,
                 onValueChange = { onIntent(EditItemIntent.UpdateLocationAddress(it)) },
                 label = { Text("地點地址") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = if (state.locationLatitude != null) {
+                    { Text("座標: ${state.locationLatitude}, ${state.locationLongitude}") }
+                } else null
             )
 
             // 日期選擇
