@@ -23,6 +23,7 @@ data class ItineraryListState(
  * ItineraryList Intent
  */
 sealed class ItineraryListIntent : UiIntent {
+    object InitializeAndLoad : ItineraryListIntent()
     object LoadItineraries : ItineraryListIntent()
     object Refresh : ItineraryListIntent()
     data class Search(val query: String) : ItineraryListIntent()

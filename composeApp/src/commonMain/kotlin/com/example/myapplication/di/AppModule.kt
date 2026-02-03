@@ -88,6 +88,9 @@ val appModule = module {
     // 地圖 Use Cases
     factory { GetMapMarkersUseCase(get()) }
 
+    // 初始化 Use Cases
+    factory { InitializeSampleDataUseCase(get(), get()) }
+
     // Interactors
     factory {
         ItemInteractor(
@@ -111,7 +114,7 @@ val appModule = module {
     // MVI ViewModels
     viewModel { RouteViewViewModel(get()) }
     viewModel { TravelHistoryViewModelMVI(get(), get()) }
-    viewModel { ItineraryListViewModelMVI(get(), get()) }
+    viewModel { ItineraryListViewModelMVI(get(), get(), get()) }
     viewModel {
         ItineraryDetailViewModelMVI(
             itineraryRepository = get(),

@@ -1,6 +1,7 @@
 package com.example.myapplication.presentation.itinerary_list
 
 import com.example.myapplication.domain.repository.ItineraryRepository
+import com.example.myapplication.domain.usecase.InitializeSampleDataUseCase
 import com.example.myapplication.domain.usecase.SearchItinerariesUseCase
 import com.example.myapplication.presentation.mvi.BaseViewModel
 
@@ -9,22 +10,37 @@ import com.example.myapplication.presentation.mvi.BaseViewModel
  */
 class ItineraryListViewModel(
     private val itineraryRepository: ItineraryRepository,
-    private val searchUseCase: SearchItinerariesUseCase
+    private val searchUseCase: SearchItinerariesUseCase,
+    private val initializeSampleDataUseCase: InitializeSampleDataUseCase,
 ) : BaseViewModel<ItineraryListState, ItineraryListIntent, ItineraryListEvent>(
     initialState = ItineraryListState()
 ) {
-    
+
     init {
-        handleIntent(ItineraryListIntent.LoadItineraries)
+        handleIntent(ItineraryListIntent.InitializeAndLoad)
     }
     
     override suspend fun processIntent(intent: ItineraryListIntent) {
         when (intent) {
+            is ItineraryListIntent.InitializeAndLoad -> initializeAndLoad()
             is ItineraryListIntent.LoadItineraries -> loadItineraries()
             is ItineraryListIntent.Refresh -> refresh()
             is ItineraryListIntent.Search -> search(intent.query)
             is ItineraryListIntent.DeleteItinerary -> deleteItinerary(intent.id)
         }
+    }
+
+    /**
+     * 初始化預設資料並載入行程
+     */
+    private suspend fun initializeAndLoad() {
+        updateState { copy(isLoading = true, error = null) }
+
+        // 先嘗試初始化預設資料（如果沒有資料的話）
+        initializeSampleDataUseCase()
+
+        // 再載入行程
+        loadItineraries()
     }
     
     /**
