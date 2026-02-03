@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.example.myapplication.test
 
 import com.example.myapplication.domain.entity.Hashtag
@@ -6,13 +8,26 @@ import com.example.myapplication.domain.entity.Location
 import com.example.myapplication.domain.entity.Photo
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 /**
  * 測試用的 Arb (Arbitrary) 生成器
  */
+
+private val hexChars = "0123456789abcdef"
+
+/**
+ * 生成隨機 UUID 字串的 Arb (KMP 相容)
+ */
+fun Arb.Companion.uuidString(): Arb<String> = arbitrary {
+    // 格式: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+    val segments = listOf(8, 4, 4, 4, 12)
+    segments.joinToString("-") { length ->
+        (1..length).map { hexChars.random() }.joinToString("")
+    }
+}
 
 /**
  * 生成隨機 LocalDate 的 Arb
@@ -51,8 +66,8 @@ fun Arb.Companion.location(): Arb<Location> = arbitrary {
 fun Arb.Companion.itineraryItem(): Arb<ItineraryItem> = arbitrary {
     val now = Clock.System.now()
     ItineraryItem(
-        id = Arb.uuid().bind().toString(),
-        itineraryId = Arb.uuid().bind().toString(),
+        id = Arb.uuidString().bind(),
+        itineraryId = Arb.uuidString().bind(),
         date = Arb.localDate().bind(),
         arrivalTime = Arb.localTime().orNull().bind(),
         departureTime = Arb.localTime().orNull().bind(),
