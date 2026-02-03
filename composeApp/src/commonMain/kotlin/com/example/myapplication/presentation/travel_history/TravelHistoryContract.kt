@@ -17,7 +17,8 @@ data class TravelHistoryState(
     val historyByLocation: Map<String, List<ItineraryItem>> = emptyMap(),
     val dateFilter: ClosedRange<LocalDate>? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val expandedItemIds: Set<String> = emptySet()
 ) : UiState
 
 /**
@@ -27,6 +28,7 @@ sealed class TravelHistoryIntent : UiIntent {
     object LoadHistory : TravelHistoryIntent()
     data class FilterByDateRange(val dateRange: ClosedRange<LocalDate>) : TravelHistoryIntent()
     object ClearFilter : TravelHistoryIntent()
+    data class ToggleItemExpansion(val itemId: String) : TravelHistoryIntent()
 }
 
 /**

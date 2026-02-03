@@ -27,6 +27,7 @@ class TravelHistoryViewModel(
             is TravelHistoryIntent.LoadHistory -> loadHistory()
             is TravelHistoryIntent.FilterByDateRange -> filterByDateRange(intent.dateRange)
             is TravelHistoryIntent.ClearFilter -> clearFilter()
+            is TravelHistoryIntent.ToggleItemExpansion -> toggleItemExpansion(intent.itemId)
         }
     }
     
@@ -119,5 +120,20 @@ class TravelHistoryViewModel(
     private suspend fun clearFilter() {
         updateState { copy(dateFilter = null) }
         loadHistory()
+    }
+
+    /**
+     * 切換項目展開/收合狀態
+     */
+    private fun toggleItemExpansion(itemId: String) {
+        updateState {
+            copy(
+                expandedItemIds = if (itemId in expandedItemIds) {
+                    expandedItemIds - itemId
+                } else {
+                    expandedItemIds + itemId
+                }
+            )
+        }
     }
 }
