@@ -1,8 +1,6 @@
 package com.example.myapplication.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -11,12 +9,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.myapplication.domain.entity.Photo
+import com.github.panpf.zoomimage.CoilZoomAsyncImage
+import com.github.panpf.zoomimage.rememberCoilZoomState
 
 /**
  * 照片預覽 Dialog
@@ -36,9 +35,7 @@ fun PhotoPreviewDialog(
     modifier: Modifier = Modifier
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var scale by remember { mutableStateOf(1f) }
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
+    val zoomState = rememberCoilZoomState()
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -52,59 +49,16 @@ fun PhotoPreviewDialog(
             modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.95f))
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onDoubleTap = {
-                            // 雙擊切換縮放
-                            if (scale > 1f) {
-                                scale = 1f
-                                offsetX = 0f
-                                offsetY = 0f
-                            } else {
-                                scale = 2f
-                            }
-                        },
-                        onTap = {
-                            // 單擊關閉 (如果沒有縮放)
-                            if (scale == 1f) {
-                                onDismiss()
-                            }
-                        }
-                    )
-                }
         ) {
-            // 照片顯示區
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(0.5f, 4f)
-                            if (scale > 1f) {
-                                offsetX += pan.x
-                                offsetY += pan.y
-                            } else {
-                                offsetX = 0f
-                                offsetY = 0f
-                            }
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                LocalImage(
-                    photo = photo,
-                    contentDescription = "照片預覽",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            translationX = offsetX,
-                            translationY = offsetY
-                        ),
-                    useThumbnail = false // 使用原圖
-                )
-            }
+            // 照片顯示區 - 使用 ZoomImage
+            CoilZoomAsyncImage(
+                model = photo.filePath,
+                contentDescription = "照片預覽",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+                zoomState = zoomState,
+                onTap = { onDismiss() }
+            )
 
             // 頂部操作列
             TopActionBar(
@@ -239,8 +193,14 @@ private fun PhotoInfoBar(
 
                 // 檔案大小
                 val sizeText = when {
-                    photo.fileSize >= 1024 * 1024 -> "%.1f MB".format(photo.fileSize / (1024f * 1024f))
-                    photo.fileSize >= 1024 -> "%.1f KB".format(photo.fileSize / 1024f)
+                    photo.fileSize >= 1024 * 1024 -> {
+                        val mb = photo.fileSize / (1024f * 1024f)
+                        "${(mb * 10).toInt() / 10f} MB"
+                    }
+                    photo.fileSize >= 1024 -> {
+                        val kb = photo.fileSize / 1024f
+                        "${(kb * 10).toInt() / 10f} KB"
+                    }
                     else -> "${photo.fileSize} B"
                 }
                 Text(
@@ -273,9 +233,7 @@ fun SimplePhotoPreviewDialog(
     modifier: Modifier = Modifier
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var scale by remember { mutableStateOf(1f) }
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
+    val zoomState = rememberCoilZoomState()
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -289,56 +247,16 @@ fun SimplePhotoPreviewDialog(
             modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.95f))
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onDoubleTap = {
-                            if (scale > 1f) {
-                                scale = 1f
-                                offsetX = 0f
-                                offsetY = 0f
-                            } else {
-                                scale = 2f
-                            }
-                        },
-                        onTap = {
-                            if (scale == 1f) {
-                                onDismiss()
-                            }
-                        }
-                    )
-                }
         ) {
-            // 照片
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(0.5f, 4f)
-                            if (scale > 1f) {
-                                offsetX += pan.x
-                                offsetY += pan.y
-                            } else {
-                                offsetX = 0f
-                                offsetY = 0f
-                            }
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                LocalImage(
-                    filePath = filePath,
-                    contentDescription = "照片預覽",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            translationX = offsetX,
-                            translationY = offsetY
-                        )
-                )
-            }
+            // 照片 - 使用 ZoomImage
+            CoilZoomAsyncImage(
+                model = filePath,
+                contentDescription = "照片預覽",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+                zoomState = zoomState,
+                onTap = { onDismiss() }
+            )
 
             // 頂部操作列
             Surface(

@@ -71,6 +71,7 @@ kotlin {
             implementation(libs.peekaboo.ui)
             implementation(libs.peekaboo.image.picker)
             implementation(libs.coil.compose)
+            implementation(libs.zoomimage.compose.coil3)
             // Ktor HTTP Client
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)

@@ -21,6 +21,7 @@ ktor = "3.0.3"
 peekaboo = "0.5.2"
 coil = "3.1.0"
 maplibre-compose = "0.12.1"
+zoomimage = "1.4.0"
 
 [libraries]
 peekaboo-ui = { module = "io.github.onseok:peekaboo-ui", version.ref = "peekaboo" }
@@ -54,6 +55,7 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
+zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
