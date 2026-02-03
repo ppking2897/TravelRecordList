@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,12 +38,20 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
  * @property dayNumber 第幾天 (Day 1, Day 2, ...)
  * @property date 日期
  * @property primaryLocationName 該日主要地點名稱
+ * @property completedCount 已完成項目數量
+ * @property totalCount 總項目數量
  */
 data class TimelineNode(
     val dayNumber: Int,
     val date: LocalDate,
-    val primaryLocationName: String?
-)
+    val primaryLocationName: String?,
+    val completedCount: Int = 0,
+    val totalCount: Int = 0
+) {
+    /** 是否全部完成 */
+    val isAllCompleted: Boolean
+        get() = totalCount > 0 && completedCount >= totalCount
+}
 
 /**
  * 時間軸水平導覽元件
@@ -72,11 +81,14 @@ fun TimelineNavigator(
     val nodes = remember(dates, groupedItems) {
         dates.mapIndexed { index, date ->
             val itemsForDate = groupedItems.find { it.date == date }
-            val primaryLocation = itemsForDate?.items?.firstOrNull()?.location?.name
+            val items = itemsForDate?.items ?: emptyList()
+            val primaryLocation = items.firstOrNull()?.location?.name
             TimelineNode(
                 dayNumber = index + 1,
                 date = date,
-                primaryLocationName = primaryLocation
+                primaryLocationName = primaryLocation,
+                completedCount = items.count { it.isCompleted },
+                totalCount = items.size
             )
         }
     }
@@ -177,16 +189,21 @@ private fun TimelineNodeItem(
         animationSpec = tween(durationMillis = 200)
     )
 
-    val nodeColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outline
+    // 完成狀態顏色（綠色）
+    val successColor = MaterialTheme.colorScheme.tertiary
+
+    // 根據選中和完成狀態決定節點顏色
+    val nodeColor = when {
+        node.isAllCompleted -> successColor
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outline
     }
 
-    val textColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
+    // 根據選中和完成狀態決定文字顏色
+    val textColor = when {
+        node.isAllCompleted -> successColor
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Column(
@@ -228,13 +245,23 @@ private fun TimelineNodeItem(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // 節點圓點
+            // 節點圓點（完成時顯示打勾圖示）
             Box(
                 modifier = Modifier
                     .size(nodeSize)
                     .clip(CircleShape)
-                    .background(nodeColor)
-            )
+                    .background(nodeColor),
+                contentAlignment = Alignment.Center
+            ) {
+                if (node.isAllCompleted) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "已完成",
+                        modifier = Modifier.size(nodeSize * 0.6f),
+                        tint = MaterialTheme.colorScheme.onTertiary
+                    )
+                }
+            }
 
             // 後續連接線
             if (showTrailingLine) {
@@ -261,6 +288,16 @@ private fun TimelineNodeItem(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = Spacing.xs)
         )
+
+        // 進度指示 (如 2/3)
+        if (node.totalCount > 0) {
+            Text(
+                text = "(${node.completedCount}/${node.totalCount})",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (node.isAllCompleted) successColor else textColor.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

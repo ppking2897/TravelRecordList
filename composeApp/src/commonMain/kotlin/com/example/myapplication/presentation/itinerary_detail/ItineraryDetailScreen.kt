@@ -1,5 +1,10 @@
 package com.example.myapplication.presentation.itinerary_detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -7,6 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -218,6 +227,23 @@ private fun ItineraryDetailScreenContent(
     val isLightTheme = !isSystemInDarkTheme()
     val lazyListState = rememberLazyListState()
 
+    // FAB 滑動隱藏狀態
+    var isFabVisible by remember { mutableStateOf(true) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // 向下滑動 (available.y < 0) -> 隱藏 FAB
+                // 向上滑動 (available.y > 0) -> 顯示 FAB
+                if (available.y < -10) {
+                    isFabVisible = false
+                } else if (available.y > 10) {
+                    isFabVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     // 使用 SurfaceLevel 漸層背景
     val backgroundGradient = if (isLightTheme) {
         AppGradients.warmBackgroundGradient
@@ -227,7 +253,7 @@ private fun ItineraryDetailScreenContent(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     if (isSelectionMode) {
                         Text("已選擇 ${selectedItemIds.size} 項")
@@ -255,13 +281,7 @@ private fun ItineraryDetailScreenContent(
                         IconButton(onClick = onMapClick) {
                             Icon(Icons.Default.Map, contentDescription = "地圖檢視")
                         }
-                        // 選擇模式按鈕
-                        IconButton(onClick = onToggleSelectionMode) {
-                            Icon(Icons.Default.Checklist, contentDescription = "選擇模式")
-                        }
-                        IconButton(onClick = onGenerateRouteClick) {
-                            Icon(Icons.Default.Share, contentDescription = "生成路線")
-                        }
+                        // 更多選項（含選擇模式、生成路線、編輯、刪除）
                         Box {
                             IconButton(onClick = { showMoreMenu = true }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "更多選項")
@@ -270,6 +290,26 @@ private fun ItineraryDetailScreenContent(
                                 expanded = showMoreMenu,
                                 onDismissRequest = { showMoreMenu = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text("選擇模式") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        onToggleSelectionMode()
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Checklist, contentDescription = null)
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("生成路線") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        onGenerateRouteClick()
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Share, contentDescription = null)
+                                    }
+                                )
                                 DropdownMenuItem(
                                     text = { Text("編輯行程") },
                                     onClick = {
@@ -301,8 +341,12 @@ private fun ItineraryDetailScreenContent(
             )
         },
         floatingActionButton = {
-            // 選擇模式下隱藏 FAB
-            if (!isSelectionMode) {
+            // 選擇模式下隱藏 FAB，滑動時也會隱藏
+            AnimatedVisibility(
+                visible = !isSelectionMode && isFabVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
                 FloatingActionButton(onClick = onAddItemClick) {
                     Icon(Icons.Default.Add, contentDescription = "新增項目")
                 }
@@ -353,7 +397,10 @@ private fun ItineraryDetailScreenContent(
                 // 內容
                 LazyColumn(
                     state = lazyListState,
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .nestedScroll(nestedScrollConnection),
                     contentPadding = PaddingValues(ListStyle.contentPadding),
                     verticalArrangement = Arrangement.spacedBy(ListStyle.contentPadding)
                 ) {
