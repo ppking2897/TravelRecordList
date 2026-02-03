@@ -7,6 +7,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.domain.entity.ItineraryItem
@@ -129,7 +129,11 @@ fun ItemCard(
         Card(
             modifier = Modifier
                 .weight(1f)
-                .clickable(enabled = if (isSelectionMode) true else onExpandToggle != null) {
+                .clickable(
+                    enabled = if (isSelectionMode) true else onExpandToggle != null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     if (isSelectionMode) {
                         onSelectionToggle()
                     } else {
@@ -176,7 +180,6 @@ fun ItemCard(
                         Text(
                             text = item.activity,
                             style = MaterialTheme.typography.titleMedium,
-                            textDecoration = if (item.isCompleted) TextDecoration.LineThrough else null,
                             color = if (item.isCompleted) {
                                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             } else {
