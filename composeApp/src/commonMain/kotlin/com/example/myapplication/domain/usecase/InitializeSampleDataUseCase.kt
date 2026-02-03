@@ -1,6 +1,6 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.data.sample.SampleDataProvider
+import com.example.myapplication.domain.sample.SampleDataProvider
 import com.example.myapplication.domain.repository.ItineraryItemRepository
 import com.example.myapplication.domain.repository.ItineraryRepository
 

@@ -1,5 +1,5 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.data.sample
+package com.example.myapplication.domain.sample
 
 import com.example.myapplication.domain.entity.Itinerary
 import com.example.myapplication.domain.entity.ItineraryItem
