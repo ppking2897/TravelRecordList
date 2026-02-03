@@ -439,7 +439,7 @@ private fun AddEditItineraryScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text(if (isEditMode) "編輯行程" else "新增行程") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
