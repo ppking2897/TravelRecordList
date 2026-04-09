@@ -5,7 +5,7 @@ import com.example.myapplication.feature.itinerary_item.domain.model.Location
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo
 import com.example.myapplication.core.domain.validation.Validation
 import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
-import com.example.myapplication.core.itinerary.domain.repository.ItineraryRepository
+import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.uuid.ExperimentalUuidApi

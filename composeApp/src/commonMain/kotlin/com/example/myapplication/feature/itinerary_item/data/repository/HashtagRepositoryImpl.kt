@@ -4,7 +4,7 @@ package com.example.myapplication.feature.itinerary_item.data.repository
 import com.example.myapplication.feature.itinerary_item.domain.model.Hashtag
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.repository.HashtagRepository
-import com.example.myapplication.core.itinerary.domain.repository.ItineraryRepository
+import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
 import kotlin.time.Clock
 
 /**

@@ -5,12 +5,12 @@ import com.example.myapplication.feature.itinerary_item.domain.usecase.AddPhotoU
 import com.example.myapplication.feature.itinerary_item.domain.usecase.BatchDeleteItemsUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.BatchUpdateItemsUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.DeleteItineraryItemUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.DeleteItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.DeletePhotoUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.FilterByHashtagUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.GetItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase

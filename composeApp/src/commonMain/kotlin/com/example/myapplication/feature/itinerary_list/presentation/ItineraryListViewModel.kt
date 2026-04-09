@@ -1,9 +1,9 @@
 package com.example.myapplication.feature.itinerary_list.presentation
 
-import com.example.myapplication.core.itinerary.domain.usecase.DeleteItineraryUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.GetAllItinerariesUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.InitializeSampleDataUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.SearchItinerariesUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.DeleteItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.SearchItinerariesUseCase
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
 
 /**

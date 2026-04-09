@@ -5,12 +5,12 @@ package com.example.myapplication.feature.itinerary_add_edit.presentation
 import kotlinx.datetime.LocalDate
 import com.example.myapplication.core.data.local.ImageStorageService
 import com.example.myapplication.feature.draft.domain.model.DraftType
-import com.example.myapplication.core.itinerary.domain.usecase.CreateItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.CreateItineraryUseCase
 import com.example.myapplication.feature.draft.domain.usecase.DeleteDraftUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.GetItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
 import com.example.myapplication.feature.draft.domain.usecase.LoadDraftUseCase
 import com.example.myapplication.feature.draft.domain.usecase.SaveDraftUseCase
-import com.example.myapplication.core.itinerary.domain.usecase.UpdateItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.UpdateItineraryUseCase
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Clock

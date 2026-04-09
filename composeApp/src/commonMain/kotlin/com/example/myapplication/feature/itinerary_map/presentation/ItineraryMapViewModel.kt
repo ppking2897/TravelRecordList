@@ -2,7 +2,7 @@ package com.example.myapplication.feature.itinerary_map.presentation
 
 import com.example.myapplication.feature.route.domain.model.MapMarker
 import kotlinx.datetime.LocalDate
-import com.example.myapplication.core.itinerary.domain.usecase.GetItineraryUseCase
+import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
 import com.example.myapplication.feature.route.domain.usecase.GetMapMarkersUseCase
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
 

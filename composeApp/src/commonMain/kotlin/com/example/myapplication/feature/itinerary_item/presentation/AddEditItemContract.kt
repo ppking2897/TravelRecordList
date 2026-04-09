@@ -1,6 +1,6 @@
 package com.example.myapplication.feature.itinerary_item.presentation
 
-import com.example.myapplication.core.itinerary.domain.model.Itinerary
+import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.domain.service.LocationSuggestion
 import com.example.myapplication.core.presentation.mvi.UiEvent
 import com.example.myapplication.core.presentation.mvi.UiIntent

@@ -2,7 +2,7 @@
 package com.example.myapplication.core.data.local
 
 import com.example.myapplication.feature.draft.data.model.DraftResponse
-import com.example.myapplication.core.itinerary.data.model.ItineraryResponse
+import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
 import com.example.myapplication.feature.itinerary_item.data.model.ItineraryItemResponse
 import com.example.myapplication.feature.route.data.model.RouteResponse
 import com.example.myapplication.core.data.sync.SyncMarker

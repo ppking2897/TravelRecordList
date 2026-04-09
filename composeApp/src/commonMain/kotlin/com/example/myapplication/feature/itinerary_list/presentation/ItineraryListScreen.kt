@@ -59,7 +59,7 @@ import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing
 import androidx.lifecycle.compose.LifecycleEventEffect
-import com.example.myapplication.core.itinerary.domain.model.Itinerary
+import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.core.presentation.components.DefaultCoverPlaceholder
 import com.example.myapplication.core.presentation.components.DeleteConfirmDialog
