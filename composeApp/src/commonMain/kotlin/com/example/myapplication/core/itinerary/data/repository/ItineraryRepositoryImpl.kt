@@ -1,12 +1,12 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.itinerary.data.repository
+package com.example.myapplication.core.itinerary.data.repository
 
-import com.example.myapplication.feature.itinerary.data.mapper.toDto
-import com.example.myapplication.feature.itinerary.data.mapper.toDomain
+import com.example.myapplication.core.itinerary.data.mapper.toDto
+import com.example.myapplication.core.itinerary.data.mapper.toDomain
 import com.example.myapplication.core.data.local.JsonSerializer
 import com.example.myapplication.core.data.local.StorageService
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import com.example.myapplication.core.itinerary.domain.model.Itinerary
+import com.example.myapplication.core.itinerary.domain.repository.ItineraryRepository
 
 /**
  * ItineraryRepository 實作

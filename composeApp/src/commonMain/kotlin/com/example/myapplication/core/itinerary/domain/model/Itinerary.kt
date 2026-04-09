@@ -1,5 +1,5 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.itinerary.domain.model
+package com.example.myapplication.core.itinerary.domain.model
 
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.Instant

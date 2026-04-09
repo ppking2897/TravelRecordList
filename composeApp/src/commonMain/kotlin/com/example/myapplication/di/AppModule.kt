@@ -2,7 +2,7 @@ package com.example.myapplication.di
 
 import com.example.myapplication.core.di.coreModule
 import com.example.myapplication.feature.draft.di.draftModule
-import com.example.myapplication.feature.itinerary.di.itineraryModule
+import com.example.myapplication.core.itinerary.di.itineraryModule
 import com.example.myapplication.feature.itinerary_list.di.itineraryListModule
 import com.example.myapplication.feature.itinerary_detail.di.itineraryDetailModule
 import com.example.myapplication.feature.itinerary_add_edit.di.itineraryAddEditModule

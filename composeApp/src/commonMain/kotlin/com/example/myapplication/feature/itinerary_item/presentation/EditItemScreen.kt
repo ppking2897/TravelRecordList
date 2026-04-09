@@ -45,7 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.core.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.domain.service.LocationSearchService
 import com.example.myapplication.core.presentation.components.DateDropdown
 import com.example.myapplication.core.presentation.components.LocalImage

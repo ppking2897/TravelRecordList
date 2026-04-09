@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary.data.mapper
+package com.example.myapplication.core.itinerary.data.mapper
 
-import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.core.itinerary.data.model.ItineraryResponse
+import com.example.myapplication.core.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
 import com.example.myapplication.feature.itinerary_item.data.mapper.toDomain
 

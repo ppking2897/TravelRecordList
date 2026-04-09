@@ -7,7 +7,7 @@ import com.example.myapplication.core.data.local.StorageService
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.route.domain.model.Route
 import com.example.myapplication.feature.route.domain.model.RouteLocation
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import com.example.myapplication.core.itinerary.domain.repository.ItineraryRepository
 import com.example.myapplication.feature.route.domain.repository.RouteRepository
 
 /**

@@ -23,7 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.core.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.presentation.theme.AppGradients
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing

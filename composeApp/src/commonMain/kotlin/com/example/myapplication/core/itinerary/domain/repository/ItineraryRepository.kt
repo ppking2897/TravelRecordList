@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary.domain.repository
+package com.example.myapplication.core.itinerary.domain.repository
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.core.itinerary.domain.model.Itinerary
 
 /**
  * 行程資料存取介面
