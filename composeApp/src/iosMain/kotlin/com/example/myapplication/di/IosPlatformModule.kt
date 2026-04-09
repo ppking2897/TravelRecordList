@@ -1,6 +1,6 @@
 package com.example.myapplication.di
 
-import com.example.myapplication.data.storage.ImageStorageService
+import com.example.myapplication.core.domain.service.ImageStorageService
 import com.example.myapplication.data.storage.IosStorageService
 import com.example.myapplication.data.storage.StorageService
 import org.koin.core.module.Module

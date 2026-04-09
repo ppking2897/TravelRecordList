@@ -13,7 +13,7 @@ import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
-import com.example.myapplication.core.data.local.ImageStorageService
+import com.example.myapplication.core.domain.service.ImageStorageService
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

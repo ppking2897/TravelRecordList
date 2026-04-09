@@ -3,7 +3,7 @@
 package com.example.myapplication.feature.itinerary_add_edit.presentation
 
 import kotlinx.datetime.LocalDate
-import com.example.myapplication.core.data.local.ImageStorageService
+import com.example.myapplication.core.domain.service.ImageStorageService
 import com.example.myapplication.feature.draft.domain.model.DraftType
 import com.example.myapplication.feature.itinerary.domain.usecase.CreateItineraryUseCase
 import com.example.myapplication.feature.draft.domain.usecase.DeleteDraftUseCase

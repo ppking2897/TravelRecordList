@@ -2,7 +2,7 @@
 package com.example.myapplication.feature.itinerary_item.data.repository
 
 import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
-import com.example.myapplication.core.data.local.ImageStorageService
+import com.example.myapplication.core.domain.service.ImageStorageService
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo

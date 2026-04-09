@@ -1,4 +1,4 @@
-package com.example.myapplication.core.data.local
+package com.example.myapplication.core.domain.service
 
 /**
  * 圖片儲存服務介面
@@ -12,20 +12,20 @@ interface ImageStorageService {
      * @return 儲存後的圖片檔案路徑
      */
     suspend fun saveImage(imageData: ByteArray, itemId: String): Result<String>
-    
+
     /**
      * 讀取圖片資料
      * @param imagePath 圖片檔案路徑
      * @return 圖片資料
      */
     suspend fun loadImage(imagePath: String): Result<ByteArray>
-    
+
     /**
      * 刪除圖片
      * @param imagePath 圖片檔案路徑
      */
     suspend fun deleteImage(imagePath: String): Result<Unit>
-    
+
     /**
      * 壓縮圖片
      * @param imageData 原始圖片資料
@@ -33,7 +33,7 @@ interface ImageStorageService {
      * @return 壓縮後的圖片資料
      */
     suspend fun compressImage(imageData: ByteArray, maxSizeKB: Int = 500): Result<ByteArray>
-    
+
     /**
      * 生成縮圖
      * @param imageData 原始圖片資料
@@ -46,7 +46,7 @@ interface ImageStorageService {
         width: Int = 200,
         height: Int = 200
     ): Result<ByteArray>
-    
+
     /**
      * 取得圖片儲存目錄
      */
