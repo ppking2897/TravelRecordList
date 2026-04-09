@@ -20,5 +20,6 @@ fun initKoin(
     appDeclaration: KoinAppDeclaration = {}
 ) = startKoin {
     appDeclaration()
-    modules(platformModule, appModule)
+    modules(platformModule)
+    modules(appModule)
 }

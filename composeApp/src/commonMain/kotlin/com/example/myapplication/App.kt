@@ -6,28 +6,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.myapplication.data.storage.ImageStorageService
-import com.example.myapplication.domain.repository.DraftRepository
-import com.example.myapplication.domain.repository.ItineraryRepository
-import com.example.myapplication.domain.usecase.*
-import com.example.myapplication.presentation.navigation.Screen
-import com.example.myapplication.presentation.theme.TravelRecordTheme
-import com.example.myapplication.presentation.itinerary_list.ItineraryListScreen
-import com.example.myapplication.presentation.itinerary_list.ItineraryListViewModel
-import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailScreen
-import com.example.myapplication.presentation.itinerary_detail.ItineraryDetailViewModel
-import com.example.myapplication.presentation.add_edit_itinerary.AddEditItineraryScreen
-import com.example.myapplication.presentation.add_edit_item.AddEditItemScreen
-import com.example.myapplication.presentation.edit_item.EditItemScreen
-import com.example.myapplication.presentation.travel_history.TravelHistoryScreen
-import com.example.myapplication.presentation.travel_history.TravelHistoryViewModel
-import com.example.myapplication.presentation.route_view.RouteViewScreen
-import com.example.myapplication.presentation.itinerary_map.ItineraryMapScreen
-import com.example.myapplication.presentation.itinerary_map.ItineraryMapViewModel
+import com.example.myapplication.core.presentation.navigation.Screen
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListScreen
+import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListViewModel
+import com.example.myapplication.feature.itinerary_detail.presentation.ItineraryDetailScreen
+import com.example.myapplication.feature.itinerary_detail.presentation.ItineraryDetailViewModel
+import com.example.myapplication.feature.itinerary_add_edit.presentation.ItineraryAddEditScreen
+import com.example.myapplication.feature.itinerary_item.presentation.AddEditItemScreen
+import com.example.myapplication.feature.itinerary_item.presentation.EditItemScreen
+import com.example.myapplication.feature.travel_history.presentation.TravelHistoryScreen
+import com.example.myapplication.feature.travel_history.presentation.TravelHistoryViewModel
+import com.example.myapplication.feature.route.presentation.RouteViewScreen
+import com.example.myapplication.feature.itinerary.presentation.ItineraryMapScreen
+import com.example.myapplication.feature.itinerary.presentation.ItineraryMapViewModel
 import kotlin.time.ExperimentalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -64,12 +59,7 @@ fun TravelApp() {
 
         // 新增行程
         composable(Screen.AddItinerary.route) {
-            AddEditItineraryScreen(
-                createItineraryUseCase = koinInject(),
-                saveDraftUseCase = koinInject(),
-                loadDraftUseCase = koinInject(),
-                draftRepository = koinInject(),
-                imageStorageService = koinInject(),
+            ItineraryAddEditScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { id ->
                     navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
@@ -85,18 +75,10 @@ fun TravelApp() {
             arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
         ) { backStackEntry ->
             val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            AddEditItineraryScreen(
+            ItineraryAddEditScreen(
                 itineraryId = itineraryId,
-                createItineraryUseCase = koinInject(),
-                updateItineraryUseCase = koinInject(),
-                itineraryRepository = koinInject(),
-                saveDraftUseCase = koinInject(),
-                loadDraftUseCase = koinInject(),
-                draftRepository = koinInject(),
-                imageStorageService = koinInject(),
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { _ ->
-                    // 編輯完成後返回上一頁（列表或詳情頁）
                     navController.popBackStack()
                 }
             )
@@ -198,7 +180,6 @@ fun TravelApp() {
                 routeId = routeId,
                 onNavigateBack = { navController.popBackStack() },
                 onExportSuccess = { json ->
-                    // TODO: 實作匯出功能
                     println("Export JSON: $json")
                 }
             )

@@ -1,0 +1,38 @@
+package com.example.myapplication.feature.itinerary.data.mapper
+
+import com.example.myapplication.feature.itinerary.data.dto.ItineraryDto
+import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
+import com.example.myapplication.feature.itinerary_item.data.mapper.toDomain
+
+/**
+ * Itinerary DTO ??Entity è½‰æ?
+ */
+object ItineraryMapper {
+    fun toDomain(dto: ItineraryDto): Itinerary = Itinerary(
+        id = dto.id,
+        title = dto.title,
+        description = dto.description,
+        startDate = dto.startDate,
+        endDate = dto.endDate,
+        coverPhotoPath = dto.coverPhotoPath,
+        items = dto.items.map { it.toDomain() },
+        createdAt = dto.createdAt,
+        modifiedAt = dto.modifiedAt
+    )
+
+    fun toDto(entity: Itinerary): ItineraryDto = ItineraryDto(
+        id = entity.id,
+        title = entity.title,
+        description = entity.description,
+        startDate = entity.startDate,
+        endDate = entity.endDate,
+        coverPhotoPath = entity.coverPhotoPath,
+        items = entity.items.map { it.toDto() },
+        createdAt = entity.createdAt,
+        modifiedAt = entity.modifiedAt
+    )
+}
+
+fun ItineraryDto.toDomain(): Itinerary = ItineraryMapper.toDomain(this)
+fun Itinerary.toDto(): ItineraryDto = ItineraryMapper.toDto(this)
