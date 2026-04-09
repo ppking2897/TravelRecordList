@@ -1,33 +1,33 @@
 package com.example.myapplication.feature.draft.data.mapper
 
-import com.example.myapplication.feature.draft.data.dto.DraftDto
-import com.example.myapplication.feature.draft.data.dto.DraftTypeDto
+import com.example.myapplication.feature.draft.data.model.DraftResponse
+import com.example.myapplication.feature.draft.data.model.DraftTypeResponse
 import com.example.myapplication.feature.draft.domain.model.Draft
 import com.example.myapplication.feature.draft.domain.model.DraftType
 
 /**
- * DraftType DTO ??Entity 轉�?
+ * DraftType Response ↔ Domain 轉換
  */
 object DraftTypeMapper {
-    fun toDomain(dto: DraftTypeDto): DraftType = when (dto) {
-        DraftTypeDto.ITINERARY -> DraftType.ITINERARY
-        DraftTypeDto.ITEM -> DraftType.ITEM
+    fun toDomain(dto: DraftTypeResponse): DraftType = when (dto) {
+        DraftTypeResponse.ITINERARY -> DraftType.ITINERARY
+        DraftTypeResponse.ITEM -> DraftType.ITEM
     }
 
-    fun toDto(entity: DraftType): DraftTypeDto = when (entity) {
-        DraftType.ITINERARY -> DraftTypeDto.ITINERARY
-        DraftType.ITEM -> DraftTypeDto.ITEM
+    fun toDto(entity: DraftType): DraftTypeResponse = when (entity) {
+        DraftType.ITINERARY -> DraftTypeResponse.ITINERARY
+        DraftType.ITEM -> DraftTypeResponse.ITEM
     }
 }
 
-fun DraftTypeDto.toDomain(): DraftType = DraftTypeMapper.toDomain(this)
-fun DraftType.toDto(): DraftTypeDto = DraftTypeMapper.toDto(this)
+fun DraftTypeResponse.toDomain(): DraftType = DraftTypeMapper.toDomain(this)
+fun DraftType.toDto(): DraftTypeResponse = DraftTypeMapper.toDto(this)
 
 /**
- * Draft DTO ??Entity 轉�?
+ * Draft Response ↔ Domain 轉換
  */
 object DraftMapper {
-    fun toDomain(dto: DraftDto): Draft = Draft(
+    fun toDomain(dto: DraftResponse): Draft = Draft(
         id = dto.id,
         type = dto.type.toDomain(),
         data = dto.data,
@@ -35,7 +35,7 @@ object DraftMapper {
         modifiedAt = dto.modifiedAt
     )
 
-    fun toDto(entity: Draft): DraftDto = DraftDto(
+    fun toDto(entity: Draft): DraftResponse = DraftResponse(
         id = entity.id,
         type = entity.type.toDto(),
         data = entity.data,
@@ -44,5 +44,5 @@ object DraftMapper {
     )
 }
 
-fun DraftDto.toDomain(): Draft = DraftMapper.toDomain(this)
-fun Draft.toDto(): DraftDto = DraftMapper.toDto(this)
+fun DraftResponse.toDomain(): Draft = DraftMapper.toDomain(this)
+fun Draft.toDto(): DraftResponse = DraftMapper.toDto(this)

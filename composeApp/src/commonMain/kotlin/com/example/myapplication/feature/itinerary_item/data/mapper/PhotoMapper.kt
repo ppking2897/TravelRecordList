@@ -1,13 +1,13 @@
 package com.example.myapplication.feature.itinerary_item.data.mapper
 
-import com.example.myapplication.feature.itinerary_item.data.dto.PhotoDto
+import com.example.myapplication.feature.itinerary_item.data.model.PhotoResponse
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo
 
 /**
- * Photo DTO ??Entity 轉�?
+ * Photo Response ↔ Domain 轉換
  */
 object PhotoMapper {
-    fun toDomain(dto: PhotoDto): Photo = Photo(
+    fun toDomain(dto: PhotoResponse): Photo = Photo(
         id = dto.id,
         itemId = dto.itemId,
         fileName = dto.fileName,
@@ -22,7 +22,7 @@ object PhotoMapper {
         modifiedAt = dto.modifiedAt
     )
 
-    fun toDto(entity: Photo): PhotoDto = PhotoDto(
+    fun toDto(entity: Photo): PhotoResponse = PhotoResponse(
         id = entity.id,
         itemId = entity.itemId,
         fileName = entity.fileName,
@@ -38,5 +38,5 @@ object PhotoMapper {
     )
 }
 
-fun PhotoDto.toDomain(): Photo = PhotoMapper.toDomain(this)
-fun Photo.toDto(): PhotoDto = PhotoMapper.toDto(this)
+fun PhotoResponse.toDomain(): Photo = PhotoMapper.toDomain(this)
+fun Photo.toDto(): PhotoResponse = PhotoMapper.toDto(this)

@@ -11,7 +11,9 @@ import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRe
 import com.example.myapplication.feature.route.domain.repository.RouteRepository
 
 /**
- * RouteRepository ?�實�? * 使用 StorageService ?��?資�??��??? */
+ * RouteRepository 實作
+ * 使用 StorageService 儲存資料
+ */
 class RouteRepositoryImpl(
     private val storageService: StorageService,
     private val itineraryRepository: ItineraryRepository

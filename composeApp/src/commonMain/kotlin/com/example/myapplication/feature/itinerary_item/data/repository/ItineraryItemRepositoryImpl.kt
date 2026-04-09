@@ -11,7 +11,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 
 /**
- * ItineraryItemRepository ?�實�? * 使用 StorageService ?��?資�??��??? */
+ * ItineraryItemRepository 實作
+ * 使用 StorageService 儲存資料
+ */
 class ItineraryItemRepositoryImpl(
     private val storageService: StorageService
 ) : ItineraryItemRepository {
@@ -192,8 +194,9 @@ class ItineraryItemRepositoryImpl(
 
     override suspend fun reorderItems(itineraryId: String, itemIds: List<String>): Result<Unit> {
         return try {
-            // ?�新索�?以�??�新?��?
-            // 注�?：此實�?保�??�目?��?序�?�?            // ?�實?��??�中?�能?�要為每個�??�添??sortOrder 欄�?
+            // 更新索引以反映新順序
+            // 注意：此實作保留目前的排序邏輯
+            // 實際應用中可能需要為每個項目添加 sortOrder 欄位
             val allIds = getItemIds()
             val otherIds = allIds.filter { it !in itemIds }
             val newOrder = itemIds + otherIds

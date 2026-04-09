@@ -1,15 +1,15 @@
 package com.example.myapplication.feature.itinerary.data.mapper
 
-import com.example.myapplication.feature.itinerary.data.dto.ItineraryDto
+import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
 import com.example.myapplication.feature.itinerary_item.data.mapper.toDomain
 
 /**
- * Itinerary DTO ??Entity 轉�?
+ * Itinerary Response ↔ Domain 轉換
  */
 object ItineraryMapper {
-    fun toDomain(dto: ItineraryDto): Itinerary = Itinerary(
+    fun toDomain(dto: ItineraryResponse): Itinerary = Itinerary(
         id = dto.id,
         title = dto.title,
         description = dto.description,
@@ -21,7 +21,7 @@ object ItineraryMapper {
         modifiedAt = dto.modifiedAt
     )
 
-    fun toDto(entity: Itinerary): ItineraryDto = ItineraryDto(
+    fun toDto(entity: Itinerary): ItineraryResponse = ItineraryResponse(
         id = entity.id,
         title = entity.title,
         description = entity.description,
@@ -34,5 +34,5 @@ object ItineraryMapper {
     )
 }
 
-fun ItineraryDto.toDomain(): Itinerary = ItineraryMapper.toDomain(this)
-fun Itinerary.toDto(): ItineraryDto = ItineraryMapper.toDto(this)
+fun ItineraryResponse.toDomain(): Itinerary = ItineraryMapper.toDomain(this)
+fun Itinerary.toDto(): ItineraryResponse = ItineraryMapper.toDto(this)

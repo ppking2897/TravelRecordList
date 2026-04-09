@@ -1,20 +1,20 @@
 package com.example.myapplication.feature.itinerary_item.data.mapper
 
-import com.example.myapplication.feature.itinerary_item.data.dto.LocationDto
+import com.example.myapplication.feature.itinerary_item.data.model.LocationResponse
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
 
 /**
- * Location DTO ??Entity 轉�?
+ * Location Response ↔ Domain 轉換
  */
 object LocationMapper {
-    fun toDomain(dto: LocationDto): Location = Location(
+    fun toDomain(dto: LocationResponse): Location = Location(
         name = dto.name,
         latitude = dto.latitude,
         longitude = dto.longitude,
         address = dto.address
     )
 
-    fun toDto(entity: Location): LocationDto = LocationDto(
+    fun toDto(entity: Location): LocationResponse = LocationResponse(
         name = entity.name,
         latitude = entity.latitude,
         longitude = entity.longitude,
@@ -22,5 +22,5 @@ object LocationMapper {
     )
 }
 
-fun LocationDto.toDomain(): Location = LocationMapper.toDomain(this)
-fun Location.toDto(): LocationDto = LocationMapper.toDto(this)
+fun LocationResponse.toDomain(): Location = LocationMapper.toDomain(this)
+fun Location.toDto(): LocationResponse = LocationMapper.toDto(this)

@@ -40,7 +40,7 @@ class DraftRepositoryImpl(
             val dto = JsonSerializer.deserializeDraft(jsonString)
             val draft = dto.toDomain()
 
-            // 檢查?�否?��?（�???7 天�?
+            // 檢查是否過期（超過 7 天）
             val now = Clock.System.now()
             val age = now - draft.createdAt
             if (age > 7.days) {

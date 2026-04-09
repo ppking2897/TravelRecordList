@@ -1,13 +1,13 @@
 package com.example.myapplication.feature.itinerary_item.data.mapper
 
-import com.example.myapplication.feature.itinerary_item.data.dto.ItineraryItemDto
+import com.example.myapplication.feature.itinerary_item.data.model.ItineraryItemResponse
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 
 /**
- * ItineraryItem DTO ??Entity 轉�?
+ * ItineraryItem Response ↔ Domain 轉換
  */
 object ItineraryItemMapper {
-    fun toDomain(dto: ItineraryItemDto): ItineraryItem = ItineraryItem(
+    fun toDomain(dto: ItineraryItemResponse): ItineraryItem = ItineraryItem(
         id = dto.id,
         itineraryId = dto.itineraryId,
         date = dto.date,
@@ -25,7 +25,7 @@ object ItineraryItemMapper {
         modifiedAt = dto.modifiedAt
     )
 
-    fun toDto(entity: ItineraryItem): ItineraryItemDto = ItineraryItemDto(
+    fun toDto(entity: ItineraryItem): ItineraryItemResponse = ItineraryItemResponse(
         id = entity.id,
         itineraryId = entity.itineraryId,
         date = entity.date,
@@ -44,5 +44,5 @@ object ItineraryItemMapper {
     )
 }
 
-fun ItineraryItemDto.toDomain(): ItineraryItem = ItineraryItemMapper.toDomain(this)
-fun ItineraryItem.toDto(): ItineraryItemDto = ItineraryItemMapper.toDto(this)
+fun ItineraryItemResponse.toDomain(): ItineraryItem = ItineraryItemMapper.toDomain(this)
+fun ItineraryItem.toDto(): ItineraryItemResponse = ItineraryItemMapper.toDto(this)

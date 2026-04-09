@@ -1,10 +1,10 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 package com.example.myapplication.core.data.local
 
-import com.example.myapplication.feature.draft.data.dto.DraftDto
-import com.example.myapplication.feature.itinerary.data.dto.ItineraryDto
-import com.example.myapplication.feature.itinerary_item.data.dto.ItineraryItemDto
-import com.example.myapplication.feature.route.data.dto.RouteDto
+import com.example.myapplication.feature.draft.data.model.DraftResponse
+import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
+import com.example.myapplication.feature.itinerary_item.data.model.ItineraryItemResponse
+import com.example.myapplication.feature.route.data.model.RouteResponse
 import com.example.myapplication.core.data.sync.SyncMarker
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
@@ -50,59 +50,59 @@ object JsonSerializer {
     }
 
     /**
-     * 將 ItineraryDto 序列化為 JSON 字串
+     * 將 ItineraryResponse 序列化為 JSON 字串
      */
-    fun serializeItinerary(itinerary: ItineraryDto): String {
-        return json.encodeToString(ItineraryDto.serializer(), itinerary)
+    fun serializeItinerary(itinerary: ItineraryResponse): String {
+        return json.encodeToString(ItineraryResponse.serializer(), itinerary)
     }
 
     /**
-     * 從 JSON 字串反序列化 ItineraryDto
+     * 從 JSON 字串反序列化 ItineraryResponse
      */
-    fun deserializeItinerary(jsonString: String): ItineraryDto {
-        return json.decodeFromString(ItineraryDto.serializer(), jsonString)
+    fun deserializeItinerary(jsonString: String): ItineraryResponse {
+        return json.decodeFromString(ItineraryResponse.serializer(), jsonString)
     }
 
     /**
-     * 將 ItineraryItemDto 序列化為 JSON 字串
+     * 將 ItineraryItemResponse 序列化為 JSON 字串
      */
-    fun serializeItineraryItem(item: ItineraryItemDto): String {
-        return json.encodeToString(ItineraryItemDto.serializer(), item)
+    fun serializeItineraryItem(item: ItineraryItemResponse): String {
+        return json.encodeToString(ItineraryItemResponse.serializer(), item)
     }
 
     /**
-     * 從 JSON 字串反序列化 ItineraryItemDto
+     * 從 JSON 字串反序列化 ItineraryItemResponse
      */
-    fun deserializeItineraryItem(jsonString: String): ItineraryItemDto {
-        return json.decodeFromString(ItineraryItemDto.serializer(), jsonString)
+    fun deserializeItineraryItem(jsonString: String): ItineraryItemResponse {
+        return json.decodeFromString(ItineraryItemResponse.serializer(), jsonString)
     }
 
     /**
-     * 將 RouteDto 序列化為 JSON 字串
+     * 將 RouteResponse 序列化為 JSON 字串
      */
-    fun serializeRoute(route: RouteDto): String {
-        return json.encodeToString(RouteDto.serializer(), route)
+    fun serializeRoute(route: RouteResponse): String {
+        return json.encodeToString(RouteResponse.serializer(), route)
     }
 
     /**
-     * 從 JSON 字串反序列化 RouteDto
+     * 從 JSON 字串反序列化 RouteResponse
      */
-    fun deserializeRoute(jsonString: String): RouteDto {
-        return json.decodeFromString(RouteDto.serializer(), jsonString)
+    fun deserializeRoute(jsonString: String): RouteResponse {
+        return json.decodeFromString(RouteResponse.serializer(), jsonString)
     }
 
     /**
-     * 將 DraftDto 序列化為 JSON 字串
+     * 將 DraftResponse 序列化為 JSON 字串
      */
-    fun serializeDraft(draft: DraftDto): String {
-        return json.encodeToString(DraftDto.serializer(), draft)
+    fun serializeDraft(draft: DraftResponse): String {
+        return json.encodeToString(DraftResponse.serializer(), draft)
     }
 
     /**
-     * 從 JSON 字串反序列化 DraftDto
+     * 從 JSON 字串反序列化 DraftResponse
      */
-    fun deserializeDraft(jsonString: String): DraftDto {
-        return json.decodeFromString(DraftDto.serializer(), jsonString)
+    fun deserializeDraft(jsonString: String): DraftResponse {
+        return json.decodeFromString(DraftResponse.serializer(), jsonString)
     }
 
     /**
