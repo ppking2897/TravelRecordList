@@ -51,7 +51,7 @@ sealed class AddEditItemIntent : UiIntent {
     data class UpdateArrivalTime(val time: LocalTime?) : AddEditItemIntent()
     data class UpdateDepartureTime(val time: LocalTime?) : AddEditItemIntent()
     data class AddPhoto(val path: String) : AddEditItemIntent()
-    data class AddPhotoByContent(val content: ByteArray) : AddEditItemIntent()
+    class AddPhotoByContent(val content: ByteArray) : AddEditItemIntent()
     data class RemovePhoto(val path: String) : AddEditItemIntent()
     object Save : AddEditItemIntent()
 }

@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary.presentation
+package com.example.myapplication.feature.itinerary_map.presentation
 
 import com.example.myapplication.feature.route.domain.model.MapMarker
 import kotlinx.datetime.LocalDate
@@ -30,7 +30,6 @@ class ItineraryMapViewModel(
         updateState { copy(isLoading = true, error = null) }
 
         try {
-            // 載入行程資訊
             val itineraryResult = getItineraryUseCase(itineraryId)
             val markersResult = getMapMarkersUseCase(itineraryId)
 

@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary.presentation
+package com.example.myapplication.feature.itinerary_map.presentation
 
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.route.domain.model.MapMarker

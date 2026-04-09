@@ -18,8 +18,8 @@ import com.example.myapplication.feature.itinerary_item.presentation.EditItemScr
 import com.example.myapplication.feature.travel_history.presentation.TravelHistoryScreen
 import com.example.myapplication.feature.travel_history.presentation.TravelHistoryViewModel
 import com.example.myapplication.feature.route.presentation.RouteViewScreen
-import com.example.myapplication.feature.itinerary.presentation.ItineraryMapScreen
-import com.example.myapplication.feature.itinerary.presentation.ItineraryMapViewModel
+import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapScreen
+import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapViewModel
 import kotlin.time.ExperimentalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext

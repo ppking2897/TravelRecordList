@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary.presentation
+package com.example.myapplication.feature.itinerary_map.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -119,7 +119,6 @@ private fun ItineraryMapScreenContent(
                     }
                 },
                 actions = {
-                    // 日期篩選按鈕
                     dateRange?.let { range ->
                         Box {
                             IconButton(onClick = { showDateFilterMenu = true }) {
@@ -166,7 +165,6 @@ private fun ItineraryMapScreenContent(
                                 )
                                 HorizontalDivider()
 
-                                // 生成日期範圍內的所有日期
                                 generateDateSequence(range).forEach { date ->
                                     DropdownMenuItem(
                                         text = {
@@ -273,7 +271,6 @@ private fun ItineraryMapScreenContent(
                 }
 
                 else -> {
-                    // 地圖視圖
                     ItineraryMapView(
                         markers = markers,
                         selectedMarker = selectedMarker,
@@ -281,7 +278,6 @@ private fun ItineraryMapScreenContent(
                         modifier = Modifier.fillMaxSize()
                     )
 
-                    // 底部資訊卡片
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -300,9 +296,6 @@ private fun ItineraryMapScreenContent(
     }
 }
 
-/**
- * 生成日期範圍內的日期序列
- */
 private fun generateDateSequence(range: ClosedRange<LocalDate>): List<LocalDate> {
     val dates = mutableListOf<LocalDate>()
     var current = range.start
