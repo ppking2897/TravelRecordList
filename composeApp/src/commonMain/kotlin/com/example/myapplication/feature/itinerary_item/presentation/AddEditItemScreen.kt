@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+
 package com.example.myapplication.feature.itinerary_item.presentation
 
 import androidx.compose.foundation.clickable
@@ -11,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -83,13 +87,55 @@ fun AddEditItemScreen(
         }
     }
 
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    // 判斷是否有未儲存的變更
+    val hasChanges = state.activity.isNotEmpty() ||
+        state.locationName.isNotEmpty() ||
+        state.locationAddress.isNotEmpty() ||
+        state.notes.isNotEmpty() ||
+        state.arrivalTime != null ||
+        state.departureTime != null ||
+        state.photos.isNotEmpty()
+
+    val onBack: () -> Unit = {
+        if (hasChanges) {
+            showDiscardDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    BackHandler(enabled = hasChanges) {
+        showDiscardDialog = true
+    }
+
     AddEditItemScreenContent(
         snackbarHostState = snackbarHostState,
         state = state,
         onIntent = { viewModel.handleIntent(it) },
-        onNavigateBack = onNavigateBack,
+        onNavigateBack = onBack,
         locationSearchService = locationSearchService
     )
+
+    // 離開未儲存確認 Dialog
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("捨棄變更？") },
+            text = { Text("您有未儲存的變更，確定要離開嗎？") },
+            confirmButton = {
+                TextButton(onClick = { onNavigateBack() }) {
+                    Text("捨棄")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("繼續編輯")
+                }
+            }
+        )
+    }
 }
 
 @ExperimentalTime

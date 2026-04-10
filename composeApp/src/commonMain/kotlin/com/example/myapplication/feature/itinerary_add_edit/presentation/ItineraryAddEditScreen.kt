@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 
 package com.example.myapplication.feature.itinerary_add_edit.presentation
 
@@ -12,7 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.core.presentation.components.CoverPhotoSection
 import com.preat.peekaboo.image.picker.SelectionMode
@@ -62,6 +64,28 @@ fun ItineraryAddEditScreen(
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    // 新增模式下判斷是否有未儲存的變更
+    val hasChanges = !state.isEditMode && (
+        state.title.isNotEmpty() ||
+        state.description.isNotEmpty() ||
+        state.startDate != null ||
+        state.endDate != null ||
+        state.coverPhotoPath != null
+    )
+
+    val onBack: () -> Unit = {
+        if (hasChanges) {
+            showDiscardDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
+
+    BackHandler(enabled = hasChanges) {
+        showDiscardDialog = true
+    }
 
     // 封面照片選擇器
     val coverImagePicker = rememberImagePickerLauncher(
@@ -83,7 +107,7 @@ fun ItineraryAddEditScreen(
             CenterAlignedTopAppBar(
                 title = { Text(if (state.isEditMode) "編輯行程" else "新增行程") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 }
@@ -192,6 +216,25 @@ fun ItineraryAddEditScreen(
                 }
             }
         }
+    }
+
+    // 離開未儲存確認 Dialog
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("捨棄變更？") },
+            text = { Text("您有未儲存的變更，確定要離開嗎？") },
+            confirmButton = {
+                TextButton(onClick = { onNavigateBack() }) {
+                    Text("捨棄")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("繼續編輯")
+                }
+            }
+        )
     }
 
     // Material3 DatePickerDialog for Start Date
