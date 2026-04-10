@@ -47,6 +47,7 @@ import com.example.myapplication.core.presentation.components.HashtagRow
 import com.example.myapplication.core.presentation.components.LocalImage
 import com.example.myapplication.core.presentation.components.PhotoPreviewDialog
 import com.example.myapplication.core.presentation.theme.CardStyle
+import com.example.myapplication.core.presentation.theme.CornerRadius
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing
@@ -610,7 +611,7 @@ private fun HistoryItemRow(
                             Icon(
                                 Icons.Default.Notes,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(IconSize.xs),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
@@ -639,7 +640,7 @@ private fun HistoryItemRow(
                             Icon(
                                 Icons.Default.Photo,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(IconSize.xs),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
@@ -685,8 +686,8 @@ private fun PhotoThumbnailRow(
         items(displayPhotos, key = { it.id }) { photo ->
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .size(IconSize.xl)
+                    .clip(RoundedCornerShape(CornerRadius.xs))
                     .clickable { onPhotoClick(photo) }
             ) {
                 LocalImage(
@@ -703,8 +704,8 @@ private fun PhotoThumbnailRow(
             item {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .size(IconSize.xl)
+                        .clip(RoundedCornerShape(CornerRadius.xs))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {

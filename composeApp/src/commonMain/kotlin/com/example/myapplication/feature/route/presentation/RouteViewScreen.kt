@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.core.presentation.theme.IconSize
+import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
 import com.example.myapplication.feature.route.domain.model.Route
 import com.example.myapplication.feature.route.domain.model.RouteLocation
@@ -91,8 +93,8 @@ private fun RouteInfoCard(route: Route) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Text(
                 text = route.title,
@@ -102,7 +104,7 @@ private fun RouteInfoCard(route: Route) {
             HorizontalDivider()
             
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -121,7 +123,7 @@ private fun RouteInfoCard(route: Route) {
                 .fold(kotlin.time.Duration.ZERO) { acc, duration -> acc + duration }
             if (totalDuration.inWholeMinutes > 0) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -152,13 +154,13 @@ private fun RouteLocationCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(Spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             // ... (順序指示器 code unchanged)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
                 if (!isFirst) {
                     HorizontalDivider(
@@ -198,7 +200,7 @@ private fun RouteLocationCard(
             // 地點資訊
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -223,13 +225,13 @@ private fun RouteLocationCard(
                 // 地址
                 routeLocation.location.address?.let { address ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             Icons.Default.Place,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(IconSize.xs),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
@@ -252,13 +254,13 @@ private fun RouteLocationCard(
                 // 建議停留時間
                 routeLocation.recommendedDuration?.let { duration ->
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             Icons.Default.DateRange,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp),
+                            modifier = Modifier.size(IconSize.xs),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
@@ -391,8 +393,8 @@ private fun RouteViewScreenContent(
                     if (isExporting) {
                         CircularProgressIndicator(
                             modifier = Modifier
-                                .size(24.dp)
-                                .padding(horizontal = 12.dp),
+                                .size(IconSize.md)
+                                .padding(horizontal = Spacing.md),
                             strokeWidth = 2.dp
                         )
                     } else {
@@ -425,12 +427,12 @@ private fun RouteViewScreenContent(
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                 ) {
                     Icon(
                         Icons.Default.Info,
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(IconSize.xxl),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
@@ -445,8 +447,8 @@ private fun RouteViewScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
                 // 路線資訊卡片
                 item {
@@ -459,17 +461,17 @@ private fun RouteViewScreenContent(
                         Text(
                             text = errorMessage,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier.padding(vertical = Spacing.sm)
                         )
                     }
                 }
-                
+
                 // 地點列表標題
                 item {
                     Text(
                         text = "路線地點",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = Spacing.sm)
                     )
                 }
                 
