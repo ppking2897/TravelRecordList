@@ -179,7 +179,36 @@ private fun TravelHistoryScreenContent(
                     }
                 }
             }
-            
+
+            // 統計摘要
+            if (historyByLocation.isNotEmpty()) {
+                val totalLocations = historyByLocation.size
+                val totalItems = historyByLocation.values.sumOf { it.size }
+                val completedItems = historyByLocation.values.sumOf { items ->
+                    items.count { it.isCompleted }
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.lg),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        StatItem(value = "$totalLocations", label = "個地點")
+                        StatItem(value = "$totalItems", label = "次旅行")
+                        StatItem(value = "$completedItems", label = "已完成")
+                    }
+                }
+            }
+
             // 錯誤訊息
             error?.let { errorMessage ->
                 Text(
@@ -835,5 +864,21 @@ private fun TravelHistoryScreenPreview_Empty() {
                 onToggleItemExpansion = {}
             )
         }
+    }
+}
+
+@Composable
+private fun StatItem(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
