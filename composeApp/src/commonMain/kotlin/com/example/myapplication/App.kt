@@ -1,12 +1,9 @@
 package com.example.myapplication
 
 import androidx.compose.runtime.*
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.myapplication.core.presentation.navigation.Screen
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.ui.NavDisplay
+import com.example.myapplication.core.presentation.navigation.AppRoute
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListScreen
 import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListViewModel
@@ -38,168 +35,143 @@ fun App() {
 @ExperimentalTime
 @Composable
 fun TravelApp() {
-    val navController = rememberNavController()
+    val backStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
 
-    NavHost(navController = navController, startDestination = Screen.ItineraryList.route) {
-        // 行程列表
-        composable(Screen.ItineraryList.route) {
-            val viewModel: ItineraryListViewModel = koinViewModel()
-            ItineraryListScreen(
-                viewModel = viewModel,
-                onItineraryClick = { id ->
-                    navController.navigate(Screen.ItineraryDetail.createRoute(id))
-                },
-                onEditClick = { id ->
-                    navController.navigate(Screen.EditItinerary.createRoute(id))
-                },
-                onAddClick = { navController.navigate(Screen.AddItinerary.route) },
-                onHistoryClick = { navController.navigate(Screen.TravelHistory.route) }
-            )
-        }
-
-        // 新增行程
-        composable(Screen.AddItinerary.route) {
-            ItineraryAddEditScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { id ->
-                    navController.navigate(Screen.ItineraryDetail.createRoute(id)) {
-                        popUpTo(Screen.ItineraryList.route)
-                    }
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider = { key ->
+            when (key) {
+                // 行程列表
+                is AppRoute.ItineraryList -> NavEntry(key) {
+                    val viewModel: ItineraryListViewModel = koinViewModel()
+                    ItineraryListScreen(
+                        viewModel = viewModel,
+                        onItineraryClick = { id ->
+                            backStack.add(AppRoute.ItineraryDetail(id))
+                        },
+                        onEditClick = { id ->
+                            backStack.add(AppRoute.EditItinerary(id))
+                        },
+                        onAddClick = { backStack.add(AppRoute.AddItinerary) },
+                        onHistoryClick = { backStack.add(AppRoute.TravelHistory) }
+                    )
                 }
-            )
-        }
 
-        // 編輯行程
-        composable(
-            route = Screen.EditItinerary.route,
-            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            ItineraryAddEditScreen(
-                itineraryId = itineraryId,
-                onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { _ ->
-                    navController.popBackStack()
+                // 新增行程
+                is AppRoute.AddItinerary -> NavEntry(key) {
+                    ItineraryAddEditScreen(
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onSaveSuccess = { id ->
+                            while (backStack.size > 1) backStack.removeLastOrNull()
+                            backStack.add(AppRoute.ItineraryDetail(id))
+                        }
+                    )
                 }
-            )
-        }
 
-        // 行程詳情
-        composable(
-            route = Screen.ItineraryDetail.route,
-            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            val viewModel: ItineraryDetailViewModel = koinViewModel()
-
-            ItineraryDetailScreen(
-                viewModel = viewModel,
-                itineraryId = itineraryId,
-                onNavigateBack = { navController.popBackStack() },
-                onAddItemClick = {
-                    navController.navigate(Screen.AddItem.createRoute(itineraryId))
-                },
-                onQuickAddItemClick = { defaultDate ->
-                    navController.navigate(Screen.QuickAddItem.createRoute(itineraryId, defaultDate.toString()))
-                },
-                onEditItemClick = { itemId ->
-                    navController.navigate(Screen.EditItem.createRoute(itemId))
-                },
-                onEditItineraryClick = {
-                    navController.navigate(Screen.EditItinerary.createRoute(itineraryId))
-                },
-                onDeleteItineraryClick = {},
-                onGenerateRouteClick = {},
-                onMapClick = {
-                    navController.navigate(Screen.ItineraryMap.createRoute(itineraryId))
+                // 編輯行程
+                is AppRoute.EditItinerary -> NavEntry(key) {
+                    ItineraryAddEditScreen(
+                        itineraryId = key.itineraryId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onSaveSuccess = { _ -> backStack.removeLastOrNull() }
+                    )
                 }
-            )
-        }
 
-        // 新增項目
-        composable(
-            route = Screen.AddItem.route,
-            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            AddEditItemScreen(
-                itineraryId = itineraryId,
-                onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() }
-            )
-        }
-
-        // 快速新增項目（帶預設日期）
-        composable(
-            route = Screen.QuickAddItem.route,
-            arguments = listOf(
-                navArgument("itineraryId") { type = NavType.StringType },
-                navArgument("defaultDate") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            val defaultDateString = backStackEntry.arguments?.getString("defaultDate") ?: return@composable
-            val defaultDate = kotlinx.datetime.LocalDate.parse(defaultDateString)
-            AddEditItemScreen(
-                itineraryId = itineraryId,
-                onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() },
-                defaultDate = defaultDate
-            )
-        }
-
-        // 編輯項目
-        composable(
-            route = Screen.EditItem.route,
-            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
-            EditItemScreen(
-                itemId = itemId,
-                onNavigateBack = { navController.popBackStack() },
-                onSaveSuccess = { navController.popBackStack() }
-            )
-        }
-
-        // 旅遊歷史
-        composable(Screen.TravelHistory.route) {
-            val viewModel: TravelHistoryViewModel = koinViewModel()
-            TravelHistoryScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        // 路線檢視
-        composable(
-            route = Screen.RouteView.route,
-            arguments = listOf(navArgument("routeId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val routeId = backStackEntry.arguments?.getString("routeId") ?: return@composable
-            RouteViewScreen(
-                routeId = routeId,
-                onNavigateBack = { navController.popBackStack() },
-                onExportSuccess = { json ->
-                    println("Export JSON: $json")
+                // 行程詳情
+                is AppRoute.ItineraryDetail -> NavEntry(key) {
+                    val viewModel: ItineraryDetailViewModel = koinViewModel()
+                    ItineraryDetailScreen(
+                        viewModel = viewModel,
+                        itineraryId = key.itineraryId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onAddItemClick = {
+                            backStack.add(AppRoute.AddItem(key.itineraryId))
+                        },
+                        onQuickAddItemClick = { defaultDate ->
+                            backStack.add(AppRoute.QuickAddItem(
+                                key.itineraryId,
+                                defaultDate.toString()
+                            ))
+                        },
+                        onEditItemClick = { itemId ->
+                            backStack.add(AppRoute.EditItem(itemId))
+                        },
+                        onEditItineraryClick = {
+                            backStack.add(AppRoute.EditItinerary(key.itineraryId))
+                        },
+                        onDeleteItineraryClick = {},
+                        onGenerateRouteClick = {},
+                        onMapClick = {
+                            backStack.add(AppRoute.ItineraryMap(key.itineraryId))
+                        }
+                    )
                 }
-            )
-        }
 
-        // 行程地圖
-        composable(
-            route = Screen.ItineraryMap.route,
-            arguments = listOf(navArgument("itineraryId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val itineraryId = backStackEntry.arguments?.getString("itineraryId") ?: return@composable
-            val viewModel: ItineraryMapViewModel = koinViewModel()
-            ItineraryMapScreen(
-                viewModel = viewModel,
-                itineraryId = itineraryId,
-                onNavigateBack = { navController.popBackStack() },
-                onEditItemClick = { itemId ->
-                    navController.navigate(Screen.EditItem.createRoute(itemId))
+                // 新增項目
+                is AppRoute.AddItem -> NavEntry(key) {
+                    AddEditItemScreen(
+                        itineraryId = key.itineraryId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onSaveSuccess = { backStack.removeLastOrNull() }
+                    )
                 }
-            )
+
+                // 快速新增項目
+                is AppRoute.QuickAddItem -> NavEntry(key) {
+                    val defaultDate = kotlinx.datetime.LocalDate.parse(key.defaultDate)
+                    AddEditItemScreen(
+                        itineraryId = key.itineraryId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onSaveSuccess = { backStack.removeLastOrNull() },
+                        defaultDate = defaultDate
+                    )
+                }
+
+                // 編輯項目
+                is AppRoute.EditItem -> NavEntry(key) {
+                    EditItemScreen(
+                        itemId = key.itemId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onSaveSuccess = { backStack.removeLastOrNull() }
+                    )
+                }
+
+                // 旅遊歷史
+                is AppRoute.TravelHistory -> NavEntry(key) {
+                    val viewModel: TravelHistoryViewModel = koinViewModel()
+                    TravelHistoryScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { backStack.removeLastOrNull() }
+                    )
+                }
+
+                // 路線檢視
+                is AppRoute.RouteView -> NavEntry(key) {
+                    RouteViewScreen(
+                        routeId = key.routeId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onExportSuccess = { json -> println("Export JSON: $json") }
+                    )
+                }
+
+                // 行程地圖
+                is AppRoute.ItineraryMap -> NavEntry(key) {
+                    val viewModel: ItineraryMapViewModel = koinViewModel()
+                    ItineraryMapScreen(
+                        viewModel = viewModel,
+                        itineraryId = key.itineraryId,
+                        onNavigateBack = { backStack.removeLastOrNull() },
+                        onEditItemClick = { itemId ->
+                            backStack.add(AppRoute.EditItem(itemId))
+                        }
+                    )
+                }
+
+                else -> NavEntry(Unit) {
+                    androidx.compose.material3.Text("Unknown route")
+                }
+            }
         }
-    }
+    )
 }

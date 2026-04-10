@@ -1,31 +1,40 @@
 package com.example.myapplication.core.presentation.navigation
 
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
+
 /**
- * 應用程式的畫面路由定義
+ * 應用程式的 type-safe 路由定義（Navigation 3）
  */
-sealed class Screen(val route: String) {
-    object ItineraryList : Screen("itinerary_list")
-    object ItineraryDetail : Screen("itinerary_detail/{itineraryId}") {
-        fun createRoute(itineraryId: String) = "itinerary_detail/$itineraryId"
-    }
-    object AddItinerary : Screen("add_itinerary")
-    object EditItinerary : Screen("edit_itinerary/{itineraryId}") {
-        fun createRoute(itineraryId: String) = "edit_itinerary/$itineraryId"
-    }
-    object AddItem : Screen("add_item/{itineraryId}") {
-        fun createRoute(itineraryId: String) = "add_item/$itineraryId"
-    }
-    object QuickAddItem : Screen("quick_add_item/{itineraryId}/{defaultDate}") {
-        fun createRoute(itineraryId: String, defaultDate: String) = "quick_add_item/$itineraryId/$defaultDate"
-    }
-    object EditItem : Screen("edit_item/{itemId}") {
-        fun createRoute(itemId: String) = "edit_item/$itemId"
-    }
-    object TravelHistory : Screen("travel_history")
-    object RouteView : Screen("route_view/{routeId}") {
-        fun createRoute(routeId: String) = "route_view/$routeId"
-    }
-    object ItineraryMap : Screen("itinerary_map/{itineraryId}") {
-        fun createRoute(itineraryId: String) = "itinerary_map/$itineraryId"
-    }
+@Serializable
+sealed interface AppRoute : NavKey {
+    @Serializable
+    data object ItineraryList : AppRoute
+
+    @Serializable
+    data class ItineraryDetail(val itineraryId: String) : AppRoute
+
+    @Serializable
+    data object AddItinerary : AppRoute
+
+    @Serializable
+    data class EditItinerary(val itineraryId: String) : AppRoute
+
+    @Serializable
+    data class AddItem(val itineraryId: String) : AppRoute
+
+    @Serializable
+    data class QuickAddItem(val itineraryId: String, val defaultDate: String) : AppRoute
+
+    @Serializable
+    data class EditItem(val itemId: String) : AppRoute
+
+    @Serializable
+    data object TravelHistory : AppRoute
+
+    @Serializable
+    data class RouteView(val routeId: String) : AppRoute
+
+    @Serializable
+    data class ItineraryMap(val itineraryId: String) : AppRoute
 }
