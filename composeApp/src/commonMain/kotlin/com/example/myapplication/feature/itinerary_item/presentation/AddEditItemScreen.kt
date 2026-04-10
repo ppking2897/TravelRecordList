@@ -1,5 +1,3 @@
-@file:OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
-
 package com.example.myapplication.feature.itinerary_item.presentation
 
 import androidx.compose.foundation.clickable
@@ -14,11 +12,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
-import androidx.compose.ui.backhandler.BackHandler
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.compose.material3.Button
 import com.example.myapplication.LocalSnackbarHostState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,6 +58,7 @@ fun AddEditItemScreen(
     itineraryId: String,
     onNavigateBack: () -> Unit,
     onSaveSuccess: () -> Unit,
+    onNavigateToEditItinerary: (() -> Unit)? = null,
     defaultDate: LocalDate? = null,
     viewModel: AddEditItemViewModel = koinViewModel(),
     locationSearchService: LocationSearchService = koinInject()
@@ -105,14 +107,18 @@ fun AddEditItemScreen(
         }
     }
 
-    BackHandler(enabled = hasChanges) {
-        showDiscardDialog = true
-    }
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = hasChanges,
+        onBackCompleted = { showDiscardDialog = true }
+    )
 
     AddEditItemScreenContent(
         state = state,
         onIntent = { viewModel.handleIntent(it) },
         onNavigateBack = onBack,
+        onNavigateToEditItinerary = onNavigateToEditItinerary,
         locationSearchService = locationSearchService
     )
 
@@ -143,6 +149,7 @@ fun AddEditItemScreenContent(
     state: AddEditItemState,
     onIntent: (AddEditItemIntent) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToEditItinerary: (() -> Unit)? = null,
     locationSearchService: LocationSearchService? = null
 ) {
     var showArrivalTimePicker by remember { mutableStateOf(false) }
@@ -179,6 +186,7 @@ fun AddEditItemScreenContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // ── 必填 ──
             OutlinedTextField(
                 value = state.activity,
                 onValueChange = { onIntent(AddEditItemIntent.UpdateActivity(it)) },
@@ -188,7 +196,6 @@ fun AddEditItemScreenContent(
                 supportingText = state.activityError?.let { { Text(it) } }
             )
 
-            // 智慧地址輸入
             LocationSearchField(
                 value = state.locationName,
                 onValueChange = { onIntent(AddEditItemIntent.UpdateLocationName(it)) },
@@ -208,17 +215,6 @@ fun AddEditItemScreenContent(
                 )
             }
 
-            // 地址顯示（選擇地點後自動填入，或可手動輸入）
-            OutlinedTextField(
-                value = state.locationAddress,
-                onValueChange = { onIntent(AddEditItemIntent.UpdateLocationAddress(it)) },
-                label = { Text("地點地址") },
-                modifier = Modifier.fillMaxWidth(),
-                supportingText = if (state.locationLatitude != null) {
-                    { Text("座標: ${state.locationLatitude}, ${state.locationLongitude}") }
-                } else null
-            )
-
             // 日期選擇
             if (state.hasDateRange && state.itinerary != null) {
                 DateDropdown(
@@ -237,14 +233,39 @@ fun AddEditItemScreenContent(
                 }
             } else {
                 OutlinedTextField(
-                    value = state.selectedDate?.toString() ?: "",
+                    value = "",
                     onValueChange = {},
                     label = { Text("日期 *") },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
-                    supportingText = { Text("請先在行程中設定日期範圍") }
+                    enabled = false,
+                    supportingText = { Text("行程尚未設定日期範圍") }
                 )
+                if (onNavigateToEditItinerary != null) {
+                    TextButton(onClick = onNavigateToEditItinerary) {
+                        Text("前往設定日期範圍")
+                    }
+                }
             }
+
+            // ── 選填 ──
+            HorizontalDivider()
+            Text(
+                text = "選填資訊",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // 地址（選擇地點後自動填入，或可手動輸入）
+            OutlinedTextField(
+                value = state.locationAddress,
+                onValueChange = { onIntent(AddEditItemIntent.UpdateLocationAddress(it)) },
+                label = { Text("地點地址") },
+                modifier = Modifier.fillMaxWidth(),
+                supportingText = if (state.locationLatitude != null) {
+                    { Text("座標: ${state.locationLatitude}, ${state.locationLongitude}") }
+                } else null
+            )
 
             // 到達時間選擇
             OutlinedTextField(
@@ -274,7 +295,7 @@ fun AddEditItemScreenContent(
                 }
             )
 
-            // Photos Section
+            // 照片
             Text(
                 text = "照片",
                 style = MaterialTheme.typography.titleMedium
@@ -298,7 +319,6 @@ fun AddEditItemScreenContent(
                                     contentDescription = "照片",
                                     modifier = Modifier.fillMaxSize()
                                 )
-                                // 刪除按鈕
                                 Surface(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)

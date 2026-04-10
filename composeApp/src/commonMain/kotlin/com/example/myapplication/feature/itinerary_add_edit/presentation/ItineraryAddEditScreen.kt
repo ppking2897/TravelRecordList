@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.example.myapplication.feature.itinerary_add_edit.presentation
 
@@ -12,9 +12,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.LocalSnackbarHostState
 import com.example.myapplication.core.presentation.components.CoverPhotoSection
@@ -84,9 +85,12 @@ fun ItineraryAddEditScreen(
         }
     }
 
-    BackHandler(enabled = hasChanges) {
-        showDiscardDialog = true
-    }
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = hasChanges,
+        onBackCompleted = { showDiscardDialog = true }
+    )
 
     // 封面照片選擇器
     val coverImagePicker = rememberImagePickerLauncher(
