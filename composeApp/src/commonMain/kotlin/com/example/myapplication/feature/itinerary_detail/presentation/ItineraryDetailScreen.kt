@@ -68,6 +68,7 @@ fun ItineraryDetailScreen(
     val isSelectionMode = state.isSelectionMode
     val selectedItemIds = state.selectedItemIds
 
+    val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
     var showBatchDeleteDialog by remember { mutableStateOf(false) }
@@ -98,13 +99,19 @@ fun ItineraryDetailScreen(
                 is ItineraryDetailEvent.NavigateBack -> onNavigateBack()
                 is ItineraryDetailEvent.NavigateToQuickAddItem -> onQuickAddItemClick(event.defaultDate)
                 is ItineraryDetailEvent.NavigateToRoute -> onRouteClick(event.routeId)
-                is ItineraryDetailEvent.ShowError -> { /* TODO: Snackbar */ }
+                is ItineraryDetailEvent.ShowError -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+                is ItineraryDetailEvent.ShowBatchOperationResult -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
                 else -> {}
             }
         }
     }
 
     ItineraryDetailScreenContent(
+        snackbarHostState = snackbarHostState,
         itinerary = itinerary,
         groupedItems = groupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
@@ -187,6 +194,7 @@ fun ItineraryDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ItineraryDetailScreenContent(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     itinerary: Itinerary?,
     groupedItems: List<ItemsByDate>,
     selectedDate: LocalDate?,
@@ -248,6 +256,7 @@ private fun ItineraryDetailScreenContent(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {

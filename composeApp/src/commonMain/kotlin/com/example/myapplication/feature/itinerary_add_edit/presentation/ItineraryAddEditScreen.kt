@@ -36,6 +36,7 @@ fun ItineraryAddEditScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // 初始化：編輯模式載入行程，新增模式載入草稿
     LaunchedEffect(itineraryId) {
@@ -51,7 +52,9 @@ fun ItineraryAddEditScreen(
         viewModel.event.collect { event ->
             when (event) {
                 is ItineraryAddEditEvent.SaveSuccess -> onSaveSuccess(event.itineraryId)
-                is ItineraryAddEditEvent.ShowError -> { /* 已顯示在 state.error */ }
+                is ItineraryAddEditEvent.ShowError -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
                 is ItineraryAddEditEvent.DraftSaved -> { /* 已顯示在 state.showDraftSaved */ }
             }
         }
@@ -75,6 +78,7 @@ fun ItineraryAddEditScreen(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(if (state.isEditMode) "編輯行程" else "新增行程") },

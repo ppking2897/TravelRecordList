@@ -30,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,6 +71,7 @@ fun EditItemScreen(
     locationSearchService: LocationSearchService = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(itemId) {
         viewModel.handleIntent(EditItemIntent.LoadItem(itemId))
@@ -79,13 +82,14 @@ fun EditItemScreen(
             when (event) {
                 is EditItemEvent.SaveSuccess -> onSaveSuccess()
                 is EditItemEvent.ShowError -> {
-                    // Error is already shown in UI state
+                    snackbarHostState.showSnackbar(event.message)
                 }
             }
         }
     }
 
     EditItemScreenContent(
+        snackbarHostState = snackbarHostState,
         state = state,
         onIntent = { viewModel.handleIntent(it) },
         onNavigateBack = onNavigateBack,
@@ -97,6 +101,7 @@ fun EditItemScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditItemScreenContent(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     state: EditItemState,
     onIntent: (EditItemIntent) -> Unit,
     onNavigateBack: () -> Unit,
@@ -117,6 +122,7 @@ fun EditItemScreenContent(
     )
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("編輯項目") },

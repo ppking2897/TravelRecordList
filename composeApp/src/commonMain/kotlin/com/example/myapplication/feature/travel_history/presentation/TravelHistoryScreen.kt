@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,6 +66,7 @@ fun TravelHistoryScreen(
     viewModel: TravelHistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // 收集 Event
     LaunchedEffect(Unit) {
@@ -74,13 +77,14 @@ fun TravelHistoryScreen(
                     // Dialog 在 UI 中處理
                 }
                 is TravelHistoryEvent.ShowError -> {
-                    // 錯誤已經在 state 中
+                    snackbarHostState.showSnackbar(event.message)
                 }
             }
         }
     }
 
     TravelHistoryScreenContent(
+        snackbarHostState = snackbarHostState,
         historyByLocation = state.historyByLocation,
         dateFilter = state.dateFilter,
         isLoading = state.isLoading,
@@ -101,6 +105,7 @@ fun TravelHistoryScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TravelHistoryScreenContent(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     historyByLocation: Map<String, List<ItineraryItem>>,
     dateFilter: ClosedRange<LocalDate>?,
     isLoading: Boolean,
@@ -119,6 +124,7 @@ private fun TravelHistoryScreenContent(
     var previewPhoto by remember { mutableStateOf<Photo?>(null) }
     
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("旅遊歷史") },
