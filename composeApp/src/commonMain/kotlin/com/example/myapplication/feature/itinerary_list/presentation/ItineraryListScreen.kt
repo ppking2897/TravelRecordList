@@ -33,6 +33,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -213,6 +214,29 @@ private fun ItineraryListScreenContent(
     onRefresh: () -> Unit
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
+    var selectedFilter by remember { mutableStateOf(ItineraryFilter.ALL) }
+
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    val today = kotlin.time.Clock.System.now().let {
+        kotlinx.datetime.Instant.fromEpochMilliseconds(it.toEpochMilliseconds())
+            .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+    }
+
+    val filteredItineraries = remember(itineraries, selectedFilter) {
+        when (selectedFilter) {
+            ItineraryFilter.ALL -> itineraries
+            ItineraryFilter.PLANNED -> itineraries.filter { itinerary ->
+                itinerary.startDate != null && itinerary.startDate > today
+            }
+            ItineraryFilter.IN_PROGRESS -> itineraries.filter { itinerary ->
+                itinerary.startDate != null && itinerary.endDate != null &&
+                    today >= itinerary.startDate && today <= itinerary.endDate
+            }
+            ItineraryFilter.COMPLETED -> itineraries.filter { itinerary ->
+                itinerary.items.isNotEmpty() && itinerary.items.all { it.isCompleted }
+            }
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -264,6 +288,22 @@ private fun ItineraryListScreenContent(
                     singleLine = true
                 )
 
+                // 篩選 chips
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    ItineraryFilter.entries.forEach { filter ->
+                        FilterChip(
+                            selected = selectedFilter == filter,
+                            onClick = { selectedFilter = filter },
+                            label = { Text(filter.label) }
+                        )
+                    }
+                }
+
                 // 錯誤訊息
                 error?.let { errorMessage ->
                     Text(
@@ -274,13 +314,13 @@ private fun ItineraryListScreenContent(
                 }
 
                 // 列表內容
-                if (itineraries.isEmpty() && !isLoading) {
+                if (filteredItineraries.isEmpty() && !isLoading) {
                     // 空狀態
                     EmptyStateGrid(onAddClick = onAddClick)
                 } else {
                     // 網格佈局
                     ItineraryGridWithGroups(
-                        itineraries = itineraries,
+                        itineraries = filteredItineraries,
                         onItineraryClick = onItineraryClick,
                         onEditClick = onEditClick,
                         onDeleteClick = onDeleteClick
@@ -559,6 +599,17 @@ private fun EmptyStateGrid(
             Text("建立行程")
         }
     }
+}
+
+// ============================================================================
+// 篩選
+// ============================================================================
+
+private enum class ItineraryFilter(val label: String) {
+    ALL("全部"),
+    PLANNED("計劃中"),
+    IN_PROGRESS("進行中"),
+    COMPLETED("已完成")
 }
 
 // ============================================================================
