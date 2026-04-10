@@ -121,8 +121,9 @@ fun TravelApp() {
                         onEditItineraryClick = {
                             backStack.add(AppRoute.EditItinerary(key.itineraryId))
                         },
-                        onDeleteItineraryClick = {},
-                        onGenerateRouteClick = {},
+                        onRouteClick = { routeId ->
+                            backStack.add(AppRoute.RouteView(routeId))
+                        },
                         onMapClick = {
                             backStack.add(AppRoute.ItineraryMap(key.itineraryId))
                         }

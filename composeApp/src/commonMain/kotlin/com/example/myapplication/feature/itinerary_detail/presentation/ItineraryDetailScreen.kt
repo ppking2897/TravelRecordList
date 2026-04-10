@@ -55,8 +55,7 @@ fun ItineraryDetailScreen(
     onQuickAddItemClick: (LocalDate) -> Unit,
     onEditItemClick: (String) -> Unit,
     onEditItineraryClick: () -> Unit,
-    onDeleteItineraryClick: () -> Unit,
-    onGenerateRouteClick: () -> Unit,
+    onRouteClick: (String) -> Unit,
     onMapClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
@@ -98,8 +97,8 @@ fun ItineraryDetailScreen(
             when (event) {
                 is ItineraryDetailEvent.NavigateBack -> onNavigateBack()
                 is ItineraryDetailEvent.NavigateToQuickAddItem -> onQuickAddItemClick(event.defaultDate)
-                is ItineraryDetailEvent.ShowError -> { /* Handle Error */ }
-                is ItineraryDetailEvent.NavigateToRoute -> { /* Handle Route Navigation if needed here or in UI */ }
+                is ItineraryDetailEvent.NavigateToRoute -> onRouteClick(event.routeId)
+                is ItineraryDetailEvent.ShowError -> { /* TODO: Snackbar */ }
                 else -> {}
             }
         }
