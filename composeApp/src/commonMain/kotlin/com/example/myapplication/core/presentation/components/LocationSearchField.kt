@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.core.domain.service.LocationSearchService
 import com.example.myapplication.core.domain.service.LocationSuggestion
@@ -60,9 +61,12 @@ fun LocationSearchField(
     var isLoading by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
 
-    // Debounced search
-    LaunchedEffect(value) {
+    // Debounced search（僅在 focus 時觸發）
+    LaunchedEffect(value, isFocused) {
+        if (!isFocused) return@LaunchedEffect
+
         // 空白或無服務時清空
         if (value.isBlank() || locationSearchService == null) {
             suggestions = emptyList()
@@ -110,7 +114,8 @@ fun LocationSearchField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryEditable),
+                .menuAnchor(MenuAnchorType.PrimaryEditable)
+                .onFocusChanged { isFocused = it.isFocused },
             label = { Text(label) },
             placeholder = { Text(placeholder) },
             leadingIcon = {
