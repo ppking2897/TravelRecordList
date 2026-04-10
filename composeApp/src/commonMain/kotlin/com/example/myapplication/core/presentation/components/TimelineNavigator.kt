@@ -30,6 +30,8 @@ import com.example.myapplication.core.presentation.theme.TimelineDimensions
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.util.toDateList
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
@@ -76,6 +78,8 @@ fun TimelineNavigator(
 ) {
     val dates = dateRange.toDateList()
     val listState = rememberLazyListState()
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    val today = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     // 建立時間軸節點資料
     val nodes = remember(dates, groupedItems) {
@@ -137,6 +141,7 @@ fun TimelineNavigator(
                     isSelected = isSelected,
                     showLeadingLine = true,
                     showTrailingLine = !isLast,
+                    isToday = node.date == today,
                     onClick = { onDateSelected(node.date) }
                 )
             }
@@ -260,6 +265,7 @@ private fun TimelineNodeItem(
     isSelected: Boolean,
     showLeadingLine: Boolean,
     showTrailingLine: Boolean,
+    isToday: Boolean = false,
     onClick: () -> Unit
 ) {
     val nodeSize by animateDpAsState(
@@ -323,9 +329,17 @@ private fun TimelineNodeItem(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // 節點圓點（完成時顯示打勾圖示）
+            // 節點圓點（完成時顯示打勾圖示，今天有外圈）
             Box(
                 modifier = Modifier
+                    .size(nodeSize + if (isToday) 4.dp else 0.dp)
+                    .then(
+                        if (isToday) Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                            .padding(2.dp)
+                        else Modifier
+                    )
                     .size(nodeSize)
                     .clip(CircleShape)
                     .background(nodeColor),
@@ -366,6 +380,16 @@ private fun TimelineNodeItem(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = Spacing.xs)
         )
+
+        // 今天標示
+        if (isToday) {
+            Text(
+                text = "今天",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
+            )
+        }
 
         // 進度指示 (如 2/3)
         if (node.totalCount > 0) {

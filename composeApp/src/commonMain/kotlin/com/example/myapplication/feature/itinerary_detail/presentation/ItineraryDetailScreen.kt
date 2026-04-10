@@ -230,6 +230,17 @@ private fun ItineraryDetailScreenContent(
     val isLightTheme = !isSystemInDarkTheme()
     val lazyListState = rememberLazyListState()
 
+    // 選日期後 LazyColumn 自動捲動到對應區段
+    LaunchedEffect(selectedDate, groupedItems) {
+        if (selectedDate == null || groupedItems.isEmpty()) return@LaunchedEffect
+        var targetIndex = if (error != null) 1 else 0
+        for (group in groupedItems) {
+            if (group.date == selectedDate) break
+            targetIndex += 1 + group.items.size
+        }
+        lazyListState.animateScrollToItem(targetIndex)
+    }
+
     // FAB 滑動隱藏狀態
     var isFabVisible by remember { mutableStateOf(true) }
     val nestedScrollConnection = remember {
