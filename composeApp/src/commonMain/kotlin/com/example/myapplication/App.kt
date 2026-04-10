@@ -3,7 +3,12 @@ package com.example.myapplication
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -28,6 +33,13 @@ import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
+ * 全局 SnackbarHostState，所有 Screen 共用
+ */
+val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
+    error("No SnackbarHostState provided")
+}
+
+/**
  * 旅遊流程記事應用程式主入口
  */
 @ExperimentalTime
@@ -41,7 +53,12 @@ fun App() {
 @Composable
 fun TravelApp() {
     val backStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { paddingValues ->
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -196,4 +213,6 @@ fun TravelApp() {
             }
         }
     )
+        }
+    }
 }

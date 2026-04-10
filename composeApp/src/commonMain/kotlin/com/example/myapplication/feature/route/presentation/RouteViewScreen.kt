@@ -15,9 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import com.example.myapplication.LocalSnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
 import androidx.compose.runtime.*
@@ -45,7 +44,7 @@ fun RouteViewScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val uriHandler = LocalUriHandler.current
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     // 收集 Event
     LaunchedEffect(Unit) {
@@ -66,7 +65,6 @@ fun RouteViewScreen(
     }
     
     RouteViewScreenContent(
-        snackbarHostState = snackbarHostState,
         route = state.route,
         isLoading = state.isLoading,
         isExporting = state.isExporting,
@@ -370,7 +368,6 @@ private fun RouteViewScreenPreview_Error() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteViewScreenContent(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     route: Route?,
     isLoading: Boolean,
     isExporting: Boolean,
@@ -380,7 +377,6 @@ private fun RouteViewScreenContent(
     onOpenMapClick: (Location) -> Unit
 ) {
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(route?.title ?: "路線詳情") },

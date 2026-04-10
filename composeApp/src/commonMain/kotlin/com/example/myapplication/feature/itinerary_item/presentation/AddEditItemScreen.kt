@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.material3.Button
+import com.example.myapplication.LocalSnackbarHostState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,8 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,7 +62,7 @@ fun AddEditItemScreen(
     locationSearchService: LocationSearchService = koinInject()
 ) {
     val state by viewModel.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(itineraryId) {
         viewModel.handleIntent(AddEditItemIntent.LoadItinerary(itineraryId))
@@ -111,7 +110,6 @@ fun AddEditItemScreen(
     }
 
     AddEditItemScreenContent(
-        snackbarHostState = snackbarHostState,
         state = state,
         onIntent = { viewModel.handleIntent(it) },
         onNavigateBack = onBack,
@@ -142,7 +140,6 @@ fun AddEditItemScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditItemScreenContent(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     state: AddEditItemState,
     onIntent: (AddEditItemIntent) -> Unit,
     onNavigateBack: () -> Unit,
@@ -163,7 +160,6 @@ fun AddEditItemScreenContent(
     )
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("新增項目") },

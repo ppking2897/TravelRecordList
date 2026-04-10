@@ -16,6 +16,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.LocalSnackbarHostState
 import com.example.myapplication.core.presentation.components.CoverPhotoSection
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -38,7 +39,7 @@ fun ItineraryAddEditScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     // 初始化：編輯模式載入行程，新增模式載入草稿
     LaunchedEffect(itineraryId) {
@@ -102,7 +103,6 @@ fun ItineraryAddEditScreen(
     )
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(if (state.isEditMode) "編輯行程" else "新增行程") },

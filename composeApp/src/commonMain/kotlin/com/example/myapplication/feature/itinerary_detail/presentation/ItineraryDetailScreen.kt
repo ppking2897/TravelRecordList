@@ -36,6 +36,7 @@ import com.example.myapplication.core.presentation.components.EmptyState
 import com.example.myapplication.core.presentation.components.ItemCard
 import com.example.myapplication.core.presentation.components.TimelineNavigator
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.LocalSnackbarHostState
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.datetime.LocalDate
@@ -68,7 +69,7 @@ fun ItineraryDetailScreen(
     val isSelectionMode = state.isSelectionMode
     val selectedItemIds = state.selectedItemIds
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
     var showBatchDeleteDialog by remember { mutableStateOf(false) }
@@ -111,7 +112,6 @@ fun ItineraryDetailScreen(
     }
 
     ItineraryDetailScreenContent(
-        snackbarHostState = snackbarHostState,
         itinerary = itinerary,
         groupedItems = groupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
@@ -194,7 +194,6 @@ fun ItineraryDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ItineraryDetailScreenContent(
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     itinerary: Itinerary?,
     groupedItems: List<ItemsByDate>,
     selectedDate: LocalDate?,
@@ -256,7 +255,6 @@ private fun ItineraryDetailScreenContent(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
