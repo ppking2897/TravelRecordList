@@ -5,16 +5,12 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,14 +43,12 @@ fun BatchActionBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 左側：取消按鈕和選擇數量
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // 左側：取消 + 數量
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onCancel) {
                     Icon(
                         Icons.Default.Close,
@@ -64,48 +58,40 @@ fun BatchActionBar(
                 }
                 Text(
                     text = "已選擇 $selectedCount 項",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            // 右側：操作按鈕
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 標記完成按鈕
-                Button(
+            // 右側：操作按鈕（IconButton 更緊湊）
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
                     onClick = onMarkComplete,
-                    enabled = selectedCount > 0,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    enabled = selectedCount > 0
                 ) {
                     Icon(
                         Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = Spacing.xs)
+                        contentDescription = "標記完成",
+                        tint = if (selectedCount > 0) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
                     )
-                    Text("完成")
                 }
-
-                Spacer(modifier = Modifier.width(Spacing.sm))
-
-                // 刪除按鈕
-                Button(
+                IconButton(
                     onClick = onDelete,
-                    enabled = selectedCount > 0,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
+                    enabled = selectedCount > 0
                 ) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = Spacing.xs)
+                        contentDescription = "刪除",
+                        tint = if (selectedCount > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
                     )
-                    Text("刪除")
                 }
             }
         }

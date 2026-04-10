@@ -85,7 +85,14 @@ class ItineraryDetailViewModel(
 
                     getItemsByItineraryUseCase(id)
                         .onSuccess { items ->
-                            val grouped = groupItemsByDateUseCase(items)
+                            // 保持先前的日期篩選
+                            val currentSelectedDate = currentState.selectedDate
+                            val filtered = if (currentSelectedDate != null) {
+                                filterItemsByDateUseCase(items, currentSelectedDate)
+                            } else {
+                                items
+                            }
+                            val grouped = groupItemsByDateUseCase(filtered)
                             updateState {
                                 copy(
                                     itinerary = itinerary,

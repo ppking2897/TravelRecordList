@@ -119,27 +119,105 @@ fun TimelineNavigator(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 「全部」tab
+            item {
+                AllTabItem(
+                    isSelected = selectedDate == null,
+                    onClick = { onDateSelected(null) }
+                )
+            }
+
             itemsIndexed(nodes) { index, node ->
                 val isSelected = selectedDate == node.date
                 val isFirst = index == 0
                 val isLast = index == nodes.lastIndex
 
-                // 在非第一個節點前顯示快速新增按鈕
-                if (!isFirst) {
-                    QuickAddButton(
-                        onClick = { onQuickAdd(index - 1) }
-                    )
-                }
-
                 TimelineNodeItem(
                     node = node,
                     isSelected = isSelected,
-                    showLeadingLine = !isFirst,
+                    showLeadingLine = true,
                     showTrailingLine = !isLast,
                     onClick = { onDateSelected(node.date) }
                 )
             }
         }
+    }
+}
+
+/**
+ * 「全部」tab 項目
+ */
+@Composable
+private fun AllTabItem(
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val nodeSize by animateDpAsState(
+        targetValue = if (isSelected) TimelineDimensions.nodeSelectedSize else TimelineDimensions.nodeSize,
+        animationSpec = tween(durationMillis = 200)
+    )
+
+    val nodeColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outline
+    }
+
+    val textColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Column(
+        modifier = Modifier
+            .width(TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize)
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.xs),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "總覽",
+            style = if (isSelected) {
+                MaterialTheme.typography.labelMedium
+            } else {
+                MaterialTheme.typography.labelSmall
+            },
+            color = textColor,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            Box(
+                modifier = Modifier
+                    .size(nodeSize)
+                    .clip(CircleShape)
+                    .background(nodeColor)
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(TimelineDimensions.lineWidth)
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
+
+        Text(
+            text = "",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(horizontal = Spacing.xs)
+        )
     }
 }
 
