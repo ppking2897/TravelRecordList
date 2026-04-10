@@ -45,6 +45,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,12 @@ fun ItineraryListScreen(
     viewModel: ItineraryListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    // 畫面可見時重新載入（返回時自動刷新，有資料不顯示 loading）
+    LifecycleResumeEffect(Unit) {
+        viewModel.handleIntent(ItineraryListIntent.LoadItineraries)
+        onPauseOrDispose { }
+    }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }

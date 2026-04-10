@@ -7,8 +7,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -26,6 +24,7 @@ import com.example.myapplication.feature.travel_history.presentation.TravelHisto
 import com.example.myapplication.feature.travel_history.presentation.TravelHistoryViewModel
 import com.example.myapplication.feature.route.presentation.RouteViewScreen
 import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapScreen
+import com.example.myapplication.core.presentation.util.shareLauncher
 import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapViewModel
 import kotlin.time.ExperimentalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -54,6 +53,7 @@ fun App() {
 fun TravelApp() {
     val backStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val shareLauncher = shareLauncher()
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
@@ -152,7 +152,11 @@ fun TravelApp() {
                     AddEditItemScreen(
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onSaveSuccess = { backStack.removeLastOrNull() }
+                        onSaveSuccess = { backStack.removeLastOrNull() },
+                        onNavigateToEditItinerary = {
+                            backStack.removeLastOrNull()
+                            backStack.add(AppRoute.EditItinerary(key.itineraryId))
+                        }
                     )
                 }
 
@@ -163,6 +167,10 @@ fun TravelApp() {
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
                         onSaveSuccess = { backStack.removeLastOrNull() },
+                        onNavigateToEditItinerary = {
+                            backStack.removeLastOrNull()
+                            backStack.add(AppRoute.EditItinerary(key.itineraryId))
+                        },
                         defaultDate = defaultDate
                     )
                 }
@@ -190,7 +198,7 @@ fun TravelApp() {
                     RouteViewScreen(
                         routeId = key.routeId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onExportSuccess = { json -> println("Export JSON: $json") }
+                        onExportSuccess = { json -> shareLauncher.share(json, "路線匯出") }
                     )
                 }
 
