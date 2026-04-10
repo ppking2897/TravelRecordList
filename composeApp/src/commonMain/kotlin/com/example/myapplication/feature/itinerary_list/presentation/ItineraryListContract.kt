@@ -16,6 +16,7 @@ data class ItineraryListState(
     val itineraries: List<Itinerary> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null
 ) : UiState
 

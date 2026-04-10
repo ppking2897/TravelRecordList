@@ -47,9 +47,13 @@ class ItineraryListViewModel(
 
     /**
      * 載入所有行程
+     * 有資料時背景更新，無資料時才顯示 loading
      */
     private suspend fun loadItineraries() {
-        updateState { copy(isLoading = true, error = null) }
+        val hasData = currentState.itineraries.isNotEmpty()
+        if (!hasData) {
+            updateState { copy(isLoading = true, error = null) }
+        }
 
         getAllItinerariesUseCase()
             .onSuccess { itineraries ->
@@ -61,12 +65,13 @@ class ItineraryListViewModel(
                 }
             }
             .onFailure { exception ->
-                val errorMessage = exception.message ?: "載入失敗"
-                updateState {
-                    copy(
-                        isLoading = false,
-                        error = errorMessage
-                    )
+                if (!hasData) {
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            error = exception.message ?: "載入失敗"
+                        )
+                    }
                 }
             }
     }
@@ -115,9 +120,21 @@ class ItineraryListViewModel(
     }
 
     /**
-     * 重新整理
+     * 下拉重新整理（顯示舊資料 + 刷新指示器）
      */
     private suspend fun refresh() {
-        loadItineraries()
+        updateState { copy(isRefreshing = true, error = null) }
+
+        getAllItinerariesUseCase()
+            .onSuccess { itineraries ->
+                updateState {
+                    copy(itineraries = itineraries, isRefreshing = false)
+                }
+            }
+            .onFailure { exception ->
+                updateState {
+                    copy(isRefreshing = false, error = exception.message ?: "載入失敗")
+                }
+            }
     }
 }

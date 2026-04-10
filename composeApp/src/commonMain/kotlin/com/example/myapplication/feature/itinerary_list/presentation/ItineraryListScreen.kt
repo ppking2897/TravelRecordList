@@ -53,12 +53,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.lifecycle.Lifecycle
 import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing
-import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.core.presentation.components.DefaultCoverPlaceholder
@@ -89,11 +87,6 @@ fun ItineraryListScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }
 
-    // 每次畫面恢復顯示時（ON_RESUME），重新載入資料
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        viewModel.handleIntent(ItineraryListIntent.LoadItineraries)
-    }
-
     // 收集 Event
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
@@ -117,6 +110,7 @@ fun ItineraryListScreen(
         itineraries = state.itineraries,
         searchQuery = state.searchQuery,
         isLoading = state.isLoading,
+        isRefreshing = state.isRefreshing,
         error = state.error,
         onSearchChange = { viewModel.handleIntent(ItineraryListIntent.Search(it)) },
         onItineraryClick = onItineraryClick,
@@ -200,6 +194,7 @@ private fun ItineraryListScreenContent(
     itineraries: List<Itinerary>,
     searchQuery: String,
     isLoading: Boolean,
+    isRefreshing: Boolean = false,
     error: String?,
     onSearchChange: (String) -> Unit,
     onItineraryClick: (String) -> Unit,
@@ -251,7 +246,7 @@ private fun ItineraryListScreenContent(
         }
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = isLoading,
+            isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = pullToRefreshState,
             modifier = Modifier.padding(paddingValues)

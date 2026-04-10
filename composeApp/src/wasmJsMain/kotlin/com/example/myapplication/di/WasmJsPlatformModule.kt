@@ -1,16 +1,23 @@
 package com.example.myapplication.di
 
+import com.example.myapplication.core.data.local.StorageService
+import com.example.myapplication.core.domain.service.ImageStorageService
 import com.example.myapplication.data.storage.LocalStorageStorageService
-import com.example.myapplication.data.storage.StorageService
-import com.example.myapplication.util.ImageSaver
-import org.koin.dsl.module
+import org.koin.core.module.Module
 
-/**
- * WasmJS 平台特定的依賴注入模組
- */
-val wasmJsPlatformModule = module {
+actual fun Module.registerPlatformStorageService() {
     single<StorageService> { LocalStorageStorageService() }
-    single { ImageSaver() }
 }
 
-actual val platformModule: Module = wasmJsPlatformModule
+actual fun Module.registerPlatformImageStorageService() {
+    single<ImageStorageService> {
+        object : ImageStorageService {
+            override suspend fun saveImage(imageData: ByteArray, itemId: String): Result<String> = Result.success("dummy_path")
+            override suspend fun loadImage(imagePath: String): Result<ByteArray> = Result.success(ByteArray(0))
+            override suspend fun deleteImage(imagePath: String): Result<Unit> = Result.success(Unit)
+            override suspend fun compressImage(imageData: ByteArray, maxSizeKB: Int): Result<ByteArray> = Result.success(imageData)
+            override suspend fun generateThumbnail(imageData: ByteArray, width: Int, height: Int): Result<ByteArray> = Result.success(imageData)
+            override fun getImageDirectory(): String = ""
+        }
+    }
+}
