@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -228,27 +229,14 @@ private fun ItineraryListScreenContent(
                         )
                     }
 
-                    // 橘色圓形新增按鈕
-                    Surface(
-                        onClick = onAddClick,
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier
-                            .padding(end = Spacing.md)
-                            .size(IconSize.lg)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "新增行程",
-                                tint = MaterialTheme.colorScheme.onTertiary
-                            )
-                        }
-                    }
                 }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onAddClick,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("建立行程") }
             )
         }
     ) { paddingValues ->
@@ -420,11 +408,16 @@ private fun ItineraryGridCard(
                         )
                     }
 
-                    Text(
-                        text = "建立於 ${formatCreatedDate(itinerary.createdAt)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (itinerary.items.isNotEmpty()) {
+                        val totalCount = itinerary.items.size
+                        val completedCount = itinerary.items.count { it.isCompleted }
+                        Text(
+                            text = if (completedCount > 0) "$totalCount 個項目 · $completedCount 已完成"
+                                   else "$totalCount 個項目",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
