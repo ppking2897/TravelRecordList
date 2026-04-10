@@ -172,13 +172,12 @@ fun PhotoGridItem(
                     .padding(4.dp)
             ) {
                 IconButton(
-                    onClick = { showMenu = true },
-                    modifier = Modifier.size(24.dp)
+                    onClick = { showMenu = true }
                 ) {
                     Icon(
                         Icons.Default.MoreVert,
                         contentDescription = "選項",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 
