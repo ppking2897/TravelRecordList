@@ -565,12 +565,6 @@ private fun EmptyDatePlanningState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
         Text(
             text = if (selectedDate != null) "這一天還沒有安排" else "還沒有行程項目",
             style = MaterialTheme.typography.titleLarge,

@@ -313,14 +313,18 @@ class ItineraryDetailViewModel(
         }
     }
 
-    private suspend fun quickAddItem(afterDayIndex: Int) {
+    private suspend fun quickAddItem(dayIndex: Int) {
         val dateRange = currentState.dateRange ?: return
         val startDate = dateRange.start
 
-        val defaultDate = startDate.plus(kotlinx.datetime.DatePeriod(days = afterDayIndex + 1))
+        // dayIndex 為 0-based 的目標日序（Day 1 → 0、Day 2 → 1 ...）
+        // 直接加該 index 就是目標日，不需要 +1（原本 +1 讓「新增這天」會跑到下一天）
+        val defaultDate = startDate.plus(kotlinx.datetime.DatePeriod(days = dayIndex))
 
         val clampedDate = if (defaultDate > dateRange.endInclusive) {
             dateRange.endInclusive
+        } else if (defaultDate < startDate) {
+            startDate
         } else {
             defaultDate
         }
