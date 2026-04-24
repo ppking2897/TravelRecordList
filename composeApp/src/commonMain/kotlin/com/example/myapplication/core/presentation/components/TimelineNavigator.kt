@@ -121,7 +121,10 @@ fun TimelineNavigator(
                     vertical = TimelineDimensions.verticalPadding
                 ),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically
+            // Top 對齊：選中的節點會因為顯示「地點/今天/進度」變高，若用
+            // CenterVertically 中央對齊，圓點會隨 Column 高度浮動導致連接線
+            // 斷層；Top 對齊讓圓點在「Day N 標籤」下方的位置固定，保持一直線。
+            verticalAlignment = Alignment.Top
         ) {
             // 「全部」tab
             item {
