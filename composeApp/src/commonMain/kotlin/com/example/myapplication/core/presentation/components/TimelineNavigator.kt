@@ -22,6 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -355,20 +358,41 @@ private fun TimelineNodeItem(
                     )
                 }
                 // 節點圓點本體
-                Box(
-                    modifier = Modifier
-                        .size(nodeSize)
-                        .clip(CircleShape)
-                        .background(nodeColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (node.isAllCompleted) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "已完成",
-                            modifier = Modifier.size(nodeSize * 0.6f),
-                            tint = MaterialTheme.colorScheme.onTertiary
-                        )
+                if (node.totalCount == 0) {
+                    // 待規劃：空心 + 虛線邊框（不改變 Box size，不影響對齊）
+                    val outlineColor = nodeColor
+                    Box(
+                        modifier = Modifier
+                            .size(nodeSize)
+                            .drawBehind {
+                                drawCircle(
+                                    color = outlineColor,
+                                    style = Stroke(
+                                        width = 1.5.dp.toPx(),
+                                        pathEffect = PathEffect.dashPathEffect(
+                                            floatArrayOf(3.dp.toPx(), 2.5.dp.toPx())
+                                        )
+                                    )
+                                )
+                            }
+                    )
+                } else {
+                    // 實心圓（已安排，未完成 / 已完成 / 選中 各用不同 nodeColor）
+                    Box(
+                        modifier = Modifier
+                            .size(nodeSize)
+                            .clip(CircleShape)
+                            .background(nodeColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (node.isAllCompleted) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "已完成",
+                                modifier = Modifier.size(nodeSize * 0.6f),
+                                tint = MaterialTheme.colorScheme.onTertiary
+                            )
+                        }
                     }
                 }
             }
