@@ -6,7 +6,7 @@ import kotlin.time.ExperimentalTime
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 
-/** Android 應用程式入口 負責初始化 Koin 依賴注入 */
+/** Android application entry point that initializes Koin. */
 @ExperimentalTime
 class TravelRecordApp : Application() {
     override fun onCreate() {

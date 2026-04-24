@@ -1,23 +1,42 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.buildkonfig)
+}
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
+buildkonfig {
+    packageName = "com.example.myapplication.config"
+
+    defaultConfigs {
+        buildConfigField(
+            STRING,
+            "GOOGLE_PLACES_API_KEY",
+            localProperties.getProperty("GOOGLE_PLACES_API_KEY", "")
+        )
+    }
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+    androidLibrary {
+        namespace = "com.example.myapplication.composeapp"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        androidResources.enable = true
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -27,30 +46,15 @@ kotlin {
             isStatic = true
         }
     }
-    
-    // js {
-    //     browser()
-    //     binaries.executable()
-    // }
-    
-    // @OptIn(ExperimentalWasmDsl::class)
-    // wasmJs {
-    //     browser()
-    //     binaries.executable()
-    // }
-    
+
     sourceSets {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
         androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation("androidx.datastore:datastore-preferences:1.1.1")
             implementation(libs.ktor.client.okhttp)
-            // TODO: Phase 2 - 啟用 MapLibre Compose 完整地圖功能
-            // implementation(libs.maplibre.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -73,7 +77,6 @@ kotlin {
             implementation(libs.peekaboo.image.picker)
             implementation(libs.coil.compose)
             implementation(libs.zoomimage.compose.coil3)
-            // Ktor HTTP Client
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
@@ -86,54 +89,3 @@ kotlin {
         }
     }
 }
-
-// 讀取 local.properties 中的 API Key
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(localPropertiesFile.inputStream())
-    }
-}
-
-android {
-    namespace = "com.example.myapplication"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.example.myapplication"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-
-        // Google Places API Key (從 local.properties 讀取)
-        buildConfigField(
-            "String",
-            "GOOGLE_PLACES_API_KEY",
-            "\"${localProperties.getProperty("GOOGLE_PLACES_API_KEY", "")}\""
-        )
-    }
-
-    buildFeatures {
-        buildConfig = true
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
-
