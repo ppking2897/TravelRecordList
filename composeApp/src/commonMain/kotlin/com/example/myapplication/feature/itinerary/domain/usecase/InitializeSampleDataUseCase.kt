@@ -28,16 +28,21 @@ class InitializeSampleDataUseCase(
                 return@runCatching false
             }
 
-            // 取得範例行程
-            val sampleItinerary = SampleDataProvider.getSampleItinerary()
+            // 取得範例行程（現在正在旅行 + 一筆已結束的過去旅行）
+            val sampleItineraries = listOf(
+                SampleDataProvider.getSampleItinerary(),
+                SampleDataProvider.getSamplePastItinerary()
+            )
 
-            // 先建立行程（不含 items）
-            val itineraryWithoutItems = sampleItinerary.copy(items = emptyList())
-            itineraryRepository.createItinerary(itineraryWithoutItems).getOrThrow()
+            sampleItineraries.forEach { sampleItinerary ->
+                // 先建立行程（不含 items）
+                val itineraryWithoutItems = sampleItinerary.copy(items = emptyList())
+                itineraryRepository.createItinerary(itineraryWithoutItems).getOrThrow()
 
-            // 再逐一建立行程項目
-            sampleItinerary.items.forEach { item ->
-                itemRepository.addItem(item).getOrThrow()
+                // 再逐一建立行程項目
+                sampleItinerary.items.forEach { item ->
+                    itemRepository.addItem(item).getOrThrow()
+                }
             }
 
             true
