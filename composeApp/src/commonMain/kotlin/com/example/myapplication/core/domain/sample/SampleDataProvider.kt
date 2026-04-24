@@ -4,6 +4,7 @@ package com.example.myapplication.core.domain.sample
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
+import com.example.myapplication.feature.itinerary_item.domain.model.Photo
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -123,6 +124,11 @@ object SampleDataProvider {
                 ),
                 activity = "林蔭參道散步",
                 notes = "早上人少，很適合拍照",
+                photos = listOf(
+                    Photo("sample-past-3-photo-1", "sample-past-3", "demo1.jpg", "", order = 0, fileSize = 0L, uploadedAt = now, modifiedAt = now),
+                    Photo("sample-past-3-photo-2", "sample-past-3", "demo2.jpg", "", order = 1, fileSize = 0L, uploadedAt = now, modifiedAt = now),
+                    Photo("sample-past-3-photo-3", "sample-past-3", "demo3.jpg", "", order = 2, fileSize = 0L, uploadedAt = now, modifiedAt = now)
+                ),
                 isCompleted = true,
                 completedAt = now,
                 createdAt = now,
@@ -161,8 +167,8 @@ object SampleDataProvider {
                 ),
                 activity = "逛電器街與動漫周邊",
                 notes = "回國前最後一站",
-                isCompleted = true,
-                completedAt = now,
+                isCompleted = false,
+                completedAt = null,
                 createdAt = now,
                 modifiedAt = now
             )
