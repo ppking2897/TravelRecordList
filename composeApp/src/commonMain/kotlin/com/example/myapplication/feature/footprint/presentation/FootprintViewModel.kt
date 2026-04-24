@@ -2,9 +2,9 @@
 package com.example.myapplication.feature.footprint.presentation
 
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
 import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
 import com.example.myapplication.feature.footprint.domain.usecase.GetVisitedPlacesUseCase
-import com.example.myapplication.feature.route.domain.model.MapMarker
 
 class FootprintViewModel(
     private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase
@@ -15,12 +15,12 @@ class FootprintViewModel(
         when (intent) {
             FootprintIntent.Load -> load(showLoadingWhenEmpty = true)
             FootprintIntent.Refresh -> load(showLoadingWhenEmpty = false)
-            is FootprintIntent.SelectMarker -> updateState { copy(selectedMarker = intent.marker) }
+            is FootprintIntent.ToggleExpanded -> toggleExpanded(intent.tripId)
         }
     }
 
     private suspend fun load(showLoadingWhenEmpty: Boolean) {
-        val hasData = currentState.places.isNotEmpty()
+        val hasData = currentState.groups.isNotEmpty()
         if (showLoadingWhenEmpty && !hasData) {
             updateState { copy(isLoading = true, error = null) }
         }
@@ -28,11 +28,10 @@ class FootprintViewModel(
         val result = getVisitedPlacesUseCase()
         val places = result.getOrNull()
         if (places != null) {
-            val markers = places.toMarkers()
+            val groups = places.groupByTrip()
             updateState {
                 copy(
-                    places = places,
-                    markers = markers,
+                    groups = groups,
                     isLoading = false,
                     error = null
                 )
@@ -44,20 +43,25 @@ class FootprintViewModel(
         }
     }
 
-    private fun List<VisitedPlace>.toMarkers(): List<MapMarker> {
-        return mapIndexedNotNull { index, place ->
-            val lat = place.latitude ?: return@mapIndexedNotNull null
-            val lng = place.longitude ?: return@mapIndexedNotNull null
-            MapMarker(
-                id = place.itemId,
-                latitude = lat,
-                longitude = lng,
-                title = place.activity.ifBlank { place.locationName },
-                locationName = place.locationName,
-                date = place.date,
-                order = index + 1,
-                isCompleted = place.isCompleted
-            )
+    private fun toggleExpanded(tripId: String) {
+        updateState {
+            copy(expandedTripId = if (expandedTripId == tripId) null else tripId)
         }
+    }
+
+    private fun List<VisitedPlace>.groupByTrip(): List<TripFootprintGroup> {
+        return groupBy { it.tripId }
+            .map { (_, tripPlaces) ->
+                val sortedPlaces = tripPlaces.sortedBy { it.date }
+                val first = tripPlaces.first()
+                TripFootprintGroup(
+                    tripId = first.tripId,
+                    tripTitle = first.tripTitle,
+                    startDate = sortedPlaces.firstOrNull()?.date,
+                    endDate = sortedPlaces.lastOrNull()?.date,
+                    places = sortedPlaces
+                )
+            }
+            .sortedByDescending { it.endDate }
     }
 }

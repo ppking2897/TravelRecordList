@@ -3,25 +3,23 @@ package com.example.myapplication.feature.footprint.presentation
 import com.example.myapplication.core.presentation.mvi.UiEvent
 import com.example.myapplication.core.presentation.mvi.UiIntent
 import com.example.myapplication.core.presentation.mvi.UiState
-import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
-import com.example.myapplication.feature.route.domain.model.MapMarker
+import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
 
 data class FootprintState(
     val isLoading: Boolean = false,
-    val places: List<VisitedPlace> = emptyList(),
-    val markers: List<MapMarker> = emptyList(),
-    val selectedMarker: MapMarker? = null,
+    val groups: List<TripFootprintGroup> = emptyList(),
+    val expandedTripId: String? = null,
     val error: String? = null
 ) : UiState {
-    val totalPlaces: Int get() = places.size
-    val completedPlaces: Int get() = places.count { it.isCompleted }
-    val totalTrips: Int get() = places.map { it.tripId }.distinct().size
+    val totalPlaces: Int get() = groups.sumOf { it.placeCount }
+    val totalCompleted: Int get() = groups.sumOf { it.completedCount }
+    val totalTrips: Int get() = groups.size
 }
 
 sealed class FootprintIntent : UiIntent {
     data object Load : FootprintIntent()
     data object Refresh : FootprintIntent()
-    data class SelectMarker(val marker: MapMarker?) : FootprintIntent()
+    data class ToggleExpanded(val tripId: String) : FootprintIntent()
 }
 
 sealed class FootprintEvent : UiEvent {
