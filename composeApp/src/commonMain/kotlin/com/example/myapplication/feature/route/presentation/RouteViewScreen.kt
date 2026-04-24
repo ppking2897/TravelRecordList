@@ -31,7 +31,7 @@ import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
 import com.example.myapplication.feature.route.domain.model.Route
 import com.example.myapplication.feature.route.domain.model.RouteLocation
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 /**

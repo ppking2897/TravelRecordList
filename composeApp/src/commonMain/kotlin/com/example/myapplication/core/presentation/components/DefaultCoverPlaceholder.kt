@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.core.presentation.theme.AppGradients
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 預設封面佔位圖

@@ -18,7 +18,7 @@ import com.example.myapplication.LocalSnackbarHostState
 import com.example.myapplication.core.domain.service.LocationSearchService
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime

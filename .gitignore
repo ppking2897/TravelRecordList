@@ -23,3 +23,4 @@ node_modules/
 
 # Local screenshots / ad-hoc test artifacts
 travelapp_*.png
+.claude/screenshots/

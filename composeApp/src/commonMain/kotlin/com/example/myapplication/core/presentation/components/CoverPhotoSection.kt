@@ -29,7 +29,7 @@ import com.example.myapplication.core.presentation.theme.CornerRadius
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 封面照片選擇區塊

@@ -53,7 +53,7 @@ import com.example.myapplication.feature.memory.presentation.MemoryScreen
 import com.example.myapplication.feature.route.presentation.RouteViewScreen
 import com.example.myapplication.feature.today.presentation.TodayScreen
 import kotlin.time.ExperimentalTime
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 

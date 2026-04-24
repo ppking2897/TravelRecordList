@@ -50,7 +50,7 @@ import com.example.myapplication.feature.footprint.domain.model.TripFootprintGro
 import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @ExperimentalTime
