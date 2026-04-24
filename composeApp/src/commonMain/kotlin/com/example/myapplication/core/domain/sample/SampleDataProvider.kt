@@ -4,13 +4,19 @@ package com.example.myapplication.core.domain.sample
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 /**
  * 預設資料提供者
  *
- * 提供初次安裝時的範例行程資料
+ * 提供初次安裝時的範例行程資料。起訖日期以「今天」為基準，
+ * 讓「今日」分頁一安裝就能看到內容。
  */
 object SampleDataProvider {
 
@@ -20,9 +26,10 @@ object SampleDataProvider {
      * 取得範例行程
      */
     fun getSampleItinerary(): Itinerary {
-        val now = kotlin.time.Clock.System.now()
-        val startDate = LocalDate(2025, 4, 1)
-        val endDate = LocalDate(2025, 4, 5)
+        val now = Clock.System.now()
+        val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val startDate = today.plus(-1, DateTimeUnit.DAY)
+        val endDate = today.plus(3, DateTimeUnit.DAY)
 
         return Itinerary(
             id = SAMPLE_ITINERARY_ID,
@@ -84,7 +91,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-3",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 1),
+                date = startDate.plus(1, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(9, 30),
                 departureTime = LocalTime(11, 30),
                 location = Location(
@@ -101,7 +108,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-4",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 1),
+                date = startDate.plus(1, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(13, 0),
                 departureTime = LocalTime(16, 0),
                 location = Location(
@@ -120,7 +127,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-5",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 2),
+                date = startDate.plus(2, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(10, 0),
                 departureTime = LocalTime(16, 0),
                 location = Location(
@@ -139,7 +146,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-6",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 3),
+                date = startDate.plus(3, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(10, 0),
                 departureTime = LocalTime(13, 0),
                 location = Location(
@@ -156,7 +163,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-7",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 3),
+                date = startDate.plus(3, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(17, 0),
                 departureTime = LocalTime(21, 0),
                 location = Location(
@@ -175,7 +182,7 @@ object SampleDataProvider {
             ItineraryItem(
                 id = "sample-item-8",
                 itineraryId = itineraryId,
-                date = LocalDate(startDate.year, startDate.monthNumber, startDate.dayOfMonth + 4),
+                date = startDate.plus(4, DateTimeUnit.DAY),
                 arrivalTime = LocalTime(10, 0),
                 departureTime = LocalTime(18, 0),
                 location = Location(
