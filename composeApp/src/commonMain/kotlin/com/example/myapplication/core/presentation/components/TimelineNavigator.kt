@@ -204,12 +204,18 @@ private fun AllTabItem(
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
+            // 同 TimelineNodeItem 一致的固定 container size，確保圓點水平線對齊
             Box(
-                modifier = Modifier
-                    .size(nodeSize)
-                    .clip(CircleShape)
-                    .background(nodeColor)
-            )
+                modifier = Modifier.size(TimelineDimensions.nodeSelectedSize + 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(nodeSize)
+                        .clip(CircleShape)
+                        .background(nodeColor)
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -332,29 +338,37 @@ private fun TimelineNodeItem(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // 節點圓點（完成時顯示打勾圖示，今天有外圈）
+            // 節點容器：固定 max size（nodeSelectedSize + 4dp 給 today halo 用），
+            // 不管 isToday / isSelected 組合都維持同高，連接線才能對齊。
             Box(
-                modifier = Modifier
-                    .size(nodeSize + if (isToday) 4.dp else 0.dp)
-                    .then(
-                        if (isToday) Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                            .padding(2.dp)
-                        else Modifier
-                    )
-                    .size(nodeSize)
-                    .clip(CircleShape)
-                    .background(nodeColor),
+                modifier = Modifier.size(TimelineDimensions.nodeSelectedSize + 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (node.isAllCompleted) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "已完成",
-                        modifier = Modifier.size(nodeSize * 0.6f),
-                        tint = MaterialTheme.colorScheme.onTertiary
+                // 今天的 halo 外圈（固定占位，不撐大容器）
+                if (isToday) {
+                    Box(
+                        modifier = Modifier
+                            .size(nodeSize + 4.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     )
+                }
+                // 節點圓點本體
+                Box(
+                    modifier = Modifier
+                        .size(nodeSize)
+                        .clip(CircleShape)
+                        .background(nodeColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (node.isAllCompleted) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "已完成",
+                            modifier = Modifier.size(nodeSize * 0.6f),
+                            tint = MaterialTheme.colorScheme.onTertiary
+                        )
+                    }
                 }
             }
 
