@@ -53,7 +53,7 @@ class AddItineraryItemUseCase(
 
             val itemId = Uuid.random().toString()
 
-            // 建立照片物件
+            // 建立照片物件；第一張自動標記為封面
             val photos = photoPaths.mapIndexed { index, path ->
                 Photo(
                     id = Uuid.random().toString(),
@@ -61,6 +61,7 @@ class AddItineraryItemUseCase(
                     fileName = path.substringAfterLast('/'),
                     filePath = path,
                     order = index,
+                    isCover = index == 0,
                     fileSize = 0L,
                     uploadedAt = currentTimestamp,
                     modifiedAt = currentTimestamp
@@ -79,6 +80,8 @@ class AddItineraryItemUseCase(
                 notes = notes,
                 hashtags = hashtags,
                 photos = photos,
+                // 有照片時預設以第一張當封面（ItemCard.getCoverPhoto 依此找）
+                coverPhotoId = photos.firstOrNull()?.id,
                 isCompleted = false,
                 completedAt = null,
                 createdAt = currentTimestamp,
