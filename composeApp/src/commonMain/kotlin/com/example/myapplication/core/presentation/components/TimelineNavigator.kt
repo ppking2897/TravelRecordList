@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -408,16 +409,14 @@ private fun TimelineNodeItem(
             )
         }
 
-        // 進度指示 (如 2/3)，永遠顯示（包含 0/0，保持節點高度一致）
+        // 進度指示 (如 2/3)：0/0 時用 alpha 0 隱藏文字但保留高度，
+        // 讓所有節點的垂直尺寸一致（不會因沒項目而變矮）
         Text(
             text = "(${node.completedCount}/${node.totalCount})",
             style = MaterialTheme.typography.labelSmall,
-            color = when {
-                node.isAllCompleted -> successColor
-                node.totalCount == 0 -> textColor.copy(alpha = 0.4f)
-                else -> textColor.copy(alpha = 0.7f)
-            },
-            textAlign = TextAlign.Center
+            color = if (node.isAllCompleted) successColor else textColor.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center,
+            modifier = if (node.totalCount == 0) Modifier.alpha(0f) else Modifier
         )
     }
 }
