@@ -43,4 +43,7 @@ dependencies {
     implementation(project(":composeApp"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.koin.android)
+
+    // Android Studio @Preview renderer（只在 debug 需要，release APK 不含）
+    debugImplementation("androidx.compose.ui:ui-tooling:1.9.0")
 }
