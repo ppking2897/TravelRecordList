@@ -3,44 +3,73 @@ package com.example.myapplication
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.myapplication.core.presentation.navigation.AppRoute
+import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListScreen
-import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListViewModel
+import com.example.myapplication.core.presentation.util.shareLauncher
+import com.example.myapplication.feature.itinerary_add_edit.presentation.ItineraryAddEditScreen
 import com.example.myapplication.feature.itinerary_detail.presentation.ItineraryDetailScreen
 import com.example.myapplication.feature.itinerary_detail.presentation.ItineraryDetailViewModel
-import com.example.myapplication.feature.itinerary_add_edit.presentation.ItineraryAddEditScreen
 import com.example.myapplication.feature.itinerary_item.presentation.AddEditItemScreen
 import com.example.myapplication.feature.itinerary_item.presentation.EditItemScreen
-import com.example.myapplication.feature.travel_history.presentation.TravelHistoryScreen
-import com.example.myapplication.feature.travel_history.presentation.TravelHistoryViewModel
-import com.example.myapplication.feature.route.presentation.RouteViewScreen
+import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListScreen
+import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListViewModel
+import com.example.myapplication.feature.footprint.presentation.FootprintScreen
 import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapScreen
-import com.example.myapplication.core.presentation.util.shareLauncher
 import com.example.myapplication.feature.itinerary_map.presentation.ItineraryMapViewModel
+import com.example.myapplication.feature.memory.presentation.MemoryScreen
+import com.example.myapplication.feature.route.presentation.RouteViewScreen
+import com.example.myapplication.feature.today.presentation.TodayScreen
 import kotlin.time.ExperimentalTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * 全局 SnackbarHostState，所有 Screen 共用
- */
 val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
     error("No SnackbarHostState provided")
 }
 
-/**
- * 旅遊流程記事應用程式主入口
- */
+private enum class AppTab(
+    val label: String
+) {
+    Plan("行程"),
+    Today("今日"),
+    Footprints("足跡"),
+    Memories("回憶")
+}
+
 @ExperimentalTime
 @Composable
 @Preview
@@ -51,17 +80,96 @@ fun App() {
 @ExperimentalTime
 @Composable
 fun TravelApp() {
-    val backStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
+    val planBackStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
+    var selectedTab by remember { mutableStateOf(AppTab.Plan) }
     val snackbarHostState = remember { SnackbarHostState() }
     val shareLauncher = shareLauncher()
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) }
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            bottomBar = {
+                TravelBottomNavigation(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
+            }
         ) { paddingValues ->
+            when (selectedTab) {
+                AppTab.Plan -> PlanNavHost(
+                    backStack = planBackStack,
+                    modifier = Modifier.padding(paddingValues),
+                    onSwitchToFootprints = { selectedTab = AppTab.Footprints },
+                    onShareRoute = { json -> shareLauncher.share(json, "分享行程路線") }
+                )
+
+                AppTab.Today -> TodayScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onOpenCurrentTrip = { itineraryId ->
+                        while (planBackStack.size > 1) {
+                            planBackStack.removeLastOrNull()
+                        }
+                        planBackStack.add(AppRoute.ItineraryDetail(itineraryId))
+                        selectedTab = AppTab.Plan
+                    },
+                    onGoToPlan = { selectedTab = AppTab.Plan }
+                )
+
+                AppTab.Footprints -> FootprintScreen(
+                    modifier = Modifier.padding(paddingValues)
+                )
+
+                AppTab.Memories -> MemoryScreen(
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TravelBottomNavigation(
+    selectedTab: AppTab,
+    onTabSelected: (AppTab) -> Unit
+) {
+    NavigationBar {
+        AppTab.entries.forEach { tab ->
+            NavigationBarItem(
+                selected = selectedTab == tab,
+                onClick = { onTabSelected(tab) },
+                icon = {
+                    Icon(
+                        imageVector = when (tab) {
+                            AppTab.Plan -> Icons.Default.DateRange
+                            AppTab.Today -> Icons.Default.Add
+                            AppTab.Footprints -> Icons.Default.Map
+                            AppTab.Memories -> Icons.Default.Star
+                        },
+                        contentDescription = tab.label
+                    )
+                },
+                label = { Text(tab.label) }
+            )
+        }
+    }
+}
+
+@ExperimentalTime
+@Composable
+private fun PlanNavHost(
+    backStack: MutableList<Any>,
+    modifier: Modifier = Modifier,
+    onSwitchToFootprints: () -> Unit,
+    onShareRoute: (String) -> Unit
+) {
     NavDisplay(
+        modifier = modifier,
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
+        onBack = {
+            if (backStack.size > 1) {
+                backStack.removeLastOrNull()
+            }
+        },
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
@@ -80,23 +188,17 @@ fun TravelApp() {
         },
         entryProvider = { key ->
             when (key) {
-                // 行程列表
                 is AppRoute.ItineraryList -> NavEntry(key) {
                     val viewModel: ItineraryListViewModel = koinViewModel()
                     ItineraryListScreen(
                         viewModel = viewModel,
-                        onItineraryClick = { id ->
-                            backStack.add(AppRoute.ItineraryDetail(id))
-                        },
-                        onEditClick = { id ->
-                            backStack.add(AppRoute.EditItinerary(id))
-                        },
+                        onItineraryClick = { id -> backStack.add(AppRoute.ItineraryDetail(id)) },
+                        onEditClick = { id -> backStack.add(AppRoute.EditItinerary(id)) },
                         onAddClick = { backStack.add(AppRoute.AddItinerary) },
-                        onHistoryClick = { backStack.add(AppRoute.TravelHistory) }
+                        onHistoryClick = onSwitchToFootprints
                     )
                 }
 
-                // 新增行程
                 is AppRoute.AddItinerary -> NavEntry(key) {
                     ItineraryAddEditScreen(
                         onNavigateBack = { backStack.removeLastOrNull() },
@@ -107,47 +209,31 @@ fun TravelApp() {
                     )
                 }
 
-                // 編輯行程
                 is AppRoute.EditItinerary -> NavEntry(key) {
                     ItineraryAddEditScreen(
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onSaveSuccess = { _ -> backStack.removeLastOrNull() }
+                        onSaveSuccess = { backStack.removeLastOrNull() }
                     )
                 }
 
-                // 行程詳情
                 is AppRoute.ItineraryDetail -> NavEntry(key) {
                     val viewModel: ItineraryDetailViewModel = koinViewModel()
                     ItineraryDetailScreen(
                         viewModel = viewModel,
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onAddItemClick = {
-                            backStack.add(AppRoute.AddItem(key.itineraryId))
-                        },
+                        onAddItemClick = { backStack.add(AppRoute.AddItem(key.itineraryId)) },
                         onQuickAddItemClick = { defaultDate ->
-                            backStack.add(AppRoute.QuickAddItem(
-                                key.itineraryId,
-                                defaultDate.toString()
-                            ))
+                            backStack.add(AppRoute.QuickAddItem(key.itineraryId, defaultDate.toString()))
                         },
-                        onEditItemClick = { itemId ->
-                            backStack.add(AppRoute.EditItem(itemId))
-                        },
-                        onEditItineraryClick = {
-                            backStack.add(AppRoute.EditItinerary(key.itineraryId))
-                        },
-                        onRouteClick = { routeId ->
-                            backStack.add(AppRoute.RouteView(routeId))
-                        },
-                        onMapClick = {
-                            backStack.add(AppRoute.ItineraryMap(key.itineraryId))
-                        }
+                        onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) },
+                        onEditItineraryClick = { backStack.add(AppRoute.EditItinerary(key.itineraryId)) },
+                        onRouteClick = { routeId -> backStack.add(AppRoute.RouteView(routeId)) },
+                        onMapClick = { backStack.add(AppRoute.ItineraryMap(key.itineraryId)) }
                     )
                 }
 
-                // 新增項目
                 is AppRoute.AddItem -> NavEntry(key) {
                     AddEditItemScreen(
                         itineraryId = key.itineraryId,
@@ -160,7 +246,6 @@ fun TravelApp() {
                     )
                 }
 
-                // 快速新增項目
                 is AppRoute.QuickAddItem -> NavEntry(key) {
                     val defaultDate = kotlinx.datetime.LocalDate.parse(key.defaultDate)
                     AddEditItemScreen(
@@ -175,7 +260,6 @@ fun TravelApp() {
                     )
                 }
 
-                // 編輯項目
                 is AppRoute.EditItem -> NavEntry(key) {
                     EditItemScreen(
                         itemId = key.itemId,
@@ -184,43 +268,29 @@ fun TravelApp() {
                     )
                 }
 
-                // 旅遊歷史
-                is AppRoute.TravelHistory -> NavEntry(key) {
-                    val viewModel: TravelHistoryViewModel = koinViewModel()
-                    TravelHistoryScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { backStack.removeLastOrNull() }
-                    )
-                }
-
-                // 路線檢視
                 is AppRoute.RouteView -> NavEntry(key) {
                     RouteViewScreen(
                         routeId = key.routeId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onExportSuccess = { json -> shareLauncher.share(json, "路線匯出") }
+                        onExportSuccess = onShareRoute
                     )
                 }
 
-                // 行程地圖
                 is AppRoute.ItineraryMap -> NavEntry(key) {
                     val viewModel: ItineraryMapViewModel = koinViewModel()
                     ItineraryMapScreen(
                         viewModel = viewModel,
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
-                        onEditItemClick = { itemId ->
-                            backStack.add(AppRoute.EditItem(itemId))
-                        }
+                        onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) }
                     )
                 }
 
                 else -> NavEntry(Unit) {
-                    androidx.compose.material3.Text("Unknown route")
+                    Text("Unknown route")
                 }
             }
         }
     )
-        }
-    }
 }
+
