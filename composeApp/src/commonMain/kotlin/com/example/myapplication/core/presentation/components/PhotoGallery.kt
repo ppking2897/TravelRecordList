@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -165,20 +166,28 @@ fun PhotoGridItem(
                 }
             }
             
-            // 操作選單按鈕
+            // 操作選單按鈕（半透明圓形背景避免遮擋照片）
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
             ) {
-                IconButton(
-                    onClick = { showMenu = true }
+                Surface(
+                    modifier = Modifier.size(28.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
                 ) {
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "選項",
-                        modifier = Modifier.size(20.dp)
-                    )
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "選項",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
                 
                 DropdownMenu(
