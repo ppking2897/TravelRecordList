@@ -254,8 +254,7 @@ fun ItemFormContent(
                                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
                             ) {
                                 IconButton(
-                                    onClick = { onRemovePhoto(photoPath) },
-                                    modifier = Modifier.size(24.dp)
+                                    onClick = { onRemovePhoto(photoPath) }
                                 ) {
                                     Icon(
                                         Icons.Default.Close,
