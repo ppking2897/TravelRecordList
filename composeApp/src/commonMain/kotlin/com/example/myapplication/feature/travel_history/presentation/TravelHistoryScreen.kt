@@ -13,10 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,7 +28,7 @@ import androidx.compose.material3.Surface
 import com.example.myapplication.LocalSnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDateRangePickerState
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -117,10 +116,6 @@ private fun TravelHistoryScreenContent(
     onToggleItemExpansion: (String) -> Unit
 ) {
     var showFilterDialog by remember { mutableStateOf(false) }
-    var showStartDatePicker by remember { mutableStateOf(false) }
-    var showEndDatePicker by remember { mutableStateOf(false) }
-    var selectedStartDate by remember { mutableStateOf<LocalDate?>(null) }
-    var selectedEndDate by remember { mutableStateOf<LocalDate?>(null) }
     var previewPhoto by remember { mutableStateOf<Photo?>(null) }
     
     Scaffold(
@@ -260,118 +255,44 @@ private fun TravelHistoryScreenContent(
         )
     }
 
-    // 日期篩選對話框
+    // 日期範圍篩選（Material3 DateRangePicker，一次選擇起迄）
     if (showFilterDialog) {
-        AlertDialog(
+        val dateRangeState = rememberDateRangePickerState()
+        val canConfirm = dateRangeState.selectedStartDateMillis != null &&
+            dateRangeState.selectedEndDateMillis != null
+
+        DatePickerDialog(
             onDismissRequest = { showFilterDialog = false },
-            title = { Text("選擇日期範圍") },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                ) {
-                    // 開始日期
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("開始日期")
-                        TextButton(onClick = { showStartDatePicker = true }) {
-                            Text(selectedStartDate?.toString() ?: "選擇")
-                        }
-                    }
-                    // 結束日期
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("結束日期")
-                        TextButton(onClick = { showEndDatePicker = true }) {
-                            Text(selectedEndDate?.toString() ?: "選擇")
-                        }
-                    }
-                }
-            },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val start = selectedStartDate
-                        val end = selectedEndDate
-                        if (start != null && end != null && start <= end) {
+                        val startMillis = dateRangeState.selectedStartDateMillis
+                        val endMillis = dateRangeState.selectedEndDateMillis
+                        if (startMillis != null && endMillis != null) {
+                            val start = Instant.fromEpochMilliseconds(startMillis)
+                                .toLocalDateTime(TimeZone.UTC).date
+                            val end = Instant.fromEpochMilliseconds(endMillis)
+                                .toLocalDateTime(TimeZone.UTC).date
                             onFilterByDateRange(start..end)
-                            showFilterDialog = false
-                            selectedStartDate = null
-                            selectedEndDate = null
                         }
+                        showFilterDialog = false
                     },
-                    enabled = selectedStartDate != null && selectedEndDate != null &&
-                            (selectedStartDate!! <= selectedEndDate!!)
+                    enabled = canConfirm
                 ) {
                     Text("套用")
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showFilterDialog = false
-                    selectedStartDate = null
-                    selectedEndDate = null
-                }) {
-                    Text("取消")
-                }
-            }
-        )
-    }
-
-    // 開始日期選擇器
-    if (showStartDatePicker) {
-        val datePickerState = rememberDatePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showStartDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val instant = Instant.fromEpochMilliseconds(millis)
-                        selectedStartDate = instant.toLocalDateTime(TimeZone.UTC).date
-                    }
-                    showStartDatePicker = false
-                }) {
-                    Text("確定")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) {
+                TextButton(onClick = { showFilterDialog = false }) {
                     Text("取消")
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    // 結束日期選擇器
-    if (showEndDatePicker) {
-        val datePickerState = rememberDatePickerState()
-        DatePickerDialog(
-            onDismissRequest = { showEndDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val instant = Instant.fromEpochMilliseconds(millis)
-                        selectedEndDate = instant.toLocalDateTime(TimeZone.UTC).date
-                    }
-                    showEndDatePicker = false
-                }) {
-                    Text("確定")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) {
-                    Text("取消")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
+            DateRangePicker(
+                state = dateRangeState,
+                title = { Text("選擇日期範圍", modifier = Modifier.padding(Spacing.lg)) },
+                showModeToggle = false
+            )
         }
     }
 }
