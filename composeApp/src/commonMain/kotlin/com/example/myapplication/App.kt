@@ -89,10 +89,13 @@ fun TravelApp() {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                TravelBottomNavigation(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
-                )
+                val isPlanDeepLevel = selectedTab == AppTab.Plan && planBackStack.size > 1
+                if (!isPlanDeepLevel) {
+                    TravelBottomNavigation(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it }
+                    )
+                }
             }
         ) { paddingValues ->
             when (selectedTab) {
