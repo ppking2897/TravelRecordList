@@ -10,8 +10,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import sh.calvin.reorderable.ReorderableColumn
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MoreVert
@@ -34,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.presentation.theme.AppGradients
-import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
@@ -161,9 +159,6 @@ fun ItineraryDetailScreen(
         onDeletePhoto = { photoId ->
             viewModel.handleIntent(ItineraryDetailIntent.DeletePhoto(photoId))
         },
-        onReorderItemsInDay = { date, itemIds ->
-            viewModel.handleIntent(ItineraryDetailIntent.ReorderItemsInDay(date, itemIds))
-        },
         // 批量操作 callbacks
         onToggleSelectionMode = { viewModel.handleIntent(ItineraryDetailIntent.ToggleSelectionMode) },
         onToggleItemSelection = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
@@ -234,7 +229,6 @@ private fun ItineraryDetailScreenContent(
     onAddPhoto: (String) -> Unit,
     onSetCoverPhoto: (String, String) -> Unit,
     onDeletePhoto: (String) -> Unit,
-    onReorderItemsInDay: (LocalDate, List<String>) -> Unit = { _, _ -> },
     // 批量操作 callbacks
     onToggleSelectionMode: () -> Unit = {},
     onToggleItemSelection: (String) -> Unit = {},
@@ -478,7 +472,7 @@ private fun ItineraryDetailScreenContent(
                         }
                     } else {
                         groupedItems.forEach { group ->
-                            item(key = "header_${group.date}") {
+                            item {
                                 Text(
                                     text = group.date.toString(),
                                     style = MaterialTheme.typography.titleMedium,
@@ -486,68 +480,30 @@ private fun ItineraryDetailScreenContent(
                                 )
                             }
 
-                            // 每個日期一個 ReorderableColumn（reorder 邊界被限制在同日內，
-                            // 不會跨日拖拽）。批量選擇模式下禁用 drag handle。
-                            item(key = "group_${group.date}") {
+                            itemsIndexed(
+                                items = group.items,
+                                key = { _, item -> item.id }
+                            ) { _, item ->
+                                val isLastInGroup = item == group.items.last()
                                 val isLastGroup = group == groupedItems.last()
-                                var orderedItems by remember(group.items) {
-                                    mutableStateOf(group.items)
-                                }
+                                val isLastItem = isLastInGroup && isLastGroup
 
-                                ReorderableColumn(
-                                    list = orderedItems,
-                                    onSettle = { fromIndex, toIndex ->
-                                        val newList = orderedItems
-                                            .toMutableList()
-                                            .apply { add(toIndex, removeAt(fromIndex)) }
-                                        orderedItems = newList
-                                        onReorderItemsInDay(
-                                            group.date,
-                                            newList.map { it.id }
-                                        )
-                                    },
-                                    verticalArrangement = Arrangement.spacedBy(
-                                        ListStyle.contentPadding
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) { index, item, _ ->
-                                    val isLastInGroup = index == orderedItems.lastIndex
-                                    val isLastItem = isLastInGroup && isLastGroup
-
-                                    ReorderableItem {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            ItemCard(
-                                                modifier = Modifier.weight(1f),
-                                                item = item,
-                                                isExpanded = expandedItemIds.contains(item.id),
-                                                isLastItem = isLastItem,
-                                                onToggleComplete = onToggleItemCompletion,
-                                                onDelete = onDeleteItem,
-                                                onEdit = onEditItemClick,
-                                                onExpandToggle = if (isSelectionMode) null else onToggleItemExpansion,
-                                                onAddPhoto = onAddPhoto,
-                                                onSetCoverPhoto = onSetCoverPhoto,
-                                                onDeletePhoto = onDeletePhoto,
-                                                isSelectionMode = isSelectionMode,
-                                                isSelected = selectedItemIds.contains(item.id),
-                                                onSelectionToggle = { onToggleItemSelection(item.id) }
-                                            )
-                                            if (!isSelectionMode) {
-                                                Icon(
-                                                    imageVector = Icons.Default.DragHandle,
-                                                    contentDescription = "長按拖曳排序",
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier
-                                                        .longPressDraggableHandle()
-                                                        .padding(horizontal = Spacing.sm)
-                                                        .size(IconSize.md)
-                                                )
-                                            }
-                                        }
-                                    }
+                                Box(modifier = Modifier.animateItem()) {
+                                    ItemCard(
+                                        item = item,
+                                        isExpanded = expandedItemIds.contains(item.id),
+                                        isLastItem = isLastItem,
+                                        onToggleComplete = onToggleItemCompletion,
+                                        onDelete = onDeleteItem,
+                                        onEdit = onEditItemClick,
+                                        onExpandToggle = if (isSelectionMode) null else onToggleItemExpansion,
+                                        onAddPhoto = onAddPhoto,
+                                        onSetCoverPhoto = onSetCoverPhoto,
+                                        onDeletePhoto = onDeletePhoto,
+                                        isSelectionMode = isSelectionMode,
+                                        isSelected = selectedItemIds.contains(item.id),
+                                        onSelectionToggle = { onToggleItemSelection(item.id) }
+                                    )
                                 }
                             }
                         }

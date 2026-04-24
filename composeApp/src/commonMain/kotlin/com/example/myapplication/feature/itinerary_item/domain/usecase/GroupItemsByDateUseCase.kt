@@ -31,10 +31,10 @@ class GroupItemsByDateUseCase {
                 ItemsByDate(
                     date = date,
                     items = groupItems.sortedWith(
-                        // 優先依使用者自訂順序（order），相同 order 再依時間排序
-                        // 沒有時間的項目排在最後
-                        compareBy<ItineraryItem> { it.order }
-                            .thenBy { it.primaryTime() ?: LocalTime(23, 59, 59) }
+                        compareBy<ItineraryItem> {
+                            // 沒有時間的項目排在最後
+                            it.primaryTime() ?: LocalTime(23, 59, 59)
+                        }
                     )
                 )
             }

@@ -23,8 +23,7 @@ val itineraryDetailModule = module {
             setCoverPhotoUseCase = get(),
             generateThumbnailUseCase = get(),
             batchDeleteItemsUseCase = get(),
-            batchUpdateItemsUseCase = get(),
-            reorderItemsInDayUseCase = get()
+            batchUpdateItemsUseCase = get()
         )
     }
 }
