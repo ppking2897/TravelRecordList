@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.feature.route.domain.model.MapMarker
+import com.example.myapplication.core.presentation.components.ErrorContent
 import com.example.myapplication.core.presentation.components.ItineraryMapView
+import com.example.myapplication.core.presentation.components.LoadingContent
 import com.example.myapplication.core.presentation.components.MapInfoCard
 import com.example.myapplication.core.presentation.theme.AppGradients
 import kotlinx.datetime.DateTimeUnit
@@ -200,10 +201,9 @@ private fun ItineraryMapScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(backgroundGradient),
-                        contentAlignment = Alignment.Center
+                            .background(backgroundGradient)
                     ) {
-                        CircularProgressIndicator()
+                        LoadingContent()
                     }
                 }
 
@@ -211,25 +211,9 @@ private fun ItineraryMapScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(backgroundGradient),
-                        contentAlignment = Alignment.Center
+                            .background(backgroundGradient)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = error,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                        ErrorContent(message = error)
                     }
                 }
 

@@ -35,6 +35,7 @@ import com.example.myapplication.core.presentation.components.AnimatedBatchActio
 import com.example.myapplication.core.presentation.components.DeleteConfirmDialog
 import com.example.myapplication.core.presentation.components.EmptyState
 import com.example.myapplication.core.presentation.components.ItemCard
+import com.example.myapplication.core.presentation.components.LoadingContent
 import com.example.myapplication.core.presentation.components.TimelineNavigator
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.LocalSnackbarHostState
@@ -388,10 +389,9 @@ private fun ItineraryDetailScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(backgroundGradient)
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                    .padding(paddingValues)
             ) {
-                CircularProgressIndicator()
+                LoadingContent()
             }
         } else {
             Column(

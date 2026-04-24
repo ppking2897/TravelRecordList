@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.core.presentation.components.LoadingContent
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
@@ -406,14 +407,7 @@ private fun RouteViewScreenContent(
         }
     ) { paddingValues ->
         if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            LoadingContent(modifier = Modifier.padding(paddingValues))
         } else if (route == null) {
             Box(
                 modifier = Modifier
