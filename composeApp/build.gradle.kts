@@ -55,6 +55,8 @@ kotlin {
             implementation(libs.koin.android)
             implementation("androidx.datastore:datastore-preferences:1.1.1")
             implementation(libs.ktor.client.okhttp)
+            // Android Studio @Preview 渲染需要的 runtime（ComposeViewAdapter 等）
+            implementation("org.jetbrains.compose.ui:ui-tooling:1.10.3")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
