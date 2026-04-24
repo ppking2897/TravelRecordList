@@ -21,6 +21,7 @@ object ItineraryItemMapper {
         coverPhotoId = dto.coverPhotoId,
         isCompleted = dto.isCompleted,
         completedAt = dto.completedAt,
+        order = dto.order,
         createdAt = dto.createdAt,
         modifiedAt = dto.modifiedAt
     )
@@ -39,6 +40,7 @@ object ItineraryItemMapper {
         coverPhotoId = entity.coverPhotoId,
         isCompleted = entity.isCompleted,
         completedAt = entity.completedAt,
+        order = entity.order,
         createdAt = entity.createdAt,
         modifiedAt = entity.modifiedAt
     )

@@ -22,6 +22,7 @@ import kotlin.time.Duration
  * @property coverPhotoId 封面照片 ID
  * @property isCompleted 是否已完成
  * @property completedAt 完成時間戳記（只有當 isCompleted 為 true 時才設定）
+ * @property order 同日內的顯示順序（0-based），用於支援使用者拖拽排序
  * @property createdAt 建立時間戳記
  * @property modifiedAt 修改時間戳記
  */
@@ -39,6 +40,7 @@ data class ItineraryItem(
     val coverPhotoId: String? = null,
     val isCompleted: Boolean = false,
     val completedAt: Instant? = null,
+    val order: Int = 0,
     val createdAt: Instant,
     val modifiedAt: Instant
 ) {

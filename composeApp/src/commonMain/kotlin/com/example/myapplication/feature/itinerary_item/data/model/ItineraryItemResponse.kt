@@ -25,6 +25,7 @@ data class ItineraryItemResponse(
     val coverPhotoId: String? = null,
     val isCompleted: Boolean = false,
     @Contextual val completedAt: Instant? = null,
+    val order: Int = 0,
     @Contextual val createdAt: Instant,
     @Contextual val modifiedAt: Instant
 )

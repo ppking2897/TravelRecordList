@@ -19,6 +19,7 @@ import com.example.myapplication.feature.itinerary_item.domain.usecase.GenerateT
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
+import com.example.myapplication.feature.itinerary_item.domain.usecase.ReorderItemsInDayUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.ReorderPhotosUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
@@ -47,6 +48,7 @@ val itineraryItemModule = module {
     factory { DeletePhotoUseCase(get()) }
     factory { SetCoverPhotoUseCase(get()) }
     factory { ReorderPhotosUseCase(get()) }
+    factory { ReorderItemsInDayUseCase(get()) }
     factory { FilterByHashtagUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }

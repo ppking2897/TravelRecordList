@@ -194,16 +194,18 @@ class ItineraryItemRepositoryImpl(
 
     override suspend fun reorderItems(itineraryId: String, itemIds: List<String>): Result<Unit> {
         return try {
-            // 更新索引以反映新順序
-            // 注意：此實作保留目前的排序邏輯
-            // 實際應用中可能需要為每個項目添加 sortOrder 欄位
-            val allIds = getItemIds()
-            val otherIds = allIds.filter { it !in itemIds }
-            val newOrder = itemIds + otherIds
-
-            val jsonData = JsonSerializer.serializeStringList(newOrder)
-            storageService.save(ITEM_INDEX_KEY, jsonData)
-
+            // itemIds 的順序即新的 order：依序指派 0, 1, 2, ...
+            // Caller 需保證 itemIds 屬於同一日期（order 定義為日內順序）
+            itemIds.forEachIndexed { newOrder, itemId ->
+                val key = "$ITEM_KEY_PREFIX$itemId"
+                val jsonData = storageService.load(key).getOrNull() ?: return@forEachIndexed
+                val item = JsonSerializer.deserializeItineraryItem(jsonData).toDomain()
+                if (item.order != newOrder) {
+                    val updatedDto = item.copy(order = newOrder).toDto()
+                    val updatedJson = JsonSerializer.serializeItineraryItem(updatedDto)
+                    storageService.save(key, updatedJson).getOrThrow()
+                }
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
