@@ -311,6 +311,47 @@ fix(ui): 照片刪除按鈕觸控區域修正為 48dp
 
 ---
 
-## 五、變更紀錄
+## 五、執行狀態（截至 2026-04-24）
 
-- 2026-04-24：建立計畫，確認 P0/P1 多數已修完，重新盤點仍存在的問題並分三階段規劃。
+### Phase 1 — 技術債 ✅ 全部完成（8 個子任務 commit）
+Android + iOS assemble 通過、模擬器驗證通過。
+
+### Phase 2 — UX 流程補完 ✅ 大部分完成
+| # | 任務 | 狀態 |
+|---|------|------|
+| 2.1 | 同日拖拽排序 | ✅ 完成後依使用者回饋**移除**（保留 `order` 欄位資料層，改時間即可變順序）|
+| 2.2 | 地圖按日期上色 | ✅ 完成（虛線連接待真實地圖就位後再做，目前是列表版） |
+| 2.3 | 快速新增項目 | ⏸ 既有 QuickAddItem 路徑已覆蓋類似能力，未獨立做 |
+| 2.4 | 日期欄位引導 | ✅ 於 Phase 1.1 抽 ItemFormContent 時順手完成 |
+| 2.5 | 行程列表卡片擴充 | ✅ 現況已具備 |
+| 2.6 | TimelineNavigator 進度 badge | ✅ 現況已有 + 本輪修正多項跑版 / 空日期虛線圓 |
+| 2.7 | TravelHistory 日期篩選 DateRangePicker | ✅ 完成 |
+
+### Phase 3 — 品質感打磨 ⏸ **尚未開始**
+| # | 任務 | 狀態 |
+|---|------|------|
+| 3.1 | 空狀態插圖取代 Icon | ⏸ 待做 |
+| 3.2 | 深色模式判斷收到 Theme 層 | ⏸ 待做 |
+| 3.3 | 行程卡片 / 項目左右滑手勢（SwipeToDismiss）| ⏸ 待做 |
+| 3.4 | Shimmer/Skeleton 擴展到其他畫面 | ⏸ 僅列表頁完成，其他畫面待做 |
+| 3.5 | 旅遊歷史統計摘要卡片 | ⏸ 待做 |
+| 3.6 | 搜尋進階篩選（日期 / 地點 / 狀態）| ⏸ 待做 |
+| 3.7 | `contentDescription` 補齊（48 處）| ⏸ 隨任務補，不急 |
+
+### 額外完成（計畫外但實際做了）
+- Preview 遷移到 Compose Multiplatform 1.10 新 artifact（消除 28 個 deprecation warning）
+- `ClassNotFoundException: ComposeViewAdapter` 修正（`ui-tooling` runtime）
+- 封面照片解析度差修正（改讀原圖 + 預設縮圖 200→400）
+- PhotoGallery MoreVert 半透明圓形背景避免遮擋縮圖
+- TimelineNavigator 連續修正：今天 halo 撐大、圓點浮動（Top 對齊）、中文字 fallback line height、AllTab 佔位對稱
+- 快速新增項目日期偏 1 天 bug 修正
+- 新增項目有照片時第一張自動設為封面
+- TimelineNavigator 0/0 節點改虛線空心圓（待規劃狀態）
+- 每日進度計數 bug（State 分離 `groupedItems` / `allGroupedItems`）
+- LocalTime 顯示毫秒 bug（抽 `DateTimeFormatter`）
+
+---
+
+## 六、變更紀錄
+
+- 2026-04-24：建立計畫，完成 Phase 1 + Phase 2 大部分；Phase 3 待後續處理。
