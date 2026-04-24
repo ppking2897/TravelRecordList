@@ -1,9 +1,9 @@
 package com.example.myapplication.domain.usecase
 
-import com.example.myapplication.domain.entity.ItineraryItem
+import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import com.example.myapplication.feature.itinerary_item.domain.model.Location
+import com.example.myapplication.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
 import com.example.myapplication.test.itineraryItem
-import com.example.myapplication.domain.entity.Location
-import com.example.myapplication.test.location
 import com.example.myapplication.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -11,8 +11,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 /**

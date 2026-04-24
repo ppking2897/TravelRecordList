@@ -1,5 +1,7 @@
 package com.example.myapplication.domain.usecase
 
+import com.example.myapplication.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
+import com.example.myapplication.test.itineraryItem
 import com.example.myapplication.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty

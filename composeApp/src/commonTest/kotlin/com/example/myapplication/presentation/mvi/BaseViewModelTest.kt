@@ -1,5 +1,9 @@
 package com.example.myapplication.presentation.mvi
 
+import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import com.example.myapplication.core.presentation.mvi.UiEvent
+import com.example.myapplication.core.presentation.mvi.UiIntent
+import com.example.myapplication.core.presentation.mvi.UiState
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe

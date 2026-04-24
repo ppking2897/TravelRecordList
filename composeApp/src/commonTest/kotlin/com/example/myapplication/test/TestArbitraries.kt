@@ -2,10 +2,8 @@
 
 package com.example.myapplication.test
 
-import com.example.myapplication.domain.entity.Hashtag
-import com.example.myapplication.domain.entity.ItineraryItem
-import com.example.myapplication.domain.entity.Location
-import com.example.myapplication.domain.entity.Photo
+import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import com.example.myapplication.feature.itinerary_item.domain.model.Location
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import kotlin.time.Clock

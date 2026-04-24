@@ -14,11 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
 import coil3.compose.SubcomposeAsyncImage
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo
-import java.io.File
 
 /**
  * 本地圖片顯示元件
@@ -57,7 +54,7 @@ fun LocalImage(
     contentScale: ContentScale = ContentScale.Crop
 ) {
     SubcomposeAsyncImage(
-        model = File(filePath),
+        model = filePath,
         contentDescription = contentDescription,
         modifier = modifier,
         contentScale = contentScale,
