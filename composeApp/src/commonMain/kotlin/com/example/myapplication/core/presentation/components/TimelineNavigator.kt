@@ -231,10 +231,22 @@ private fun AllTabItem(
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
+        // 與 TimelineNodeItem 對齊的隱形 placeholder：
+        // - bodySmall 空行對應地點行
+        // - labelSmall 空行對應進度行 (N/M)
+        // 全部 alpha=0 但佔空間，讓 AllTab 的 Column 高度跟 Day 節點一致，
+        // 不會因為選中時內容高度差異造成 LazyRow 跑版。
         Text(
-            text = "",
+            text = "-",
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(horizontal = Spacing.xs)
+            modifier = Modifier
+                .padding(horizontal = Spacing.xs)
+                .alpha(0f)
+        )
+        Text(
+            text = "(0/0)",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.alpha(0f)
         )
     }
 }
