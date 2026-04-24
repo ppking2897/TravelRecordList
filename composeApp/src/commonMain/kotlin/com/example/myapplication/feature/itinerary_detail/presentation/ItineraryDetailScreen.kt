@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MoreVert
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.presentation.theme.AppGradients
+import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.ListStyle
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
@@ -513,14 +515,12 @@ private fun ItineraryDetailScreenContent(
                                     val isLastItem = isLastInGroup && isLastGroup
 
                                     ReorderableItem {
-                                        val dragModifier = if (isSelectionMode) {
-                                            Modifier
-                                        } else {
-                                            Modifier.longPressDraggableHandle()
-                                        }
-
-                                        Box(modifier = dragModifier) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
                                             ItemCard(
+                                                modifier = Modifier.weight(1f),
                                                 item = item,
                                                 isExpanded = expandedItemIds.contains(item.id),
                                                 isLastItem = isLastItem,
@@ -535,6 +535,17 @@ private fun ItineraryDetailScreenContent(
                                                 isSelected = selectedItemIds.contains(item.id),
                                                 onSelectionToggle = { onToggleItemSelection(item.id) }
                                             )
+                                            if (!isSelectionMode) {
+                                                Icon(
+                                                    imageVector = Icons.Default.DragHandle,
+                                                    contentDescription = "長按拖曳排序",
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier
+                                                        .longPressDraggableHandle()
+                                                        .padding(horizontal = Spacing.sm)
+                                                        .size(IconSize.md)
+                                                )
+                                            }
                                         }
                                     }
                                 }
