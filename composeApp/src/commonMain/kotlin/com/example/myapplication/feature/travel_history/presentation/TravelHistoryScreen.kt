@@ -43,6 +43,7 @@ import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryIt
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo
 import com.example.myapplication.core.presentation.components.HashtagRow
 import com.example.myapplication.core.presentation.components.LoadingContent
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.core.presentation.components.LocalImage
 import com.example.myapplication.core.presentation.components.PhotoPreviewDialog
 import com.example.myapplication.core.presentation.theme.CardStyle
@@ -772,7 +773,7 @@ private fun formatTime(time: kotlinx.datetime.LocalTime): String {
 @ExperimentalTime
 @Composable
 private fun TravelHistoryScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             TravelHistoryScreenContent(
                 historyByLocation = mapOf(
@@ -824,7 +825,7 @@ private fun TravelHistoryScreenPreview() {
 @ExperimentalTime
 @Composable
 private fun TravelHistoryScreenPreview_Loading() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             TravelHistoryScreenContent(
                 historyByLocation = emptyMap(),
@@ -845,7 +846,7 @@ private fun TravelHistoryScreenPreview_Loading() {
 @ExperimentalTime
 @Composable
 private fun TravelHistoryScreenPreview_Empty() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             TravelHistoryScreenContent(
                 historyByLocation = emptyMap(),

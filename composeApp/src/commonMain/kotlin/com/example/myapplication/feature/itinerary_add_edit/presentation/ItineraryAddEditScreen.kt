@@ -29,6 +29,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.example.myapplication.LocalSnackbarHostState
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.coroutines.launch
@@ -225,7 +226,7 @@ fun ItineraryAddEditScreen(
 @ExperimentalTime
 @Composable
 private fun ItineraryAddEditScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             Scaffold(
                 topBar = {

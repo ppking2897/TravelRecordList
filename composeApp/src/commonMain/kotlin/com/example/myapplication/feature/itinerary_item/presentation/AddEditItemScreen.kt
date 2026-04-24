@@ -24,6 +24,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.example.myapplication.LocalSnackbarHostState
 import com.example.myapplication.core.domain.service.LocationSearchService
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -180,7 +181,7 @@ fun AddEditItemScreenContent(
 @ExperimentalTime
 @Composable
 private fun AddEditItemScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             AddEditItemScreenContent(
                 state = AddEditItemState(

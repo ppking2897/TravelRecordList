@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.core.presentation.components.LoadingContent
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
 import com.example.myapplication.feature.route.domain.model.Route
 import com.example.myapplication.feature.route.domain.model.RouteLocation
@@ -287,7 +288,7 @@ private fun RouteLocationCard(
 @Preview
 @Composable
 private fun RouteViewScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             RouteViewScreenContent(
                 route = Route(
@@ -333,7 +334,7 @@ private fun RouteViewScreenPreview() {
 @Preview
 @Composable
 private fun RouteViewScreenPreview_Loading() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             RouteViewScreenContent(
                 route = null,
@@ -351,7 +352,7 @@ private fun RouteViewScreenPreview_Loading() {
 @Preview
 @Composable
 private fun RouteViewScreenPreview_Error() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             RouteViewScreenContent(
                 route = null,

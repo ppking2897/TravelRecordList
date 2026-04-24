@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.myapplication.LocalSnackbarHostState
 import com.example.myapplication.core.domain.service.LocationSearchService
+import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
@@ -117,7 +118,7 @@ fun EditItemScreenContent(
 @ExperimentalTime
 @Composable
 private fun EditItemScreenPreview() {
-    MaterialTheme {
+    TravelRecordTheme {
         Surface {
             EditItemScreenContent(
                 state = EditItemState(
