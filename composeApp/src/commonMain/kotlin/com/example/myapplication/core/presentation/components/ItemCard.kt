@@ -492,7 +492,9 @@ fun CoverPhotoDisplay(
                 photo = photo,
                 contentDescription = "封面照片",
                 modifier = Modifier.fillMaxSize(),
-                useThumbnail = true
+                // 封面圖佔卡片整個寬度，縮圖（最多 400x400）在高 DPI 裝置仍會模糊，
+                // 直接用原圖；Coil 會自動 downsample 到實際顯示尺寸。
+                useThumbnail = false
             )
 
             // 底部漸層遮罩 - 使用 AppGradients.cardOverlayGradient

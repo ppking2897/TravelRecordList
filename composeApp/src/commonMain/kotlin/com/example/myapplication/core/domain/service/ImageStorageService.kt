@@ -43,8 +43,8 @@ interface ImageStorageService {
      */
     suspend fun generateThumbnail(
         imageData: ByteArray,
-        width: Int = 200,
-        height: Int = 200
+        width: Int = 400,
+        height: Int = 400
     ): Result<ByteArray>
 
     /**
