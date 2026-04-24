@@ -231,17 +231,19 @@ private fun AllTabItem(
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
-        // 與 TimelineNodeItem 對齊的隱形 placeholder：
-        // - bodySmall 空行對應地點行
-        // - labelSmall 空行對應進度行 (N/M)
-        // 全部 alpha=0 但佔空間，讓 AllTab 的 Column 高度跟 Day 節點一致，
-        // 不會因為選中時內容高度差異造成 LazyRow 跑版。
+        // 與 TimelineNodeItem 對齊的隱形 placeholder：對應下段三行（地點/今天/進度），
+        // 全部 alpha=0 但佔空間，確保 AllTab 和 Day 節點 Column 高度永遠一致。
         Text(
             text = "-",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .padding(horizontal = Spacing.xs)
                 .alpha(0f)
+        )
+        Text(
+            text = "今天",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.alpha(0f)
         )
         Text(
             text = "(0/0)",
@@ -435,15 +437,14 @@ private fun TimelineNodeItem(
             modifier = Modifier.padding(horizontal = Spacing.xs)
         )
 
-        // 今天標示
-        if (isToday) {
-            Text(
-                text = "今天",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center
-            )
-        }
+        // 今天標示：非今天時用 alpha 0 保留空間，所有節點下段行數一致
+        Text(
+            text = "今天",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+            modifier = if (isToday) Modifier else Modifier.alpha(0f)
+        )
 
         // 進度指示 (如 2/3)：0/0 時用 alpha 0 隱藏文字但保留高度，
         // 讓所有節點的垂直尺寸一致（不會因沒項目而變矮）
