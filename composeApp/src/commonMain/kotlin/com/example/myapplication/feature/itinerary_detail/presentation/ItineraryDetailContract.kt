@@ -55,6 +55,9 @@ sealed class ItineraryDetailIntent : UiIntent {
     data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
     data class QuickAddItem(val afterDayIndex: Int) : ItineraryDetailIntent()
 
+    /** 重新排序同一日期內的項目（itemIds 即為新順序） */
+    data class ReorderItemsInDay(val date: LocalDate, val itemIds: List<String>) : ItineraryDetailIntent()
+
     // 批量操作相關 Intent
     object ToggleSelectionMode : ItineraryDetailIntent()
     data class ToggleItemSelection(val itemId: String) : ItineraryDetailIntent()

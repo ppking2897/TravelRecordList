@@ -13,6 +13,7 @@ import com.example.myapplication.feature.itinerary_item.domain.usecase.GenerateT
 import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
+import com.example.myapplication.feature.itinerary_item.domain.usecase.ReorderItemsInDayUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import com.example.myapplication.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import com.example.myapplication.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
@@ -44,7 +45,8 @@ class ItineraryDetailViewModel(
     private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
     private val generateThumbnailUseCase: GenerateThumbnailUseCase,
     private val batchDeleteItemsUseCase: BatchDeleteItemsUseCase,
-    private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase
+    private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase,
+    private val reorderItemsInDayUseCase: ReorderItemsInDayUseCase
 ) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
@@ -63,6 +65,7 @@ class ItineraryDetailViewModel(
             is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
             is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
             is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
+            is ItineraryDetailIntent.ReorderItemsInDay -> reorderItemsInDay(intent.date, intent.itemIds)
             // 批量操作相關
             is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
             is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
@@ -326,6 +329,33 @@ class ItineraryDetailViewModel(
         }
 
         sendEvent(ItineraryDetailEvent.NavigateToQuickAddItem(clampedDate))
+    }
+
+    private suspend fun reorderItemsInDay(date: LocalDate, itemIds: List<String>) {
+        val itinerary = currentState.itinerary ?: return
+
+        // Optimistic：立即反映新順序到 UI（避免等 persist 回來的延遲感）
+        updateState {
+            copy(
+                groupedItems = groupedItems.map { group ->
+                    if (group.date == date) {
+                        val reordered = itemIds.mapIndexedNotNull { newOrder, id ->
+                            group.items.find { it.id == id }?.copy(order = newOrder)
+                        }
+                        group.copy(items = reordered)
+                    } else {
+                        group
+                    }
+                }
+            )
+        }
+
+        reorderItemsInDayUseCase(itinerary.id, itemIds)
+            .onFailure { exception ->
+                sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "排序失敗"))
+                // 失敗則重新載入還原
+                handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+            }
     }
 
     // ========== 批量操作相關方法 ==========
