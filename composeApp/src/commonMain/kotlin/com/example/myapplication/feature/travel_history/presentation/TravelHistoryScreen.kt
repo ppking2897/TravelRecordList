@@ -44,6 +44,7 @@ import com.example.myapplication.feature.itinerary_item.domain.model.Photo
 import com.example.myapplication.core.presentation.components.HashtagRow
 import com.example.myapplication.core.presentation.components.LoadingContent
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.core.presentation.components.LocalImage
 import com.example.myapplication.core.presentation.components.PhotoPreviewDialog
 import com.example.myapplication.core.presentation.theme.CardStyle
@@ -750,21 +751,12 @@ private fun buildTimeRangeText(
 ): String {
     return when {
         arrivalTime != null && departureTime != null -> {
-            "${formatTime(arrivalTime)} - ${formatTime(departureTime)}"
+            "${DateTimeFormatter.formatTime(arrivalTime)} - ${DateTimeFormatter.formatTime(departureTime)}"
         }
-        arrivalTime != null -> formatTime(arrivalTime)
-        departureTime != null -> "離開 ${formatTime(departureTime)}"
+        arrivalTime != null -> DateTimeFormatter.formatTime(arrivalTime)
+        departureTime != null -> "離開 ${DateTimeFormatter.formatTime(departureTime)}"
         else -> ""
     }
-}
-
-/**
- * 格式化時間
- */
-private fun formatTime(time: kotlinx.datetime.LocalTime): String {
-    val hour = time.hour.toString().padStart(2, '0')
-    val minute = time.minute.toString().padStart(2, '0')
-    return "$hour:$minute"
 }
 
 

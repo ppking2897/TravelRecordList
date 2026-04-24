@@ -49,6 +49,7 @@ import com.example.myapplication.core.presentation.components.LocalImage
 import com.example.myapplication.core.presentation.components.LocationSearchField
 import com.example.myapplication.core.presentation.components.SimplePhotoPreviewDialog
 import com.example.myapplication.core.presentation.components.TimePickerDialog
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
@@ -198,7 +199,7 @@ fun ItemFormContent(
         )
 
         OutlinedTextField(
-            value = arrivalTime?.toString() ?: "",
+            value = DateTimeFormatter.formatTime(arrivalTime),
             onValueChange = {},
             label = { Text("到達時間") },
             modifier = Modifier.fillMaxWidth(),
@@ -211,7 +212,7 @@ fun ItemFormContent(
         )
 
         OutlinedTextField(
-            value = departureTime?.toString() ?: "",
+            value = DateTimeFormatter.formatTime(departureTime),
             onValueChange = {},
             label = { Text("離開時間") },
             modifier = Modifier.fillMaxWidth(),

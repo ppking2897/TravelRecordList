@@ -44,6 +44,7 @@ import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.memory.domain.model.DailyHighlight
 import com.example.myapplication.feature.memory.domain.model.MemoryStory
@@ -272,7 +273,7 @@ private fun DailyHighlightRow(highlight: DailyHighlight) {
         verticalAlignment = Alignment.Top
     ) {
         Text(
-            text = formatDate(highlight.date),
+            text = DateTimeFormatter.formatDate(highlight.date),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary
         )
@@ -334,11 +335,7 @@ private fun LoadingCenter(paddingValues: PaddingValues) {
 private fun formatDateRange(itinerary: Itinerary): String? {
     val start = itinerary.startDate ?: return null
     val end = itinerary.endDate ?: return null
-    return "${formatDate(start)} - ${formatDate(end)}"
-}
-
-private fun formatDate(date: LocalDate): String {
-    return "${date.year}/${date.monthNumber.toString().padStart(2, '0')}/${date.dayOfMonth.toString().padStart(2, '0')}"
+    return "${DateTimeFormatter.formatDate(start)} - ${DateTimeFormatter.formatDate(end)}"
 }
 
 // ==================== Preview 假資料 ====================

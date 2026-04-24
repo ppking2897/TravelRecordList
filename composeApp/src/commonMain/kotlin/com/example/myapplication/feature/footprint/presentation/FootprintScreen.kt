@@ -45,6 +45,7 @@ import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
 import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
 import kotlinx.datetime.LocalDate
@@ -317,7 +318,7 @@ private fun VisitedPlaceRow(place: VisitedPlace) {
             }
         }
         Text(
-            text = formatDate(place.date),
+            text = DateTimeFormatter.formatDate(place.date),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -357,13 +358,13 @@ private fun EmptyFootprintState(modifier: Modifier = Modifier) {
 private fun formatDateRange(start: LocalDate?, end: LocalDate?): String? {
     if (start == null && end == null) return null
     if (start != null && end != null) {
-        return if (start == end) formatDate(start) else "${formatDate(start)} - ${formatDate(end)}"
+        return if (start == end) {
+            DateTimeFormatter.formatDate(start)
+        } else {
+            "${DateTimeFormatter.formatDate(start)} - ${DateTimeFormatter.formatDate(end)}"
+        }
     }
-    return formatDate(start ?: end!!)
-}
-
-private fun formatDate(date: LocalDate): String {
-    return "${date.year}/${date.monthNumber.toString().padStart(2, '0')}/${date.dayOfMonth.toString().padStart(2, '0')}"
+    return DateTimeFormatter.formatDate(start ?: end!!)
 }
 
 // ==================== Preview 假資料 ====================

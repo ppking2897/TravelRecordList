@@ -63,6 +63,7 @@ import com.example.myapplication.core.presentation.components.LocationSearchFiel
 import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.model.Location
@@ -316,7 +317,7 @@ private fun TodayTripHeader(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
             Text(
-                text = today?.let { "今天 ${formatDate(it)}" } ?: "今天",
+                text = today?.let { "今天 ${DateTimeFormatter.formatDate(it)}" } ?: "今天",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -364,7 +365,7 @@ private fun TodayItemCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = item.primaryTime()?.let { formatTime(it) } ?: "未排時間",
+                        text = item.primaryTime()?.let { DateTimeFormatter.formatTime(it) } ?: "未排時間",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -467,7 +468,7 @@ private fun NoCurrentTripState(
         Spacer(Modifier.height(Spacing.md))
         Text("今天沒有旅行中的行程", style = MaterialTheme.typography.headlineSmall)
         Text(
-            text = today?.let { "今天是 ${formatDate(it)}，目前沒有日期涵蓋今天的行程。" }
+            text = today?.let { "今天是 ${DateTimeFormatter.formatDate(it)}，目前沒有日期涵蓋今天的行程。" }
                 ?: "目前沒有日期涵蓋今天的行程。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -510,7 +511,7 @@ private fun QuickRecordSheet(
         ) {
             Text("快速紀錄", style = MaterialTheme.typography.headlineSmall)
             Text(
-                text = "預設加入 ${state.today?.let { formatDate(it) } ?: "今天"} · ${state.currentTrip?.title.orEmpty()}",
+                text = "預設加入 ${state.today?.let { DateTimeFormatter.formatDate(it) } ?: "今天"} · ${state.currentTrip?.title.orEmpty()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -606,14 +607,6 @@ private fun NoteEditorDialog(
             }
         }
     )
-}
-
-private fun formatDate(date: LocalDate): String {
-    return "${date.year}/${date.monthNumber.toString().padStart(2, '0')}/${date.dayOfMonth.toString().padStart(2, '0')}"
-}
-
-private fun formatTime(time: LocalTime): String {
-    return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 }
 
 // ==================== Preview 假資料 ====================

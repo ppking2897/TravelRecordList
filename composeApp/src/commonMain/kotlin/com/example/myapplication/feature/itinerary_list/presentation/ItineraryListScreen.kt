@@ -60,6 +60,7 @@ import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.IconSize
 import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary.domain.model.TravelPhase
 import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
@@ -675,17 +676,12 @@ private fun extractMainLocation(items: List<ItineraryItem>): String? {
 
 private fun formatDateRange(startDate: LocalDate?, endDate: LocalDate?): String? {
     return when {
-        startDate != null && endDate != null -> "${startDate.toDisplayString()} - ${endDate.toDisplayString()}"
-        startDate != null -> "開始：${startDate.toDisplayString()}"
-        endDate != null -> "結束：${endDate.toDisplayString()}"
+        startDate != null && endDate != null ->
+            "${DateTimeFormatter.formatDate(startDate)} - ${DateTimeFormatter.formatDate(endDate)}"
+        startDate != null -> "開始：${DateTimeFormatter.formatDate(startDate)}"
+        endDate != null -> "結束：${DateTimeFormatter.formatDate(endDate)}"
         else -> null
     }
-}
-
-private fun LocalDate.toDisplayString(): String {
-    return "$year/${monthNumber.toString().padStart(2, '0')}/${
-        dayOfMonth.toString().padStart(2, '0')
-    }"
 }
 
 @Preview

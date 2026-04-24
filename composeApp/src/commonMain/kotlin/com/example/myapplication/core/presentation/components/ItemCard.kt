@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.model.Photo
+import com.example.myapplication.core.presentation.util.DateTimeFormatter
 import com.example.myapplication.core.presentation.theme.AppGradients
 import com.example.myapplication.core.presentation.theme.CardStyle
 import com.example.myapplication.core.presentation.theme.CompletedStateColors
@@ -358,7 +359,7 @@ private fun TimelineSection(
         // 時間顯示
         if (primaryTime != null) {
             Text(
-                text = formatTime(primaryTime),
+                text = DateTimeFormatter.formatTime(primaryTime),
                 style = MaterialTheme.typography.labelLarge,
                 color = timeTextColor
             )
@@ -515,11 +516,3 @@ fun CoverPhotoDisplay(
     }
 }
 
-/**
- * 格式化時間顯示
- */
-private fun formatTime(time: kotlinx.datetime.LocalTime): String {
-    val hour = time.hour.toString().padStart(2, '0')
-    val minute = time.minute.toString().padStart(2, '0')
-    return "$hour:$minute"
-}
