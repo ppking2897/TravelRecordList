@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -190,11 +191,10 @@ private fun AllTabItem(
     ) {
         Text(
             text = "總覽",
-            style = if (isSelected) {
-                MaterialTheme.typography.labelMedium
-            } else {
-                MaterialTheme.typography.labelSmall
-            },
+            // 固定 style 避免字型 line height 微差造成 Column 高度跳動；
+            // 選中改用 Bold 區分。
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             color = textColor,
             textAlign = TextAlign.Center
         )
@@ -324,14 +324,12 @@ private fun TimelineNodeItem(
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Day 標籤
+        // Day 標籤（固定 style + Bold 區分選中，避免 labelSmall↔labelMedium 切換
+        // 在不同字型 fallback 下 line height 微差造成節點跳動）
         Text(
             text = "Day ${node.dayNumber}",
-            style = if (isSelected) {
-                MaterialTheme.typography.labelMedium
-            } else {
-                MaterialTheme.typography.labelSmall
-            },
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             color = textColor,
             textAlign = TextAlign.Center
         )
