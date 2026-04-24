@@ -1,9 +1,11 @@
 package com.example.myapplication.feature.itinerary_list.presentation
 
+import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
 import com.example.myapplication.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import com.example.myapplication.feature.itinerary.domain.usecase.SearchItinerariesUseCase
+import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import com.example.myapplication.core.presentation.mvi.BaseViewModel
 
 /**
@@ -12,6 +14,7 @@ import com.example.myapplication.core.presentation.mvi.BaseViewModel
 class ItineraryListViewModel(
     private val getAllItinerariesUseCase: GetAllItinerariesUseCase,
     private val searchUseCase: SearchItinerariesUseCase,
+    private val getItemsByItineraryUseCase: GetItemsByItineraryUseCase,
     private val initializeSampleDataUseCase: InitializeSampleDataUseCase,
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
 ) : BaseViewModel<ItineraryListState, ItineraryListIntent, ItineraryListEvent>(
@@ -55,25 +58,15 @@ class ItineraryListViewModel(
             updateState { copy(isLoading = true, error = null) }
         }
 
-        getAllItinerariesUseCase()
-            .onSuccess { itineraries ->
-                updateState {
-                    copy(
-                        itineraries = itineraries,
-                        isLoading = false
-                    )
-                }
-            }
-            .onFailure { exception ->
-                if (!hasData) {
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            error = exception.message ?: "載入失敗"
-                        )
-                    }
-                }
-            }
+        val result = getAllItinerariesUseCase()
+        val itineraries = result.getOrNull()
+        if (itineraries != null) {
+            val hydrated = hydrateItems(itineraries)
+            updateState { copy(itineraries = hydrated, isLoading = false) }
+        } else if (!hasData) {
+            val message = result.exceptionOrNull()?.message ?: "載入失敗"
+            updateState { copy(isLoading = false, error = message) }
+        }
     }
 
     /**
@@ -85,24 +78,15 @@ class ItineraryListViewModel(
         if (query.isBlank()) {
             loadItineraries()
         } else {
-            searchUseCase(query)
-                .onSuccess { results ->
-                    updateState {
-                        copy(
-                            itineraries = results,
-                            isLoading = false
-                        )
-                    }
-                }
-                .onFailure { exception ->
-                    val errorMessage = exception.message ?: "搜尋失敗"
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            error = errorMessage
-                        )
-                    }
-                }
+            val result = searchUseCase(query)
+            val results = result.getOrNull()
+            if (results != null) {
+                val hydrated = hydrateItems(results)
+                updateState { copy(itineraries = hydrated, isLoading = false) }
+            } else {
+                val errorMessage = result.exceptionOrNull()?.message ?: "搜尋失敗"
+                updateState { copy(isLoading = false, error = errorMessage) }
+            }
         }
     }
 
@@ -125,16 +109,21 @@ class ItineraryListViewModel(
     private suspend fun refresh() {
         updateState { copy(isRefreshing = true, error = null) }
 
-        getAllItinerariesUseCase()
-            .onSuccess { itineraries ->
-                updateState {
-                    copy(itineraries = itineraries, isRefreshing = false)
-                }
-            }
-            .onFailure { exception ->
-                updateState {
-                    copy(isRefreshing = false, error = exception.message ?: "載入失敗")
-                }
-            }
+        val result = getAllItinerariesUseCase()
+        val itineraries = result.getOrNull()
+        if (itineraries != null) {
+            val hydrated = hydrateItems(itineraries)
+            updateState { copy(itineraries = hydrated, isRefreshing = false) }
+        } else {
+            val message = result.exceptionOrNull()?.message ?: "載入失敗"
+            updateState { copy(isRefreshing = false, error = message) }
+        }
+    }
+
+    private suspend fun hydrateItems(itineraries: List<Itinerary>): List<Itinerary> {
+        return itineraries.map { itinerary ->
+            val items = getItemsByItineraryUseCase(itinerary.id).getOrElse { emptyList() }
+            itinerary.copy(items = items)
+        }
     }
 }

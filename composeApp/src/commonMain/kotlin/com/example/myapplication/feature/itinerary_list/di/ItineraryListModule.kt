@@ -9,6 +9,7 @@ val itineraryListModule = module {
         ItineraryListViewModel(
             getAllItinerariesUseCase = get(),
             searchUseCase = get(),
+            getItemsByItineraryUseCase = get(),
             initializeSampleDataUseCase = get(),
             deleteItineraryUseCase = get()
         )
