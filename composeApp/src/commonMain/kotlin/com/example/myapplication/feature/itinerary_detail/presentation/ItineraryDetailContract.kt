@@ -10,7 +10,10 @@ import kotlinx.datetime.LocalDate
 
 data class ItineraryDetailState(
     val itinerary: Itinerary? = null,
+    /** 套用日期 / hashtag 過濾後的分組，供 LazyColumn 渲染用 */
     val groupedItems: List<ItemsByDate> = emptyList(),
+    /** 未套用任何過濾的完整分組，供 TimelineNavigator 顯示每日計數用 */
+    val allGroupedItems: List<ItemsByDate> = emptyList(),
     val selectedDate: LocalDate? = null,
     val dateRange: ClosedRange<LocalDate>? = null,
     val expandedItemIds: Set<String> = emptySet(),

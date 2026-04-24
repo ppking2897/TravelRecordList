@@ -125,6 +125,7 @@ fun ItineraryDetailScreen(
     ItineraryDetailScreenContent(
         itinerary = itinerary,
         groupedItems = groupedItems.map { ItemsByDate(it.date, it.items) },
+        allGroupedItems = state.allGroupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
         dateRange = dateRange,
         expandedItemIds = state.expandedItemIds,
@@ -207,6 +208,7 @@ fun ItineraryDetailScreen(
 private fun ItineraryDetailScreenContent(
     itinerary: Itinerary?,
     groupedItems: List<ItemsByDate>,
+    allGroupedItems: List<ItemsByDate> = groupedItems,
     selectedDate: LocalDate?,
     dateRange: ClosedRange<LocalDate>?,
     expandedItemIds: Set<String>,
@@ -407,11 +409,11 @@ private fun ItineraryDetailScreenContent(
                     .background(backgroundGradient)
                     .padding(paddingValues)
             ) {
-                // 時間軸導覽
+                // 時間軸導覽（用 allGroupedItems 顯示每日總計數，不受日期 filter 影響）
                 dateRange?.let { range ->
                     TimelineNavigator(
                         dateRange = range,
-                        groupedItems = groupedItems,
+                        groupedItems = allGroupedItems,
                         selectedDate = selectedDate,
                         onDateSelected = onSelectDate,
                         onQuickAdd = onQuickAdd

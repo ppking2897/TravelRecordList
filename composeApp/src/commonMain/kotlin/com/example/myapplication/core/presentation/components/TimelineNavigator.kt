@@ -408,15 +408,17 @@ private fun TimelineNodeItem(
             )
         }
 
-        // 進度指示 (如 2/3)
-        if (node.totalCount > 0) {
-            Text(
-                text = "(${node.completedCount}/${node.totalCount})",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (node.isAllCompleted) successColor else textColor.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-        }
+        // 進度指示 (如 2/3)，永遠顯示（包含 0/0，保持節點高度一致）
+        Text(
+            text = "(${node.completedCount}/${node.totalCount})",
+            style = MaterialTheme.typography.labelSmall,
+            color = when {
+                node.isAllCompleted -> successColor
+                node.totalCount == 0 -> textColor.copy(alpha = 0.4f)
+                else -> textColor.copy(alpha = 0.7f)
+            },
+            textAlign = TextAlign.Center
+        )
     }
 }
 

@@ -93,10 +93,12 @@ class ItineraryDetailViewModel(
                                 items
                             }
                             val grouped = groupItemsByDateUseCase(filtered)
+                            val allGrouped = groupItemsByDateUseCase(items)
                             updateState {
                                 copy(
                                     itinerary = itinerary,
                                     groupedItems = grouped,
+                                    allGroupedItems = allGrouped,
                                     dateRange = dateRange,
                                     isLoading = false
                                 )
@@ -137,8 +139,12 @@ class ItineraryDetailViewModel(
                         items
                     }
                     val grouped = groupItemsByDateUseCase(filtered)
+                    val allGrouped = groupItemsByDateUseCase(items)
                     updateState {
-                        copy(groupedItems = grouped)
+                        copy(
+                            groupedItems = grouped,
+                            allGroupedItems = allGrouped
+                        )
                     }
                 }
         }
@@ -306,8 +312,12 @@ class ItineraryDetailViewModel(
                     } ?: filtered
 
                     val grouped = groupItemsByDateUseCase(dateFiltered)
+                    val allGrouped = groupItemsByDateUseCase(items)
                     updateState {
-                        copy(groupedItems = grouped)
+                        copy(
+                            groupedItems = grouped,
+                            allGroupedItems = allGrouped
+                        )
                     }
                 }
         }
