@@ -23,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.example.myapplication.feature.itinerary.domain.model.Itinerary
 import com.example.myapplication.core.presentation.theme.AppGradients
 import com.example.myapplication.core.presentation.theme.ListStyle
@@ -39,8 +40,10 @@ import com.example.myapplication.core.presentation.theme.TravelRecordTheme
 import com.example.myapplication.LocalSnackbarHostState
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.plus
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -408,6 +411,21 @@ private fun ItineraryDetailScreenContent(
                     )
                 }
 
+                selectedDate?.let { date ->
+                    DayPlanningSummary(
+                        date = date,
+                        items = groupedItems.firstOrNull { it.date == date }?.items.orEmpty(),
+                        onAddFirstItem = {
+                            val range = dateRange
+                            if (range != null) {
+                                onQuickAdd(dayIndexFor(range, date))
+                            } else {
+                                onAddItemClick()
+                            }
+                        }
+                    )
+                }
+
                 // 內容
                 LazyColumn(
                     state = lazyListState,
@@ -432,11 +450,17 @@ private fun ItineraryDetailScreenContent(
                     // 項目列表
                     if (groupedItems.isEmpty()) {
                         item {
-                            EmptyState(
-                                message = if (selectedDate != null)
-                                    "此日期沒有項目\n點擊右下角按鈕新增"
-                                else
-                                    "還沒有項目\n點擊右下角按鈕新增第一個項目"
+                            EmptyDatePlanningState(
+                                selectedDate = selectedDate,
+                                onAddFirstItem = {
+                                    val date = selectedDate
+                                    val range = dateRange
+                                    if (date != null && range != null) {
+                                        onQuickAdd(dayIndexFor(range, date))
+                                    } else {
+                                        onAddItemClick()
+                                    }
+                                }
                             )
                         }
                     } else {
@@ -485,6 +509,98 @@ private fun ItineraryDetailScreenContent(
             }
         }
     }
+}
+
+@Composable
+private fun DayPlanningSummary(
+    date: LocalDate,
+    items: List<ItineraryItem>,
+    onAddFirstItem: () -> Unit
+) {
+    val completedCount = items.count { it.isCompleted }
+    val photoCount = items.sumOf { it.photos.size }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                Text(
+                    text = date.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "${items.size} 個地點 · $completedCount 已完成 · $photoCount 張照片",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            if (items.isEmpty()) {
+                TextButton(onClick = onAddFirstItem) {
+                    Text("新增這天")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyDatePlanningState(
+    selectedDate: LocalDate?,
+    onAddFirstItem: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = if (selectedDate != null) "這一天還沒有安排" else "還沒有行程項目",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = if (selectedDate != null) {
+                "先新增第一個地點，開始規劃這一天。"
+            } else {
+                "先選擇日期或點擊新增，建立第一個地點。"
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Button(onClick = onAddFirstItem) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(modifier = Modifier.width(Spacing.sm))
+            Text(if (selectedDate != null) "新增這天的第一個地點" else "新增第一個地點")
+        }
+    }
+}
+
+private fun dayIndexFor(
+    range: ClosedRange<LocalDate>,
+    selectedDate: LocalDate
+): Int {
+    var current = range.start
+    var index = 0
+    while (current < selectedDate && current < range.endInclusive) {
+        current = current.plus(1, DateTimeUnit.DAY)
+        index += 1
+    }
+    return index
 }
 
 // Preview

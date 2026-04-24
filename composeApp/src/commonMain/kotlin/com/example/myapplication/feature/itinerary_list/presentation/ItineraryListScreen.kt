@@ -1,8 +1,6 @@
 package com.example.myapplication.feature.itinerary_list.presentation
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -41,13 +39,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,16 +52,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.ListStyle
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.example.myapplication.core.presentation.components.DefaultCoverPlaceholder
 import com.example.myapplication.core.presentation.components.DeleteConfirmDialog
 import com.example.myapplication.core.presentation.components.LocalImage
+import com.example.myapplication.core.presentation.theme.CardStyle
+import com.example.myapplication.core.presentation.theme.IconSize
+import com.example.myapplication.core.presentation.theme.Spacing
 import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import com.example.myapplication.feature.itinerary.domain.model.TravelPhase
+import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
+import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -73,9 +72,6 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * 行程列表畫面（MVI 架構）
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItineraryListScreen(
@@ -86,17 +82,14 @@ fun ItineraryListScreen(
     viewModel: ItineraryListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }
 
-    // 畫面可見時重新載入（返回時自動刷新，有資料不顯示 loading）
     LifecycleResumeEffect(Unit) {
         viewModel.handleIntent(ItineraryListIntent.LoadItineraries)
         onPauseOrDispose { }
     }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }
-
-    // 收集 Event
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
             when (event) {
@@ -107,15 +100,12 @@ fun ItineraryListScreen(
                     itineraryToDelete = event.itinerary
                     showDeleteDialog = true
                 }
-
-                is ItineraryListEvent.ShowError -> {
-                    // 錯誤訊息透過 Event 顯示
-                }
+                is ItineraryListEvent.ShowError -> Unit
             }
         }
     }
 
-    ItineraryListScreenContent(
+    ItineraryPlanningDashboard(
         itineraries = state.itineraries,
         searchQuery = state.searchQuery,
         isLoading = state.isLoading,
@@ -133,11 +123,10 @@ fun ItineraryListScreen(
         onRefresh = { viewModel.handleIntent(ItineraryListIntent.Refresh) }
     )
 
-    // 刪除確認 Dialog
     if (showDeleteDialog && itineraryToDelete != null) {
         DeleteConfirmDialog(
-            title = "確認刪除",
-            message = "確定要刪除「${itineraryToDelete!!.title}」嗎？此操作無法復原。",
+            title = "刪除行程",
+            message = "確定要刪除「${itineraryToDelete!!.title}」嗎？這個動作無法復原。",
             onConfirm = {
                 viewModel.handleIntent(ItineraryListIntent.DeleteItinerary(itineraryToDelete!!.id))
                 showDeleteDialog = false
@@ -151,55 +140,9 @@ fun ItineraryListScreen(
     }
 }
 
-
-// Preview
-@Preview
-@kotlin.time.ExperimentalTime
-@Composable
-private fun ItineraryListScreenPreview() {
-    TravelRecordTheme {
-        Surface {
-            ItineraryListScreenContent(
-                itineraries = listOf(
-                    Itinerary(
-                        id = "1",
-                        title = "東京之旅",
-                        description = "探索日本首都的美食與文化",
-                        startDate = kotlinx.datetime.LocalDate(2024, 3, 15),
-                        endDate = kotlinx.datetime.LocalDate(2024, 3, 20),
-                        items = emptyList(),
-                        createdAt = kotlin.time.Clock.System.now(),
-                        modifiedAt = kotlin.time.Clock.System.now()
-                    ),
-                    Itinerary(
-                        id = "2",
-                        title = "台南美食之旅",
-                        description = "品嚐台南在地小吃",
-                        startDate = kotlinx.datetime.LocalDate(2024, 4, 1),
-                        endDate = kotlinx.datetime.LocalDate(2024, 4, 3),
-                        items = emptyList(),
-                        createdAt = kotlin.time.Clock.System.now(),
-                        modifiedAt = kotlin.time.Clock.System.now()
-                    )
-                ),
-                searchQuery = "",
-                isLoading = false,
-                error = null,
-                onSearchChange = {},
-                onItineraryClick = {},
-                onEditClick = {},
-                onDeleteClick = {},
-                onAddClick = {},
-                onHistoryClick = {},
-                onRefresh = {}
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ItineraryListScreenContent(
+private fun ItineraryPlanningDashboard(
     itineraries: List<Itinerary>,
     searchQuery: String,
     isLoading: Boolean,
@@ -214,45 +157,64 @@ private fun ItineraryListScreenContent(
     onRefresh: () -> Unit
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
-    var selectedFilter by remember { mutableStateOf(ItineraryFilter.ALL) }
+    var selectedFilter by remember { mutableStateOf(ItineraryFilter.All) }
+    val today = rememberToday()
+    val phaseUseCase = remember { GetItineraryPhaseUseCase() }
 
-    @OptIn(kotlin.time.ExperimentalTime::class)
-    val today = kotlin.time.Clock.System.now().let {
-        kotlinx.datetime.Instant.fromEpochMilliseconds(it.toEpochMilliseconds())
-            .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
-    }
+    val filteredItineraries = remember(itineraries, searchQuery, selectedFilter, today) {
+        val phaseFiltered = when (selectedFilter) {
+            ItineraryFilter.All -> itineraries
+            ItineraryFilter.Planning -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.Planning }
+            ItineraryFilter.InProgress -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.InProgress }
+            ItineraryFilter.Completed -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.Completed }
+        }
 
-    val filteredItineraries = remember(itineraries, selectedFilter) {
-        when (selectedFilter) {
-            ItineraryFilter.ALL -> itineraries
-            ItineraryFilter.PLANNED -> itineraries.filter { itinerary ->
-                itinerary.startDate != null && itinerary.startDate > today
-            }
-            ItineraryFilter.IN_PROGRESS -> itineraries.filter { itinerary ->
-                itinerary.startDate != null && itinerary.endDate != null &&
-                    today >= itinerary.startDate && today <= itinerary.endDate
-            }
-            ItineraryFilter.COMPLETED -> itineraries.filter { itinerary ->
-                itinerary.items.isNotEmpty() && itinerary.items.all { it.isCompleted }
+        if (searchQuery.isBlank()) {
+            phaseFiltered
+        } else {
+            val query = searchQuery.trim()
+            phaseFiltered.filter { itinerary ->
+                itinerary.title.contains(query, ignoreCase = true) ||
+                    itinerary.description.contains(query, ignoreCase = true) ||
+                    itinerary.items.any { item ->
+                        item.activity.contains(query, ignoreCase = true) ||
+                            item.location.name.contains(query, ignoreCase = true)
+                    }
             }
         }
     }
+
+    val currentTrips = remember(filteredItineraries, today) {
+        filteredItineraries
+            .filter { phaseUseCase(it, today) == TravelPhase.InProgress }
+            .sortedBy { it.endDate?.toString() ?: "9999-12-31" }
+    }
+    val upcomingTrips = remember(filteredItineraries, today) {
+        filteredItineraries
+            .filter { phaseUseCase(it, today) == TravelPhase.Planning }
+            .sortedBy { it.startDate?.toString() ?: "9999-12-31" }
+            .take(3)
+    }
+    val recentTrips = remember(filteredItineraries) {
+        filteredItineraries
+            .sortedByDescending { it.modifiedAt }
+            .take(3)
+    }
+    val shouldShowRecentTrips = recentTrips.isNotEmpty() && filteredItineraries.size > 1
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("我的行程") },
+                title = { Text("行程規劃") },
                 actions = {
-                    // 歷史記錄按鈕
                     IconButton(onClick = onHistoryClick) {
                         Icon(
                             Icons.Default.Place,
-                            contentDescription = "旅遊歷史",
+                            contentDescription = "查看足跡",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-
                 }
             )
         },
@@ -270,305 +232,387 @@ private fun ItineraryListScreenContent(
             state = pullToRefreshState,
             modifier = Modifier.padding(paddingValues)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = Spacing.lg,
+                    top = Spacing.sm,
+                    end = Spacing.lg,
+                    bottom = 112.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
-                // 即時搜尋列（始終顯示）
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
-                    placeholder = { Text("搜尋行程...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
-                    },
-                    singleLine = true
-                )
+                item {
+                    PlanningHeader(
+                        currentCount = currentTrips.size,
+                        upcomingCount = upcomingTrips.size,
+                        completedCount = filteredItineraries.count { phaseUseCase(it, today) == TravelPhase.Completed }
+                    )
+                }
 
-                // 篩選 chips
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.lg),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
-                    ItineraryFilter.entries.forEach { filter ->
-                        FilterChip(
-                            selected = selectedFilter == filter,
-                            onClick = { selectedFilter = filter },
-                            label = { Text(filter.label) }
+                item {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("搜尋行程、地點或活動...") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        singleLine = true
+                    )
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                    ) {
+                        ItineraryFilter.entries.forEach { filter ->
+                            FilterChip(
+                                selected = selectedFilter == filter,
+                                onClick = { selectedFilter = filter },
+                                label = { Text(filter.label) }
+                            )
+                        }
+                    }
+                }
+
+                error?.let { errorMessage ->
+                    item {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
 
-                // 錯誤訊息
-                error?.let { errorMessage ->
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(Spacing.lg)
-                    )
-                }
-
-                // 列表內容
-                if (filteredItineraries.isEmpty() && !isLoading) {
-                    // 空狀態
-                    EmptyStateGrid(onAddClick = onAddClick)
+                if (isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else if (filteredItineraries.isEmpty()) {
+                    item {
+                        EmptyPlanningState(onAddClick = onAddClick)
+                    }
                 } else {
-                    // 網格佈局
-                    ItineraryGridWithGroups(
-                        itineraries = filteredItineraries,
-                        onItineraryClick = onItineraryClick,
-                        onEditClick = onEditClick,
-                        onDeleteClick = onDeleteClick
-                    )
+                    if (currentTrips.isNotEmpty()) {
+                        item { SectionHeader("現在旅行中", "今天可以直接進入每日規劃") }
+                        items(currentTrips, key = { "current_${it.id}" }) { itinerary ->
+                            ItineraryDashboardCard(
+                                itinerary = itinerary,
+                                phase = phaseUseCase(itinerary, today),
+                                emphasized = true,
+                                onClick = { onItineraryClick(itinerary.id) },
+                                onEdit = { onEditClick(itinerary.id) },
+                                onDelete = { onDeleteClick(itinerary) }
+                            )
+                        }
+                    }
+
+                    if (upcomingTrips.isNotEmpty()) {
+                        item { SectionHeader("即將出發", "出發前先把每日地點安排好") }
+                        items(upcomingTrips, key = { "upcoming_${it.id}" }) { itinerary ->
+                            ItineraryDashboardCard(
+                                itinerary = itinerary,
+                                phase = phaseUseCase(itinerary, today),
+                                onClick = { onItineraryClick(itinerary.id) },
+                                onEdit = { onEditClick(itinerary.id) },
+                                onDelete = { onDeleteClick(itinerary) }
+                            )
+                        }
+                    }
+
+                    if (shouldShowRecentTrips) {
+                        item { SectionHeader("最近編輯", "快速回到剛調整過的行程") }
+                        items(recentTrips, key = { "recent_${it.id}" }) { itinerary ->
+                            ItineraryDashboardCard(
+                                itinerary = itinerary,
+                                phase = phaseUseCase(itinerary, today),
+                                compact = true,
+                                onClick = { onItineraryClick(itinerary.id) },
+                                onEdit = { onEditClick(itinerary.id) },
+                                onDelete = { onDeleteClick(itinerary) }
+                            )
+                        }
+                    }
+
+                    item { SectionHeader("全部行程", "${filteredItineraries.size} 筆行程") }
+                    items(filteredItineraries, key = { "all_${it.id}" }) { itinerary ->
+                        ItineraryDashboardCard(
+                            itinerary = itinerary,
+                            phase = phaseUseCase(itinerary, today),
+                            compact = true,
+                            onClick = { onItineraryClick(itinerary.id) },
+                            onEdit = { onEditClick(itinerary.id) },
+                            onDelete = { onDeleteClick(itinerary) }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// ============================================================================
-// 新增的網格佈局組件
-// ============================================================================
-
-/**
- * 網格佈局帶年份分組
- */
 @Composable
-private fun ItineraryGridWithGroups(
-    itineraries: List<Itinerary>,
-    onItineraryClick: (String) -> Unit,
-    onEditClick: (String) -> Unit,
-    onDeleteClick: (Itinerary) -> Unit,
-    modifier: Modifier = Modifier
+private fun PlanningHeader(
+    currentCount: Int,
+    upcomingCount: Int,
+    completedCount: Int
 ) {
-    val groupedItineraries = remember(itineraries) { groupByCreationYear(itineraries) }
-
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(ListStyle.contentPadding),
-        horizontalArrangement = Arrangement.spacedBy(ListStyle.gridSpacing),
-        verticalArrangement = Arrangement.spacedBy(ListStyle.gridSpacing)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
-        groupedItineraries.forEach { (year, yearItineraries) ->
-            // 年份標題（跨兩列）
-            item(key = "year_$year", span = { GridItemSpan(2) }) {
-                YearGroupHeader(year = year)
-            }
-
-            // 行程卡片
-            items(items = yearItineraries, key = { it.id }) { itinerary ->
-                ItineraryGridCard(
-                    itinerary = itinerary,
-                    onClick = { onItineraryClick(itinerary.id) },
-                    onEdit = { onEditClick(itinerary.id) },
-                    onDelete = { onDeleteClick(itinerary) }
-                )
+        Column(
+            modifier = Modifier.padding(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+        ) {
+            Text(
+                text = "從出發前開始，把每一天安排好。",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                DashboardStat("$currentCount", "旅行中")
+                DashboardStat("$upcomingCount", "即將出發")
+                DashboardStat("$completedCount", "已結束")
             }
         }
     }
 }
 
-/**
- * 網格卡片組件
- */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ItineraryGridCard(
+private fun DashboardStat(
+    value: String,
+    label: String
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    subtitle: String
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun ItineraryDashboardCard(
     itinerary: Itinerary,
+    phase: TravelPhase,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emphasized: Boolean = false,
+    compact: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val stats = remember(itinerary.items) { itinerary.stats() }
 
-    Box(modifier = modifier) {
-        Card(
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
+        colors = CardDefaults.cardColors(
+            containerColor = if (emphasized) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = { showMenu = true }
-                ),
-            elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+                .padding(CardStyle.contentPadding),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                // 封面圖片區域（含位置標籤）
-                Box(modifier = Modifier.fillMaxWidth().height(Spacing.xxxl * 2.5f)) {
-                    // 顯示封面照片或預設佔位圖
-                    if (itinerary.coverPhotoPath != null) {
-                        LocalImage(
-                            filePath = itinerary.coverPhotoPath,
-                            contentDescription = "封面照片",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        DefaultCoverPlaceholder(
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
+            TripCover(
+                itinerary = itinerary,
+                modifier = Modifier.size(if (compact) 72.dp else 96.dp)
+            )
 
-                    extractMainLocation(itinerary.items)?.let { location ->
-                        LocationBadge(
-                            location = location,
-                            modifier = Modifier.align(Alignment.TopStart).padding(Spacing.sm)
-                        )
-                    }
-                }
-
-                // 內容區域
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(CardStyle.compactContentPadding),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = itinerary.title,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.weight(1f)
                     )
+                    PhaseBadge(phase = phase)
+                }
 
-                    formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
-                        Text(
-                            text = dateText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
+                    Text(
+                        text = dateText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Text(
+                    text = "${stats.itemCount} 個地點 · ${stats.completedCount} 已完成 · ${stats.photoCount} 張照片",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                extractMainLocation(itinerary.items)?.let { location ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Place,
+                            contentDescription = null,
+                            modifier = Modifier.size(IconSize.xs),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    }
-
-                    if (itinerary.items.isNotEmpty()) {
-                        val totalCount = itinerary.items.size
-                        val completedCount = itinerary.items.count { it.isCompleted }
                         Text(
-                            text = if (completedCount > 0) "$totalCount 個項目 · $completedCount 已完成"
-                                   else "$totalCount 個項目",
+                            text = location,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
             }
-        }
 
-        // 操作選單 - 放在 Box 內，會相對於卡片定位
-        DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("編輯") },
-                onClick = { showMenu = false; onEdit() },
-                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
-            )
-            DropdownMenuItem(
-                text = { Text("刪除") },
-                onClick = { showMenu = false; onDelete() },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "更多操作")
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("編輯") },
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("刪除") },
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     )
                 }
-            )
+            }
         }
     }
 }
 
-
-/**
- * 位置標籤組件
- */
 @Composable
-private fun LocationBadge(
-    location: String,
+private fun TripCover(
+    itinerary: Itinerary,
     modifier: Modifier = Modifier
 ) {
+    Box(modifier = modifier) {
+        if (itinerary.coverPhotoPath != null) {
+            LocalImage(
+                filePath = itinerary.coverPhotoPath,
+                contentDescription = itinerary.title,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            DefaultCoverPlaceholder(modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+private fun PhaseBadge(
+    phase: TravelPhase
+) {
+    val color = when (phase) {
+        TravelPhase.Planning -> MaterialTheme.colorScheme.primaryContainer
+        TravelPhase.InProgress -> MaterialTheme.colorScheme.tertiaryContainer
+        TravelPhase.Completed -> MaterialTheme.colorScheme.surfaceVariant
+    }
+    val textColor = when (phase) {
+        TravelPhase.Planning -> MaterialTheme.colorScheme.onPrimaryContainer
+        TravelPhase.InProgress -> MaterialTheme.colorScheme.onTertiaryContainer
+        TravelPhase.Completed -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.primary,
+        color = color,
         shape = MaterialTheme.shapes.small
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Place,
-                contentDescription = null,
-                modifier = Modifier.size(IconSize.xs),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-            Text(
-                text = location,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Text(
+            text = phase.label,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+        )
     }
 }
 
-/**
- * 年份分組標題
- */
 @Composable
-private fun YearGroupHeader(
-    year: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.primary,
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.padding(start = Spacing.xs)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "$year 年",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-    }
-}
-
-
-/**
- * 空狀態組件（網格版本）
- */
-@Composable
-private fun EmptyStateGrid(
-    onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun EmptyPlanningState(
+    onAddClick: () -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(Spacing.xxl),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -580,14 +624,14 @@ private fun EmptyStateGrid(
         )
         Spacer(modifier = Modifier.height(Spacing.lg))
         Text(
-            text = "還沒有任何行程",
+            text = "還沒有行程",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
-            text = "開始規劃您的第一個旅遊行程",
+            text = "先建立一趟旅行，再安排每天要去的地點。",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -596,74 +640,91 @@ private fun EmptyStateGrid(
         Button(onClick = onAddClick) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(Spacing.sm))
-            Text("建立行程")
+            Text("建立第一個行程")
         }
     }
 }
 
-// ============================================================================
-// 篩選
-// ============================================================================
+private data class ItineraryStats(
+    val itemCount: Int,
+    val completedCount: Int,
+    val photoCount: Int
+)
 
 private enum class ItineraryFilter(val label: String) {
-    ALL("全部"),
-    PLANNED("計劃中"),
-    IN_PROGRESS("進行中"),
-    COMPLETED("已完成")
+    All("全部"),
+    Planning("規劃中"),
+    InProgress("旅行中"),
+    Completed("已結束")
 }
 
-// ============================================================================
-// 輔助函數
-// ============================================================================
+@OptIn(kotlin.time.ExperimentalTime::class)
+@Composable
+private fun rememberToday(): LocalDate {
+    return remember {
+        Instant.fromEpochMilliseconds(kotlin.time.Clock.System.now().toEpochMilliseconds())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+    }
+}
 
-/**
- * 從行程項目中提取最常出現的城市名稱
- */
+private fun Itinerary.stats(): ItineraryStats {
+    return ItineraryStats(
+        itemCount = items.size,
+        completedCount = items.count { it.isCompleted },
+        photoCount = items.sumOf { it.photos.size }
+    )
+}
+
 private fun extractMainLocation(items: List<ItineraryItem>): String? {
     if (items.isEmpty()) return null
     return items.groupingBy { it.location.name }.eachCount().maxByOrNull { it.value }?.key
 }
 
-/**
- * 格式化日期範圍顯示
- */
 private fun formatDateRange(startDate: LocalDate?, endDate: LocalDate?): String? {
     return when {
-        startDate != null && endDate != null ->
-            "${startDate.toDisplayString()} - ${endDate.toDisplayString()}"
-
+        startDate != null && endDate != null -> "${startDate.toDisplayString()} - ${endDate.toDisplayString()}"
         startDate != null -> "開始：${startDate.toDisplayString()}"
         endDate != null -> "結束：${endDate.toDisplayString()}"
         else -> null
     }
 }
 
-/**
- * 格式化建立日期
- */
-@OptIn(kotlin.time.ExperimentalTime::class)
-private fun formatCreatedDate(instant: Instant): String {
-    val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-    return localDate.toDisplayString()
-}
-
-/**
- * LocalDate 轉換為顯示格式 (yyyy/MM/dd)
- */
 private fun LocalDate.toDisplayString(): String {
     return "$year/${monthNumber.toString().padStart(2, '0')}/${
         dayOfMonth.toString().padStart(2, '0')
     }"
 }
 
-/**
- * 按建立年份對行程進行分組（降序）
- */
-@OptIn(kotlin.time.ExperimentalTime::class)
-private fun groupByCreationYear(itineraries: List<Itinerary>): Map<Int, List<Itinerary>> {
-    return itineraries
-        .groupBy { it.createdAt.toLocalDateTime(TimeZone.currentSystemDefault()).year }
-        .toList()
-        .sortedByDescending { it.first }
-        .toMap()
+@Preview
+@kotlin.time.ExperimentalTime
+@Composable
+private fun ItineraryPlanningDashboardPreview() {
+    TravelRecordTheme {
+        Surface {
+            ItineraryPlanningDashboard(
+                itineraries = listOf(
+                    Itinerary(
+                        id = "1",
+                        title = "京都大阪 5 日遊",
+                        description = "春季賞櫻行程",
+                        startDate = LocalDate(2025, 4, 1),
+                        endDate = LocalDate(2025, 4, 5),
+                        createdAt = kotlin.time.Clock.System.now(),
+                        modifiedAt = kotlin.time.Clock.System.now()
+                    )
+                ),
+                searchQuery = "",
+                isLoading = false,
+                error = null,
+                onSearchChange = {},
+                onItineraryClick = {},
+                onEditClick = {},
+                onDeleteClick = {},
+                onAddClick = {},
+                onHistoryClick = {},
+                onRefresh = {}
+            )
+        }
+    }
 }
