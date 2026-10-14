@@ -100,6 +100,15 @@ kotlin {
     }
 }
 
+// peekaboo-ui 0.5.2（已無新版）帶進 CameraX 1.3.2，其原生程式庫未對齊 16 KB 分頁；在此統一拉高 CameraX 版本
+dependencies {
+    constraints {
+        listOf("camera-core", "camera-camera2", "camera-lifecycle", "camera-video", "camera-view").forEach { artifact ->
+            add("androidMainImplementation", "androidx.camera:$artifact:${libs.versions.camerax.get()}")
+        }
+    }
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }

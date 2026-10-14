@@ -24,6 +24,7 @@ coil = "3.1.0"
 maplibre-compose = "0.12.1"
 zoomimage = "1.4.0"
 buildkonfig = "0.18.0"
+camerax = "1.4.2"
 
 [libraries]
 peekaboo-ui = { module = "io.github.onseok:peekaboo-ui", version.ref = "peekaboo" }
