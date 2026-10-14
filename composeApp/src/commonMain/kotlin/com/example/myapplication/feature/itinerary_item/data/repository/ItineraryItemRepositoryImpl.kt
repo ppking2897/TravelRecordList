@@ -8,7 +8,6 @@ import com.example.myapplication.core.data.local.StorageService
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 
 /**
  * ItineraryItemRepository 實作
@@ -107,28 +106,6 @@ class ItineraryItemRepositoryImpl(
 
             val filtered = allItems.filter {
                 it.location.name.equals(locationName, ignoreCase = false)
-            }
-
-            val sorted = filtered.sortedWith(
-                compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.primaryTime() }
-            )
-
-            Result.success(sorted)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getItemsByDateRange(
-        start: LocalDate,
-        end: LocalDate
-    ): Result<List<ItineraryItem>> {
-        return try {
-            val allItems = getAllItems()
-
-            val filtered = allItems.filter { item ->
-                item.date >= start && item.date <= end
             }
 
             val sorted = filtered.sortedWith(

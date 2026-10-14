@@ -12,7 +12,6 @@ import com.example.myapplication.feature.itinerary_map.di.itineraryMapModule
 import com.example.myapplication.feature.memory.di.memoryModule
 import com.example.myapplication.feature.route.di.routeModule
 import com.example.myapplication.feature.today.di.todayModule
-import com.example.myapplication.feature.travel_history.di.travelHistoryModule
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -27,6 +26,5 @@ val appModule =
             todayModule +
             draftModule +
             routeModule +
-            travelHistoryModule +
             footprintModule +
             memoryModule

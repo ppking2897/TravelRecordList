@@ -30,9 +30,6 @@ sealed interface AppRoute : NavKey {
     data class EditItem(val itemId: String) : AppRoute
 
     @Serializable
-    data object TravelHistory : AppRoute
-
-    @Serializable
     data class RouteView(val routeId: String) : AppRoute
 
     @Serializable

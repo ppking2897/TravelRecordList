@@ -3,7 +3,6 @@ package com.example.myapplication.feature.itinerary_item.domain.repository
 
 import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 
 /**
  * 行程項目資料存取介面
@@ -15,7 +14,6 @@ interface ItineraryItemRepository {
     suspend fun getItem(id: String): Result<ItineraryItem?>
     suspend fun getItemsByItinerary(itineraryId: String): Result<List<ItineraryItem>>
     suspend fun getItemsByLocation(locationName: String): Result<List<ItineraryItem>>
-    suspend fun getItemsByDateRange(start: LocalDate, end: LocalDate): Result<List<ItineraryItem>>
     suspend fun toggleCompletion(itemId: String, currentTimestamp: Instant): Result<ItineraryItem>
     suspend fun calculateProgress(itineraryId: String): Result<Float>
 
