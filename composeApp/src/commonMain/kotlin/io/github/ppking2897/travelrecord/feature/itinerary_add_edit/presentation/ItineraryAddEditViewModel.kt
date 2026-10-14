@@ -2,6 +2,8 @@
 
 package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
@@ -28,22 +30,24 @@ class ItineraryAddEditViewModel(
     private val loadDraftUseCase: LoadDraftUseCase,
     private val deleteDraftUseCase: DeleteDraftUseCase,
     private val imageStorageService: ImageStorageService
-) : BaseViewModel<ItineraryAddEditState, ItineraryAddEditIntent, ItineraryAddEditEvent>(
+) : BaseViewModel<ItineraryAddEditIntent, ItineraryAddEditState, ItineraryAddEditEvent>(
     initialState = ItineraryAddEditState()
 ) {
 
-    override suspend fun processIntent(intent: ItineraryAddEditIntent) {
-        when (intent) {
-            is ItineraryAddEditIntent.LoadItinerary -> loadItinerary(intent.itineraryId)
-            is ItineraryAddEditIntent.LoadDraft -> loadDraft()
-            is ItineraryAddEditIntent.UpdateTitle -> updateTitle(intent.title)
-            is ItineraryAddEditIntent.UpdateDescription -> updateDescription(intent.description)
-            is ItineraryAddEditIntent.UpdateStartDate -> updateStartDate(intent.date)
-            is ItineraryAddEditIntent.UpdateEndDate -> updateEndDate(intent.date)
-            is ItineraryAddEditIntent.SetCoverPhoto -> setCoverPhoto(intent.imageData)
-            is ItineraryAddEditIntent.RemoveCoverPhoto -> removeCoverPhoto()
-            is ItineraryAddEditIntent.Save -> save()
-            is ItineraryAddEditIntent.SaveDraft -> saveDraft()
+    override fun processIntent(intent: ItineraryAddEditIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is ItineraryAddEditIntent.LoadItinerary -> loadItinerary(intent.itineraryId)
+                is ItineraryAddEditIntent.LoadDraft -> loadDraft()
+                is ItineraryAddEditIntent.UpdateTitle -> updateTitle(intent.title)
+                is ItineraryAddEditIntent.UpdateDescription -> updateDescription(intent.description)
+                is ItineraryAddEditIntent.UpdateStartDate -> updateStartDate(intent.date)
+                is ItineraryAddEditIntent.UpdateEndDate -> updateEndDate(intent.date)
+                is ItineraryAddEditIntent.SetCoverPhoto -> setCoverPhoto(intent.imageData)
+                is ItineraryAddEditIntent.RemoveCoverPhoto -> removeCoverPhoto()
+                is ItineraryAddEditIntent.Save -> save()
+                is ItineraryAddEditIntent.SaveDraft -> saveDraft()
+            }
         }
     }
 
@@ -166,7 +170,7 @@ class ItineraryAddEditViewModel(
         imageStorageService.saveImage(imageData, coverId)
             .onSuccess { path ->
                 // 刪除舊的封面照片（如果有）
-                currentState.coverPhotoPath?.let { oldPath ->
+                state.value.coverPhotoPath?.let { oldPath ->
                     imageStorageService.deleteImage(oldPath)
                 }
                 updateState { copy(coverPhotoPath = path, isLoading = false) }
@@ -185,7 +189,7 @@ class ItineraryAddEditViewModel(
      * 移除封面照片
      */
     private suspend fun removeCoverPhoto() {
-        val coverPath = currentState.coverPhotoPath ?: return
+        val coverPath = state.value.coverPhotoPath ?: return
 
         imageStorageService.deleteImage(coverPath)
         updateState { copy(coverPhotoPath = null) }
@@ -195,7 +199,7 @@ class ItineraryAddEditViewModel(
      * 儲存行程
      */
     private suspend fun save() {
-        val snapshot = currentState
+        val snapshot = state.value
 
         // 驗證
         if (snapshot.title.isBlank()) {
@@ -270,7 +274,7 @@ class ItineraryAddEditViewModel(
      * 儲存草稿（僅新增模式）
      */
     private suspend fun saveDraft() {
-        val snapshot = currentState
+        val snapshot = state.value
         if (snapshot.isEditMode) return
 
         val draftData = buildMap {

@@ -5,16 +5,12 @@ import io.github.ppking2897.travelrecord.feature.memory.data.service.LocalRuleBa
 import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
 import io.github.ppking2897.travelrecord.feature.memory.domain.usecase.GetMemoriesUseCase
 import io.github.ppking2897.travelrecord.feature.memory.presentation.MemoryViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val memoryModule = module {
     single<MemoryStoryGenerator> { LocalRuleBasedMemoryStoryGenerator() }
     factory { GetMemoriesUseCase(get(), get(), get()) }
 
-    viewModel {
-        MemoryViewModel(
-            getMemoriesUseCase = get()
-        )
-    }
+    viewModelOf(::MemoryViewModel)
 }

@@ -2,9 +2,6 @@ package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -34,12 +31,12 @@ data class AddEditItemState(
     val isLoading: Boolean = false,
     val hasDateRange: Boolean = false,
     val photos: List<String> = emptyList()
-) : UiState
+)
 
 /**
  * AddEditItem Intent
  */
-sealed class AddEditItemIntent : UiIntent {
+sealed class AddEditItemIntent {
     data class LoadItinerary(val itineraryId: String) : AddEditItemIntent()
     data class Initialize(val itinerary: Itinerary) : AddEditItemIntent()
     data class UpdateActivity(val activity: String) : AddEditItemIntent()
@@ -59,7 +56,7 @@ sealed class AddEditItemIntent : UiIntent {
 /**
  * AddEditItem Event
  */
-sealed class AddEditItemEvent : UiEvent {
+sealed class AddEditItemEvent {
     object SaveSuccess : AddEditItemEvent()
     data class ShowError(val message: String) : AddEditItemEvent()
 }

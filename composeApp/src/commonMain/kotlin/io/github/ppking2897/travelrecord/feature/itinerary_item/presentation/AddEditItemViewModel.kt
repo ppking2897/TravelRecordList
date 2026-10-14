@@ -2,7 +2,9 @@
 
 package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
@@ -25,26 +27,28 @@ class AddEditItemViewModel(
     private val addItemUseCase: AddItineraryItemUseCase,
     private val getItineraryUseCase: GetItineraryUseCase,
     private val imageStorageService: ImageStorageService
-) : BaseViewModel<AddEditItemState, AddEditItemIntent, AddEditItemEvent>(
+) : BaseViewModel<AddEditItemIntent, AddEditItemState, AddEditItemEvent>(
     initialState = AddEditItemState()
 ) {
 
-    override suspend fun processIntent(intent: AddEditItemIntent) {
-        when (intent) {
-            is AddEditItemIntent.LoadItinerary -> loadItinerary(intent.itineraryId)
-            is AddEditItemIntent.Initialize -> initialize(intent.itinerary)
-            is AddEditItemIntent.UpdateActivity -> updateActivity(intent.activity)
-            is AddEditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
-            is AddEditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
-            is AddEditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
-            is AddEditItemIntent.UpdateNotes -> updateNotes(intent.notes)
-            is AddEditItemIntent.UpdateDate -> updateDate(intent.date)
-            is AddEditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
-            is AddEditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
-            is AddEditItemIntent.AddPhoto -> addPhoto(intent.path)
-            is AddEditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
-            is AddEditItemIntent.RemovePhoto -> removePhoto(intent.path)
-            is AddEditItemIntent.Save -> save()
+    override fun processIntent(intent: AddEditItemIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is AddEditItemIntent.LoadItinerary -> loadItinerary(intent.itineraryId)
+                is AddEditItemIntent.Initialize -> initialize(intent.itinerary)
+                is AddEditItemIntent.UpdateActivity -> updateActivity(intent.activity)
+                is AddEditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
+                is AddEditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
+                is AddEditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
+                is AddEditItemIntent.UpdateNotes -> updateNotes(intent.notes)
+                is AddEditItemIntent.UpdateDate -> updateDate(intent.date)
+                is AddEditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
+                is AddEditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
+                is AddEditItemIntent.AddPhoto -> addPhoto(intent.path)
+                is AddEditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
+                is AddEditItemIntent.RemovePhoto -> removePhoto(intent.path)
+                is AddEditItemIntent.Save -> save()
+            }
         }
     }
 
@@ -208,7 +212,7 @@ class AddEditItemViewModel(
      * 儲存項目
      */
     private suspend fun save() {
-        val snapshot = currentState
+        val snapshot = state.value
 
         // 驗證
         if (snapshot.activity.isBlank()) {

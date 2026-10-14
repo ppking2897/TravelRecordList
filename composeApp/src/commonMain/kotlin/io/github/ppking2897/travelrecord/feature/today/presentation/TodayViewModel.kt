@@ -32,25 +32,27 @@ class TodayViewModel(
     private val addPhotoUseCase: AddPhotoUseCase,
     private val generateThumbnailUseCase: GenerateThumbnailUseCase,
     private val imageStorageService: ImageStorageService
-) : BaseViewModel<TodayState, TodayIntent, TodayEvent>(
+) : BaseViewModel<TodayIntent, TodayState, TodayEvent>(
     initialState = TodayState()
 ) {
-    override suspend fun processIntent(intent: TodayIntent) {
-        when (intent) {
-            TodayIntent.LoadToday -> loadToday()
-            TodayIntent.Refresh -> loadToday()
-            is TodayIntent.UpdateQuickActivity -> updateQuickActivity(intent.value)
-            is TodayIntent.UpdateQuickLocation -> updateQuickLocation(intent.value)
-            is TodayIntent.SelectQuickLocation -> selectQuickLocation(intent.suggestion)
-            is TodayIntent.UpdateQuickNotes -> updateQuickNotes(intent.value)
-            is TodayIntent.AddQuickPhoto -> addQuickPhoto(intent.imageData)
-            TodayIntent.SaveQuickRecord -> saveQuickRecord()
-            is TodayIntent.ToggleItemCompletion -> toggleItemCompletion(intent.itemId)
-            is TodayIntent.AddPhotoToItem -> addPhotoToItem(intent.itemId, intent.imageData)
-            is TodayIntent.StartEditingNote -> startEditingNote(intent.itemId)
-            is TodayIntent.UpdateEditingNote -> updateEditingNote(intent.value)
-            TodayIntent.SaveEditingNote -> saveEditingNote()
-            TodayIntent.CancelEditingNote -> cancelEditingNote()
+    override fun processIntent(intent: TodayIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                TodayIntent.LoadToday -> loadToday()
+                TodayIntent.Refresh -> loadToday()
+                is TodayIntent.UpdateQuickActivity -> updateQuickActivity(intent.value)
+                is TodayIntent.UpdateQuickLocation -> updateQuickLocation(intent.value)
+                is TodayIntent.SelectQuickLocation -> selectQuickLocation(intent.suggestion)
+                is TodayIntent.UpdateQuickNotes -> updateQuickNotes(intent.value)
+                is TodayIntent.AddQuickPhoto -> addQuickPhoto(intent.imageData)
+                TodayIntent.SaveQuickRecord -> saveQuickRecord()
+                is TodayIntent.ToggleItemCompletion -> toggleItemCompletion(intent.itemId)
+                is TodayIntent.AddPhotoToItem -> addPhotoToItem(intent.itemId, intent.imageData)
+                is TodayIntent.StartEditingNote -> startEditingNote(intent.itemId)
+                is TodayIntent.UpdateEditingNote -> updateEditingNote(intent.value)
+                TodayIntent.SaveEditingNote -> saveEditingNote()
+                TodayIntent.CancelEditingNote -> cancelEditingNote()
+            }
         }
     }
 
@@ -180,7 +182,7 @@ class TodayViewModel(
     }
 
     private suspend fun saveQuickRecord() {
-        val snapshot = currentState
+        val snapshot = state.value
         val trip = snapshot.currentTrip ?: run {
             sendEvent(TodayEvent.ShowMessage("目前沒有旅行中的行程"))
             return
@@ -236,7 +238,7 @@ class TodayViewModel(
     }
 
     private suspend fun toggleItemCompletion(itemId: String) {
-        val item = currentState.todayItems.find { it.id == itemId } ?: return
+        val item = state.value.todayItems.find { it.id == itemId } ?: return
         val updated = item.copy(
             isCompleted = !item.isCompleted,
             completedAt = if (item.isCompleted) null else Clock.System.now()
@@ -270,7 +272,7 @@ class TodayViewModel(
     }
 
     private fun startEditingNote(itemId: String) {
-        val item = currentState.todayItems.find { it.id == itemId } ?: return
+        val item = state.value.todayItems.find { it.id == itemId } ?: return
         updateState {
             copy(
                 editingNoteItemId = itemId,
@@ -284,9 +286,9 @@ class TodayViewModel(
     }
 
     private suspend fun saveEditingNote() {
-        val itemId = currentState.editingNoteItemId ?: return
-        val item = currentState.todayItems.find { it.id == itemId } ?: return
-        val updated = item.copy(notes = currentState.editingNoteText)
+        val itemId = state.value.editingNoteItemId ?: return
+        val item = state.value.todayItems.find { it.id == itemId } ?: return
+        val updated = item.copy(notes = state.value.editingNoteText)
 
         updateItineraryItemUseCase(updated, Clock.System.now())
             .onSuccess {

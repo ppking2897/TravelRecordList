@@ -1,9 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import kotlinx.datetime.LocalDate
 
 /**
@@ -26,12 +23,12 @@ data class ItineraryAddEditState(
     val isLoading: Boolean = false,
     val isEditMode: Boolean = false,
     val showDraftSaved: Boolean = false
-) : UiState
+)
 
 /**
  * ItineraryAddEdit Intent
  */
-sealed class ItineraryAddEditIntent : UiIntent {
+sealed class ItineraryAddEditIntent {
     data class LoadItinerary(val itineraryId: String) : ItineraryAddEditIntent()
     object LoadDraft : ItineraryAddEditIntent()
     data class UpdateTitle(val title: String) : ItineraryAddEditIntent()
@@ -47,7 +44,7 @@ sealed class ItineraryAddEditIntent : UiIntent {
 /**
  * ItineraryAddEdit Event
  */
-sealed class ItineraryAddEditEvent : UiEvent {
+sealed class ItineraryAddEditEvent {
     data class SaveSuccess(val itineraryId: String) : ItineraryAddEditEvent()
     data class ShowError(val message: String) : ItineraryAddEditEvent()
     object DraftSaved : ItineraryAddEditEvent()

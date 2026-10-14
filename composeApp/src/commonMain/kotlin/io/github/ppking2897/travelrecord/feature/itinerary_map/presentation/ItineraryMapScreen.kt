@@ -46,7 +46,7 @@ fun ItineraryMapScreen(
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(itineraryId) {
-        viewModel.handleIntent(ItineraryMapIntent.LoadMapData(itineraryId))
+        viewModel.processIntent(ItineraryMapIntent.LoadMapData(itineraryId))
     }
 
     LaunchedEffect(Unit) {
@@ -74,10 +74,10 @@ fun ItineraryMapScreen(
         error = state.error,
         hasNoMarkersToShow = state.hasNoMarkersToShow,
         onNavigateBack = onNavigateBack,
-        onMarkerClick = { viewModel.handleIntent(ItineraryMapIntent.SelectMarker(it)) },
-        onDismissMarker = { viewModel.handleIntent(ItineraryMapIntent.SelectMarker(null)) },
+        onMarkerClick = { viewModel.processIntent(ItineraryMapIntent.SelectMarker(it)) },
+        onDismissMarker = { viewModel.processIntent(ItineraryMapIntent.SelectMarker(null)) },
         onEditItem = onEditItemClick,
-        onFilterByDate = { viewModel.handleIntent(ItineraryMapIntent.FilterByDate(it)) }
+        onFilterByDate = { viewModel.processIntent(ItineraryMapIntent.FilterByDate(it)) }
     )
 }
 

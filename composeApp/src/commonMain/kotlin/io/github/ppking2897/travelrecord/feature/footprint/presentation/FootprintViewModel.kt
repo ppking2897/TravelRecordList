@@ -1,26 +1,30 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 package io.github.ppking2897.travelrecord.feature.footprint.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import io.github.ppking2897.travelrecord.feature.footprint.domain.model.TripFootprintGroup
 import io.github.ppking2897.travelrecord.feature.footprint.domain.model.VisitedPlace
 import io.github.ppking2897.travelrecord.feature.footprint.domain.usecase.GetVisitedPlacesUseCase
+import kotlinx.coroutines.launch
 
 class FootprintViewModel(
     private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase
-) : BaseViewModel<FootprintState, FootprintIntent, FootprintEvent>(
+) : BaseViewModel<FootprintIntent, FootprintState, FootprintEvent>(
     initialState = FootprintState()
 ) {
-    override suspend fun processIntent(intent: FootprintIntent) {
-        when (intent) {
-            FootprintIntent.Load -> load(showLoadingWhenEmpty = true)
-            FootprintIntent.Refresh -> load(showLoadingWhenEmpty = false)
-            is FootprintIntent.ToggleExpanded -> toggleExpanded(intent.tripId)
+    override fun processIntent(intent: FootprintIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                FootprintIntent.Load -> load(showLoadingWhenEmpty = true)
+                FootprintIntent.Refresh -> load(showLoadingWhenEmpty = false)
+                is FootprintIntent.ToggleExpanded -> toggleExpanded(intent.tripId)
+            }
         }
     }
 
     private suspend fun load(showLoadingWhenEmpty: Boolean) {
-        val hasData = currentState.groups.isNotEmpty()
+        val hasData = state.value.groups.isNotEmpty()
         if (showLoadingWhenEmpty && !hasData) {
             updateState { copy(isLoading = true, error = null) }
         }

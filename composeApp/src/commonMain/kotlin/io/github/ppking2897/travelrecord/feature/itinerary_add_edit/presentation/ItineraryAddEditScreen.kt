@@ -54,9 +54,9 @@ fun ItineraryAddEditScreen(
 
     LaunchedEffect(itineraryId) {
         if (itineraryId != null) {
-            viewModel.handleIntent(ItineraryAddEditIntent.LoadItinerary(itineraryId))
+            viewModel.processIntent(ItineraryAddEditIntent.LoadItinerary(itineraryId))
         } else {
-            viewModel.handleIntent(ItineraryAddEditIntent.LoadDraft)
+            viewModel.processIntent(ItineraryAddEditIntent.LoadDraft)
         }
     }
 
@@ -106,7 +106,7 @@ fun ItineraryAddEditScreen(
             val imageData = byteArrays.firstOrNull()
             if (imageData != null) {
                 scope.launch {
-                    viewModel.handleIntent(ItineraryAddEditIntent.SetCoverPhoto(imageData))
+                    viewModel.processIntent(ItineraryAddEditIntent.SetCoverPhoto(imageData))
                 }
             }
         }
@@ -136,17 +136,17 @@ fun ItineraryAddEditScreen(
             isLoading = state.isLoading,
             isEditMode = state.isEditMode,
             showDraftSaved = state.showDraftSaved,
-            onTitleChange = { viewModel.handleIntent(ItineraryAddEditIntent.UpdateTitle(it)) },
-            onDescriptionChange = { viewModel.handleIntent(ItineraryAddEditIntent.UpdateDescription(it)) },
+            onTitleChange = { viewModel.processIntent(ItineraryAddEditIntent.UpdateTitle(it)) },
+            onDescriptionChange = { viewModel.processIntent(ItineraryAddEditIntent.UpdateDescription(it)) },
             onStartDateClick = { showStartDatePicker = true },
             onEndDateClick = { showEndDatePicker = true },
             onSelectCoverPhoto = { coverImagePicker.launch() },
             onRemoveCoverPhoto = {
                 scope.launch {
-                    viewModel.handleIntent(ItineraryAddEditIntent.RemoveCoverPhoto)
+                    viewModel.processIntent(ItineraryAddEditIntent.RemoveCoverPhoto)
                 }
             },
-            onSave = { viewModel.handleIntent(ItineraryAddEditIntent.Save) },
+            onSave = { viewModel.processIntent(ItineraryAddEditIntent.Save) },
             contentPadding = paddingValues
         )
     }
@@ -178,7 +178,7 @@ fun ItineraryAddEditScreen(
                     datePickerState.selectedDateMillis?.let { millis ->
                         val instant = Instant.fromEpochMilliseconds(millis)
                         val date = instant.toLocalDateTime(TimeZone.UTC).date
-                        viewModel.handleIntent(ItineraryAddEditIntent.UpdateStartDate(date))
+                        viewModel.processIntent(ItineraryAddEditIntent.UpdateStartDate(date))
                     }
                     showStartDatePicker = false
                 }) {
@@ -204,7 +204,7 @@ fun ItineraryAddEditScreen(
                     datePickerState.selectedDateMillis?.let { millis ->
                         val instant = Instant.fromEpochMilliseconds(millis)
                         val date = instant.toLocalDateTime(TimeZone.UTC).date
-                        viewModel.handleIntent(ItineraryAddEditIntent.UpdateEndDate(date))
+                        viewModel.processIntent(ItineraryAddEditIntent.UpdateEndDate(date))
                     }
                     showEndDatePicker = false
                 }) {

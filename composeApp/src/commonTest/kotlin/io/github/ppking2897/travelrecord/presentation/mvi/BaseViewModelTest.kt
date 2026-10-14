@@ -1,15 +1,14 @@
 package io.github.ppking2897.travelrecord.presentation.mvi
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import kotlinx.coroutines.withTimeout
 
@@ -56,12 +55,12 @@ data class TestState(
     val value: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
-) : UiState
+)
 
 /**
  * 測試用的 Intent
  */
-sealed class TestIntent : UiIntent {
+sealed class TestIntent {
     data class UpdateValue(val value: String) : TestIntent()
     object Load : TestIntent()
     object Fail : TestIntent()
@@ -70,7 +69,7 @@ sealed class TestIntent : UiIntent {
 /**
  * 測試用的 Event
  */
-sealed class TestEvent : UiEvent {
+sealed class TestEvent {
     data class ShowMessage(val message: String) : TestEvent()
     object Navigate : TestEvent()
 }
@@ -78,22 +77,24 @@ sealed class TestEvent : UiEvent {
 /**
  * 測試用的 ViewModel
  */
-class TestViewModel : BaseViewModel<TestState, TestIntent, TestEvent>(
+class TestViewModel : BaseViewModel<TestIntent, TestState, TestEvent>(
     initialState = TestState()
 ) {
-    override suspend fun processIntent(intent: TestIntent) {
-        when (intent) {
-            is TestIntent.UpdateValue -> {
-                updateState { copy(value = intent.value) }
-            }
-            is TestIntent.Load -> {
-                updateState { copy(isLoading = true) }
-                kotlinx.coroutines.delay(100)
-                updateState { copy(isLoading = false, value = "loaded") }
-            }
-            is TestIntent.Fail -> {
-                updateState { copy(error = "Failed") }
-                sendEvent(TestEvent.ShowMessage("Error occurred"))
+    override fun processIntent(intent: TestIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is TestIntent.UpdateValue -> {
+                    updateState { copy(value = intent.value) }
+                }
+                is TestIntent.Load -> {
+                    updateState { copy(isLoading = true) }
+                    kotlinx.coroutines.delay(100)
+                    updateState { copy(isLoading = false, value = "loaded") }
+                }
+                is TestIntent.Fail -> {
+                    updateState { copy(error = "Failed") }
+                    sendEvent(TestEvent.ShowMessage("Error occurred"))
+                }
             }
         }
     }
@@ -114,7 +115,7 @@ class BaseViewModelBasicTest : BaseViewModelTest({
         runTest {
             val viewModel = TestViewModel()
             
-            viewModel.handleIntent(TestIntent.UpdateValue("test"))
+            viewModel.processIntent(TestIntent.UpdateValue("test"))
             advanceUntilIdle()
             
             viewModel.state.value.value shouldBe "test"
@@ -125,7 +126,7 @@ class BaseViewModelBasicTest : BaseViewModelTest({
         runTest {
             val viewModel = TestViewModel()
             
-            viewModel.handleIntent(TestIntent.Fail)
+            viewModel.processIntent(TestIntent.Fail)
             advanceUntilIdle()
             
             val receivedEvent = withTimeout(1000) {
@@ -141,7 +142,7 @@ class BaseViewModelBasicTest : BaseViewModelTest({
             val viewModel = TestViewModel()
             val stateBefore = viewModel.state.value
             
-            viewModel.handleIntent(TestIntent.UpdateValue("new"))
+            viewModel.processIntent(TestIntent.UpdateValue("new"))
             advanceUntilIdle()
             
             // Original state should not change
@@ -155,7 +156,7 @@ class BaseViewModelBasicTest : BaseViewModelTest({
         runTest {
             val viewModel = TestViewModel()
             
-            viewModel.handleIntent(TestIntent.Load)
+            viewModel.processIntent(TestIntent.Load)
             advanceTimeBy(50)
             
             // During loading

@@ -3,9 +3,6 @@ package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -36,12 +33,12 @@ data class EditItemState(
     val isLoading: Boolean = false,
     val hasDateRange: Boolean = false,
     val photos: List<String> = emptyList()
-) : UiState
+)
 
 /**
  * EditItem Intent
  */
-sealed class EditItemIntent : UiIntent {
+sealed class EditItemIntent {
     data class LoadItem(val itemId: String) : EditItemIntent()
     data class Initialize(val item: ItineraryItem, val itinerary: Itinerary) : EditItemIntent()
     data class UpdateActivity(val activity: String) : EditItemIntent()
@@ -61,7 +58,7 @@ sealed class EditItemIntent : UiIntent {
 /**
  * EditItem Event
  */
-sealed class EditItemEvent : UiEvent {
+sealed class EditItemEvent {
     object SaveSuccess : EditItemEvent()
     data class ShowError(val message: String) : EditItemEvent()
 }

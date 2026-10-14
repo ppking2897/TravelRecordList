@@ -1,8 +1,10 @@
 package io.github.ppking2897.travelrecord.feature.route.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import kotlinx.coroutines.launch
 
 /**
  * RouteView 畫面的 ViewModel
@@ -12,14 +14,16 @@ import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 class RouteViewViewModel(
     private val getRouteUseCase: GetRouteUseCase,
     private val exportRouteUseCase: ExportRouteUseCase
-) : BaseViewModel<RouteViewState, RouteViewIntent, RouteViewEvent>(
+) : BaseViewModel<RouteViewIntent, RouteViewState, RouteViewEvent>(
     initialState = RouteViewState()
 ) {
 
-    override suspend fun processIntent(intent: RouteViewIntent) {
-        when (intent) {
-            is RouteViewIntent.LoadRoute -> loadRoute(intent.routeId)
-            is RouteViewIntent.ExportRoute -> exportRoute(intent.routeId)
+    override fun processIntent(intent: RouteViewIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is RouteViewIntent.LoadRoute -> loadRoute(intent.routeId)
+                is RouteViewIntent.ExportRoute -> exportRoute(intent.routeId)
+            }
         }
     }
 

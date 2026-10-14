@@ -23,15 +23,13 @@
 
 外層 `.claude/rules/kmp-*` 比本專案的寫法新（rules 4–7 月更新，本專案寫法 4/9 定型）。原則：**「怎麼寫」以 rules 為準，「專案裡有什麼」以專案為準。**
 
-### 待遷移（rules 較新；遷移完成前照現有 code 寫）
-
-BaseViewModel 是全專案共用的基底，新舊寫法不能並存，所以要整批遷移，不在寫新功能時順手改。遷移排在改善計畫的地基項目。
+### 待遷移（rules 較新；新畫面照 rules 寫，既有畫面不在寫新功能時順手改）
 
 | 面向 | 外層 rules（目標） | 本專案現況 |
 |---|---|---|
-| BaseViewModel | `BaseViewModel<Intent, State, Event>`，Screen 呼 `processIntent` | `BaseViewModel<S : UiState, I : UiIntent, E : UiEvent>`（`core/presentation/mvi/`）；Screen 呼 `handleIntent(intent)`，子類實作 `suspend processIntent`；`sendEvent` 是 suspend |
-| Contract | Intent / State / Event 不掛介面 | 各自實作 `UiIntent` / `UiState` / `UiEvent`（跟 BaseViewModel 一起遷移） |
-| ViewModel 註冊 | `viewModelOf(::XxxViewModel)` | `viewModel { XxxViewModel(get(), …) }` |
+| Screen 拆法 | 拆出無 ViewModel 依賴的 `XxxContentView`，只在 Screen 層放一個整頁 Preview（檔案最底）；callback 不給預設值 | 10 個 Screen 都沒有拆 ContentView；`ItineraryDetailScreen` 有 1 個 callback 帶 `= {}` |
+
+> 既有 ViewModel 的 `processIntent` 把整段 `when` 包在 `viewModelScope.launch` 裡，是為了保留遷移前「每個 Intent 各跑一個 coroutine」的行為；新寫的 ViewModel 照 rules，由各處理函式自己 launch。
 
 ### 本專案不適用（rules 的前提跟本專案不同）
 

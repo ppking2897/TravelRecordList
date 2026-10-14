@@ -1,9 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.today.presentation
 
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.LocalDate
@@ -19,7 +16,7 @@ data class TodayState(
     val quickRecord: QuickRecordState = QuickRecordState(),
     val editingNoteItemId: String? = null,
     val editingNoteText: String = ""
-) : UiState {
+) {
     val completedCount: Int
         get() = todayItems.count { it.isCompleted }
 
@@ -44,7 +41,7 @@ data class QuickRecordState(
     val locationError: String? = null
 )
 
-sealed class TodayIntent : UiIntent {
+sealed class TodayIntent {
     data object LoadToday : TodayIntent()
     data object Refresh : TodayIntent()
     data class UpdateQuickActivity(val value: String) : TodayIntent()
@@ -75,6 +72,6 @@ sealed class TodayIntent : UiIntent {
     data object CancelEditingNote : TodayIntent()
 }
 
-sealed class TodayEvent : UiEvent {
+sealed class TodayEvent {
     data class ShowMessage(val message: String) : TodayEvent()
 }

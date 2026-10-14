@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
@@ -7,6 +8,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.Initia
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import kotlinx.coroutines.launch
 
 /**
  * ItineraryList 畫面的 ViewModel（MVI 架構）
@@ -17,21 +19,23 @@ class ItineraryListViewModel(
     private val getItemsByItineraryUseCase: GetItemsByItineraryUseCase,
     private val initializeSampleDataUseCase: InitializeSampleDataUseCase,
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
-) : BaseViewModel<ItineraryListState, ItineraryListIntent, ItineraryListEvent>(
+) : BaseViewModel<ItineraryListIntent, ItineraryListState, ItineraryListEvent>(
     initialState = ItineraryListState()
 ) {
 
     init {
-        handleIntent(ItineraryListIntent.InitializeAndLoad)
+        processIntent(ItineraryListIntent.InitializeAndLoad)
     }
 
-    override suspend fun processIntent(intent: ItineraryListIntent) {
-        when (intent) {
-            is ItineraryListIntent.InitializeAndLoad -> initializeAndLoad()
-            is ItineraryListIntent.LoadItineraries -> loadItineraries()
-            is ItineraryListIntent.Refresh -> refresh()
-            is ItineraryListIntent.Search -> search(intent.query)
-            is ItineraryListIntent.DeleteItinerary -> deleteItinerary(intent.id)
+    override fun processIntent(intent: ItineraryListIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is ItineraryListIntent.InitializeAndLoad -> initializeAndLoad()
+                is ItineraryListIntent.LoadItineraries -> loadItineraries()
+                is ItineraryListIntent.Refresh -> refresh()
+                is ItineraryListIntent.Search -> search(intent.query)
+                is ItineraryListIntent.DeleteItinerary -> deleteItinerary(intent.id)
+            }
         }
     }
 
@@ -53,7 +57,7 @@ class ItineraryListViewModel(
      * 有資料時背景更新，無資料時才顯示 loading
      */
     private suspend fun loadItineraries() {
-        val hasData = currentState.itineraries.isNotEmpty()
+        val hasData = state.value.itineraries.isNotEmpty()
         if (!hasData) {
             updateState { copy(isLoading = true, error = null) }
         }
@@ -96,7 +100,7 @@ class ItineraryListViewModel(
     private suspend fun deleteItinerary(id: String) {
         deleteItineraryUseCase(id)
             .onSuccess {
-                handleIntent(ItineraryListIntent.Refresh)
+                processIntent(ItineraryListIntent.Refresh)
             }
             .onFailure { exception ->
                 sendEvent(ItineraryListEvent.ShowError(exception.message ?: "刪除失敗"))

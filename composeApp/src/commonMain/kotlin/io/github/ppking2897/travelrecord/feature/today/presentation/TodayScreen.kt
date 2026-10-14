@@ -99,7 +99,7 @@ fun TodayScreen(
         scope = scope,
         onResult = { byteArrays ->
             byteArrays.forEach { imageData ->
-                viewModel.handleIntent(TodayIntent.AddQuickPhoto(imageData))
+                viewModel.processIntent(TodayIntent.AddQuickPhoto(imageData))
             }
         }
     )
@@ -111,14 +111,14 @@ fun TodayScreen(
             val itemId = selectedItemIdForPhoto
             val imageData = byteArrays.firstOrNull()
             if (itemId != null && imageData != null) {
-                viewModel.handleIntent(TodayIntent.AddPhotoToItem(itemId, imageData))
+                viewModel.processIntent(TodayIntent.AddPhotoToItem(itemId, imageData))
             }
             selectedItemIdForPhoto = null
         }
     )
 
     LaunchedEffect(Unit) {
-        viewModel.handleIntent(TodayIntent.LoadToday)
+        viewModel.processIntent(TodayIntent.LoadToday)
     }
 
     LaunchedEffect(Unit) {
@@ -132,28 +132,28 @@ fun TodayScreen(
     TodayScreenContent(
         state = state,
         modifier = modifier,
-        onRefresh = { viewModel.handleIntent(TodayIntent.Refresh) },
+        onRefresh = { viewModel.processIntent(TodayIntent.Refresh) },
         onOpenCurrentTrip = onOpenCurrentTrip,
         onGoToPlan = onGoToPlan,
         onQuickRecord = { showQuickRecordSheet = true },
-        onToggleComplete = { viewModel.handleIntent(TodayIntent.ToggleItemCompletion(it)) },
+        onToggleComplete = { viewModel.processIntent(TodayIntent.ToggleItemCompletion(it)) },
         onAddPhoto = { itemId ->
             selectedItemIdForPhoto = itemId
             itemImagePicker.launch()
         },
-        onEditNote = { viewModel.handleIntent(TodayIntent.StartEditingNote(it)) }
+        onEditNote = { viewModel.processIntent(TodayIntent.StartEditingNote(it)) }
     )
 
     if (showQuickRecordSheet) {
         QuickRecordSheet(
             state = state,
             onDismiss = { showQuickRecordSheet = false },
-            onActivityChange = { viewModel.handleIntent(TodayIntent.UpdateQuickActivity(it)) },
-            onLocationChange = { viewModel.handleIntent(TodayIntent.UpdateQuickLocation(it)) },
-            onLocationSelected = { viewModel.handleIntent(TodayIntent.SelectQuickLocation(it)) },
-            onNotesChange = { viewModel.handleIntent(TodayIntent.UpdateQuickNotes(it)) },
+            onActivityChange = { viewModel.processIntent(TodayIntent.UpdateQuickActivity(it)) },
+            onLocationChange = { viewModel.processIntent(TodayIntent.UpdateQuickLocation(it)) },
+            onLocationSelected = { viewModel.processIntent(TodayIntent.SelectQuickLocation(it)) },
+            onNotesChange = { viewModel.processIntent(TodayIntent.UpdateQuickNotes(it)) },
             onAddPhotos = { quickRecordImagePicker.launch() },
-            onSave = { viewModel.handleIntent(TodayIntent.SaveQuickRecord) },
+            onSave = { viewModel.processIntent(TodayIntent.SaveQuickRecord) },
             locationSearchService = locationSearchService
         )
     }
@@ -161,9 +161,9 @@ fun TodayScreen(
     if (state.editingNoteItemId != null) {
         NoteEditorDialog(
             value = state.editingNoteText,
-            onValueChange = { viewModel.handleIntent(TodayIntent.UpdateEditingNote(it)) },
-            onDismiss = { viewModel.handleIntent(TodayIntent.CancelEditingNote) },
-            onSave = { viewModel.handleIntent(TodayIntent.SaveEditingNote) }
+            onValueChange = { viewModel.processIntent(TodayIntent.UpdateEditingNote(it)) },
+            onDismiss = { viewModel.processIntent(TodayIntent.CancelEditingNote) },
+            onSave = { viewModel.processIntent(TodayIntent.SaveEditingNote) }
         )
     }
 }

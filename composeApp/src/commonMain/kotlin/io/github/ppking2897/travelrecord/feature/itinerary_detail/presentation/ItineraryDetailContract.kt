@@ -3,9 +3,6 @@ package io.github.ppking2897.travelrecord.feature.itinerary_detail.presentation
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import kotlinx.datetime.LocalDate
 
 data class ItineraryDetailState(
@@ -23,9 +20,9 @@ data class ItineraryDetailState(
     // 批量操作相關狀態
     val isSelectionMode: Boolean = false,
     val selectedItemIds: Set<String> = emptySet()
-) : UiState
+)
 
-sealed class ItineraryDetailIntent : UiIntent {
+sealed class ItineraryDetailIntent {
     data class LoadItinerary(val id: String) : ItineraryDetailIntent()
     data class SelectDate(val date: LocalDate?) : ItineraryDetailIntent()
     data class ToggleItemCompletion(val itemId: String) : ItineraryDetailIntent()
@@ -67,7 +64,7 @@ sealed class ItineraryDetailIntent : UiIntent {
     object BatchMarkComplete : ItineraryDetailIntent()
 }
 
-sealed class ItineraryDetailEvent : UiEvent {
+sealed class ItineraryDetailEvent {
     object NavigateBack : ItineraryDetailEvent()
     object NavigateToAddItem : ItineraryDetailEvent()
     data class NavigateToQuickAddItem(val defaultDate: LocalDate) : ItineraryDetailEvent()

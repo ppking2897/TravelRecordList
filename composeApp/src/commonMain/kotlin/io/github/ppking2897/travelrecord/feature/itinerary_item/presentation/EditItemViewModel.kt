@@ -2,8 +2,10 @@
 
 package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
@@ -29,26 +31,28 @@ class EditItemViewModel(
     private val getItineraryItemUseCase: GetItineraryItemUseCase,
     private val getItineraryUseCase: GetItineraryUseCase,
     private val imageStorageService: ImageStorageService
-) : BaseViewModel<EditItemState, EditItemIntent, EditItemEvent>(
+) : BaseViewModel<EditItemIntent, EditItemState, EditItemEvent>(
     initialState = EditItemState()
 ) {
 
-    override suspend fun processIntent(intent: EditItemIntent) {
-        when (intent) {
-            is EditItemIntent.LoadItem -> loadItem(intent.itemId)
-            is EditItemIntent.Initialize -> initialize(intent.item, intent.itinerary)
-            is EditItemIntent.UpdateActivity -> updateActivity(intent.activity)
-            is EditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
-            is EditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
-            is EditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
-            is EditItemIntent.UpdateNotes -> updateNotes(intent.notes)
-            is EditItemIntent.UpdateDate -> updateDate(intent.date)
-            is EditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
-            is EditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
-            is EditItemIntent.AddPhoto -> addPhoto(intent.path)
-            is EditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
-            is EditItemIntent.RemovePhoto -> removePhoto(intent.path)
-            is EditItemIntent.Save -> save()
+    override fun processIntent(intent: EditItemIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is EditItemIntent.LoadItem -> loadItem(intent.itemId)
+                is EditItemIntent.Initialize -> initialize(intent.item, intent.itinerary)
+                is EditItemIntent.UpdateActivity -> updateActivity(intent.activity)
+                is EditItemIntent.UpdateLocationName -> updateLocationName(intent.name)
+                is EditItemIntent.UpdateLocationAddress -> updateLocationAddress(intent.address)
+                is EditItemIntent.SelectLocation -> selectLocation(intent.suggestion)
+                is EditItemIntent.UpdateNotes -> updateNotes(intent.notes)
+                is EditItemIntent.UpdateDate -> updateDate(intent.date)
+                is EditItemIntent.UpdateArrivalTime -> updateArrivalTime(intent.time)
+                is EditItemIntent.UpdateDepartureTime -> updateDepartureTime(intent.time)
+                is EditItemIntent.AddPhoto -> addPhoto(intent.path)
+                is EditItemIntent.AddPhotoByContent -> addPhotoByContent(intent.content)
+                is EditItemIntent.RemovePhoto -> removePhoto(intent.path)
+                is EditItemIntent.Save -> save()
+            }
         }
     }
 
@@ -209,7 +213,7 @@ class EditItemViewModel(
      * 從內容新增照片
      */
     private suspend fun addPhotoByContent(content: ByteArray) {
-        val itemId = currentState.item?.id ?: Uuid.random().toString()
+        val itemId = state.value.item?.id ?: Uuid.random().toString()
         imageStorageService.saveImage(content, itemId)
             .onSuccess { path ->
                 updateState {
@@ -234,7 +238,7 @@ class EditItemViewModel(
      * 儲存項目
      */
     private suspend fun save() {
-        val snapshot = currentState
+        val snapshot = state.value
 
         // 驗證
         if (snapshot.activity.isBlank()) {

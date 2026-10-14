@@ -45,31 +45,33 @@ class ItineraryDetailViewModel(
     private val generateThumbnailUseCase: GenerateThumbnailUseCase,
     private val batchDeleteItemsUseCase: BatchDeleteItemsUseCase,
     private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase
-) : BaseViewModel<ItineraryDetailState, ItineraryDetailIntent, ItineraryDetailEvent>(
+) : BaseViewModel<ItineraryDetailIntent, ItineraryDetailState, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
 
-    override suspend fun processIntent(intent: ItineraryDetailIntent) {
-        when (intent) {
-            is ItineraryDetailIntent.LoadItinerary -> loadItinerary(intent.id)
-            is ItineraryDetailIntent.SelectDate -> selectDate(intent.date)
-            is ItineraryDetailIntent.ToggleItemCompletion -> toggleItemCompletion(intent.itemId)
-            is ItineraryDetailIntent.DeleteItem -> deleteItem(intent.itemId)
-            is ItineraryDetailIntent.DeleteItinerary -> deleteItinerary(intent.id)
-            is ItineraryDetailIntent.GenerateRoute -> generateRoute()
-            is ItineraryDetailIntent.ToggleItemExpansion -> toggleItemExpansion(intent.itemId)
-            is ItineraryDetailIntent.AddPhoto -> addPhoto(intent.itemId, intent.imageData)
-            is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
-            is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
-            is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
-            is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
-            // 批量操作相關
-            is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
-            is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
-            is ItineraryDetailIntent.SelectAll -> selectAll()
-            is ItineraryDetailIntent.ClearSelection -> clearSelection()
-            is ItineraryDetailIntent.BatchDelete -> batchDelete()
-            is ItineraryDetailIntent.BatchMarkComplete -> batchMarkComplete()
+    override fun processIntent(intent: ItineraryDetailIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is ItineraryDetailIntent.LoadItinerary -> loadItinerary(intent.id)
+                is ItineraryDetailIntent.SelectDate -> selectDate(intent.date)
+                is ItineraryDetailIntent.ToggleItemCompletion -> toggleItemCompletion(intent.itemId)
+                is ItineraryDetailIntent.DeleteItem -> deleteItem(intent.itemId)
+                is ItineraryDetailIntent.DeleteItinerary -> deleteItinerary(intent.id)
+                is ItineraryDetailIntent.GenerateRoute -> generateRoute()
+                is ItineraryDetailIntent.ToggleItemExpansion -> toggleItemExpansion(intent.itemId)
+                is ItineraryDetailIntent.AddPhoto -> addPhoto(intent.itemId, intent.imageData)
+                is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
+                is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
+                is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
+                is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
+                // 批量操作相關
+                is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
+                is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
+                is ItineraryDetailIntent.SelectAll -> selectAll()
+                is ItineraryDetailIntent.ClearSelection -> clearSelection()
+                is ItineraryDetailIntent.BatchDelete -> batchDelete()
+                is ItineraryDetailIntent.BatchMarkComplete -> batchMarkComplete()
+            }
         }
     }
 
@@ -86,7 +88,7 @@ class ItineraryDetailViewModel(
                     getItemsByItineraryUseCase(id)
                         .onSuccess { items ->
                             // 保持先前的日期篩選
-                            val currentSelectedDate = currentState.selectedDate
+                            val currentSelectedDate = state.value.selectedDate
                             val filtered = if (currentSelectedDate != null) {
                                 filterItemsByDateUseCase(items, currentSelectedDate)
                             } else {
@@ -130,7 +132,7 @@ class ItineraryDetailViewModel(
     private suspend fun selectDate(date: LocalDate?) {
         updateState { copy(selectedDate = date) }
 
-        currentState.itinerary?.let { itinerary ->
+        state.value.itinerary?.let { itinerary ->
             getItemsByItineraryUseCase(itinerary.id)
                 .onSuccess { items ->
                     val filtered = if (date != null) {
@@ -151,7 +153,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun toggleItemCompletion(itemId: String) {
-        val currentItem = currentState.groupedItems
+        val currentItem = state.value.groupedItems
             .flatMap { it.items }
             .find { it.id == itemId }
 
@@ -177,8 +179,8 @@ class ItineraryDetailViewModel(
     private suspend fun deleteItem(itemId: String) {
         deleteItemUseCase(itemId)
             .onSuccess {
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                state.value.itinerary?.let { itinerary ->
+                    processIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
                 }
             }
             .onFailure { exception ->
@@ -197,7 +199,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun generateRoute() {
-        currentState.itinerary?.let { itinerary ->
+        state.value.itinerary?.let { itinerary ->
             createRouteUseCase(itinerary.id)
                 .onSuccess { route ->
                     sendEvent(ItineraryDetailEvent.NavigateToRoute(route.id))
@@ -209,7 +211,7 @@ class ItineraryDetailViewModel(
     }
 
     private fun toggleItemExpansion(itemId: String) {
-        val expandedIds = currentState.expandedItemIds
+        val expandedIds = state.value.expandedItemIds
         updateState {
             copy(
                 expandedItemIds = if (itemId in expandedIds) {
@@ -242,7 +244,7 @@ class ItineraryDetailViewModel(
      * 從 Repository 重新取得特定 item 並更新 State
      */
     private suspend fun refreshItemInState(itemId: String) {
-        currentState.itinerary?.let { itinerary ->
+        state.value.itinerary?.let { itinerary ->
             getItemsByItineraryUseCase(itinerary.id)
                 .onSuccess { items ->
                     val updatedItem = items.find { it.id == itemId }
@@ -271,7 +273,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun deletePhoto(photoId: String) {
-        val itemId = currentState.groupedItems
+        val itemId = state.value.groupedItems
             .flatMap { it.items }
             .find { item -> item.photos.any { it.id == photoId } }
             ?.id
@@ -298,7 +300,7 @@ class ItineraryDetailViewModel(
     private suspend fun filterByHashtag(hashtag: String?) {
         updateState { copy(selectedHashtag = hashtag) }
 
-        currentState.itinerary?.let { itinerary ->
+        state.value.itinerary?.let { itinerary ->
             getItemsByItineraryUseCase(itinerary.id)
                 .onSuccess { items ->
                     val filtered = if (hashtag != null) {
@@ -307,7 +309,7 @@ class ItineraryDetailViewModel(
                         items
                     }
 
-                    val dateFiltered = currentState.selectedDate?.let { date ->
+                    val dateFiltered = state.value.selectedDate?.let { date ->
                         filterItemsByDateUseCase(filtered, date)
                     } ?: filtered
 
@@ -324,7 +326,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun quickAddItem(dayIndex: Int) {
-        val dateRange = currentState.dateRange ?: return
+        val dateRange = state.value.dateRange ?: return
         val startDate = dateRange.start
 
         // dayIndex 為 0-based 的目標日序（Day 1 → 0、Day 2 → 1 ...）
@@ -365,7 +367,7 @@ class ItineraryDetailViewModel(
     }
 
     private fun selectAll() {
-        val allItemIds = currentState.groupedItems
+        val allItemIds = state.value.groupedItems
             .flatMap { it.items }
             .map { it.id }
             .toSet()
@@ -381,7 +383,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun batchDelete() {
-        val selectedIds = currentState.selectedItemIds.toList()
+        val selectedIds = state.value.selectedItemIds.toList()
         if (selectedIds.isEmpty()) return
 
         batchDeleteItemsUseCase(selectedIds)
@@ -392,8 +394,8 @@ class ItineraryDetailViewModel(
                         selectedItemIds = emptySet()
                     )
                 }
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                state.value.itinerary?.let { itinerary ->
+                    processIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
                 }
                 sendEvent(ItineraryDetailEvent.ShowBatchOperationResult("已刪除 $deletedCount 個項目"))
             }
@@ -403,7 +405,7 @@ class ItineraryDetailViewModel(
     }
 
     private suspend fun batchMarkComplete() {
-        val selectedIds = currentState.selectedItemIds.toList()
+        val selectedIds = state.value.selectedItemIds.toList()
         if (selectedIds.isEmpty()) return
 
         batchUpdateItemsUseCase.markComplete(selectedIds)
@@ -414,8 +416,8 @@ class ItineraryDetailViewModel(
                         selectedItemIds = emptySet()
                     )
                 }
-                currentState.itinerary?.let { itinerary ->
-                    handleIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
+                state.value.itinerary?.let { itinerary ->
+                    processIntent(ItineraryDetailIntent.LoadItinerary(itinerary.id))
                 }
                 sendEvent(ItineraryDetailEvent.ShowBatchOperationResult("已標記 $updatedCount 個項目為完成"))
             }

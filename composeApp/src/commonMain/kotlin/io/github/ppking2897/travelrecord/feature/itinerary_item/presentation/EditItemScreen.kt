@@ -36,7 +36,7 @@ fun EditItemScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(itemId) {
-        viewModel.handleIntent(EditItemIntent.LoadItem(itemId))
+        viewModel.processIntent(EditItemIntent.LoadItem(itemId))
     }
 
     LaunchedEffect(Unit) {
@@ -52,7 +52,7 @@ fun EditItemScreen(
 
     EditItemScreenContent(
         state = state,
-        onIntent = { viewModel.handleIntent(it) },
+        onIntent = { viewModel.processIntent(it) },
         onNavigateBack = onNavigateBack,
         locationSearchService = locationSearchService
     )

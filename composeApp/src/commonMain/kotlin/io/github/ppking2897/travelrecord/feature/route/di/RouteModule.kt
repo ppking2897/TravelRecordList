@@ -7,7 +7,7 @@ import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRout
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetMapMarkersUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteUseCase
 import io.github.ppking2897.travelrecord.feature.route.presentation.RouteViewViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val routeModule = module {
@@ -21,10 +21,5 @@ val routeModule = module {
     factory { ExportRouteUseCase(get()) }
 
     // ViewModels
-    viewModel {
-        RouteViewViewModel(
-            getRouteUseCase = get(),
-            exportRouteUseCase = get()
-        )
-    }
+    viewModelOf(::RouteViewViewModel)
 }

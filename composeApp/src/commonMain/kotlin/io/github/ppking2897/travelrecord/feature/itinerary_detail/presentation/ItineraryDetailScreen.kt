@@ -95,14 +95,14 @@ fun ItineraryDetailScreen(
             val itemId = selectedItemIdForPhoto
 
             if (imageData != null && itemId != null) {
-                viewModel.handleIntent(ItineraryDetailIntent.AddPhoto(itemId, imageData))
+                viewModel.processIntent(ItineraryDetailIntent.AddPhoto(itemId, imageData))
             }
             selectedItemIdForPhoto = null
         }
     )
 
     LaunchedEffect(itineraryId) {
-        viewModel.handleIntent(ItineraryDetailIntent.LoadItinerary(itineraryId))
+        viewModel.processIntent(ItineraryDetailIntent.LoadItinerary(itineraryId))
     }
 
     LaunchedEffect(Unit) {
@@ -137,15 +137,15 @@ fun ItineraryDetailScreen(
         onNavigateBack = onNavigateBack,
         onAddItemClick = onAddItemClick,
         onQuickAdd = { afterDayIndex ->
-            viewModel.handleIntent(ItineraryDetailIntent.QuickAddItem(afterDayIndex))
+            viewModel.processIntent(ItineraryDetailIntent.QuickAddItem(afterDayIndex))
         },
         onEditItemClick = onEditItemClick,
         onEditItineraryClick = onEditItineraryClick,
-        onDeleteItineraryClick = { viewModel.handleIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId)) },
-        onGenerateRouteClick = { viewModel.handleIntent(ItineraryDetailIntent.GenerateRoute) },
-        onSelectDate = { viewModel.handleIntent(ItineraryDetailIntent.SelectDate(it)) },
-        onToggleItemCompletion = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemCompletion(it)) },
-        onToggleItemExpansion = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemExpansion(it)) },
+        onDeleteItineraryClick = { viewModel.processIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId)) },
+        onGenerateRouteClick = { viewModel.processIntent(ItineraryDetailIntent.GenerateRoute) },
+        onSelectDate = { viewModel.processIntent(ItineraryDetailIntent.SelectDate(it)) },
+        onToggleItemCompletion = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemCompletion(it)) },
+        onToggleItemExpansion = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemExpansion(it)) },
         onDeleteItem = { itemId ->
             itemToDelete = groupedItems.flatMap { it.items }.find { it.id == itemId }
             showDeleteItemDialog = true
@@ -155,17 +155,17 @@ fun ItineraryDetailScreen(
             singleImagePicker.launch()
         },
         onSetCoverPhoto = { itemId, photoId ->
-            viewModel.handleIntent(ItineraryDetailIntent.SetCoverPhoto(itemId, photoId))
+            viewModel.processIntent(ItineraryDetailIntent.SetCoverPhoto(itemId, photoId))
         },
         onDeletePhoto = { photoId ->
-            viewModel.handleIntent(ItineraryDetailIntent.DeletePhoto(photoId))
+            viewModel.processIntent(ItineraryDetailIntent.DeletePhoto(photoId))
         },
         // 批量操作 callbacks
-        onToggleSelectionMode = { viewModel.handleIntent(ItineraryDetailIntent.ToggleSelectionMode) },
-        onToggleItemSelection = { viewModel.handleIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
+        onToggleSelectionMode = { viewModel.processIntent(ItineraryDetailIntent.ToggleSelectionMode) },
+        onToggleItemSelection = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
         onBatchDelete = { showBatchDeleteDialog = true },
-        onBatchMarkComplete = { viewModel.handleIntent(ItineraryDetailIntent.BatchMarkComplete) },
-        onCancelSelection = { viewModel.handleIntent(ItineraryDetailIntent.ClearSelection) },
+        onBatchMarkComplete = { viewModel.processIntent(ItineraryDetailIntent.BatchMarkComplete) },
+        onCancelSelection = { viewModel.processIntent(ItineraryDetailIntent.ClearSelection) },
         onMapClick = onMapClick
     )
 
@@ -175,7 +175,7 @@ fun ItineraryDetailScreen(
             title = "確認刪除",
             message = "確定要刪除「${itemToDelete!!.activity}」嗎？此操作無法復原。",
             onConfirm = {
-                viewModel.handleIntent(ItineraryDetailIntent.DeleteItem(itemToDelete!!.id))
+                viewModel.processIntent(ItineraryDetailIntent.DeleteItem(itemToDelete!!.id))
                 showDeleteItemDialog = false
                 itemToDelete = null
             },
@@ -192,7 +192,7 @@ fun ItineraryDetailScreen(
             title = "確認批量刪除",
             message = "確定要刪除所選的 ${selectedItemIds.size} 個項目嗎？此操作無法復原。",
             onConfirm = {
-                viewModel.handleIntent(ItineraryDetailIntent.BatchDelete)
+                viewModel.processIntent(ItineraryDetailIntent.BatchDelete)
                 showBatchDeleteDialog = false
             },
             onDismiss = {

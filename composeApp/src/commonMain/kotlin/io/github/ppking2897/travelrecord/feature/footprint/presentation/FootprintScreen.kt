@@ -64,7 +64,7 @@ fun FootprintScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
-        viewModel.handleIntent(FootprintIntent.Load)
+        viewModel.processIntent(FootprintIntent.Load)
     }
 
     LaunchedEffect(Unit) {
@@ -78,8 +78,8 @@ fun FootprintScreen(
     FootprintScreenContent(
         state = state,
         modifier = modifier,
-        onRefresh = { viewModel.handleIntent(FootprintIntent.Refresh) },
-        onToggleExpanded = { viewModel.handleIntent(FootprintIntent.ToggleExpanded(it)) }
+        onRefresh = { viewModel.processIntent(FootprintIntent.Refresh) },
+        onToggleExpanded = { viewModel.processIntent(FootprintIntent.ToggleExpanded(it)) }
     )
 }
 

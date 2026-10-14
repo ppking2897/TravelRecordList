@@ -1,6 +1,8 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_map.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetMapMarkersUseCase
@@ -12,17 +14,19 @@ import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 class ItineraryMapViewModel(
     private val getItineraryUseCase: GetItineraryUseCase,
     private val getMapMarkersUseCase: GetMapMarkersUseCase
-) : BaseViewModel<ItineraryMapState, ItineraryMapIntent, ItineraryMapEvent>(
+) : BaseViewModel<ItineraryMapIntent, ItineraryMapState, ItineraryMapEvent>(
     ItineraryMapState()
 ) {
     private var allMarkers: List<MapMarker> = emptyList()
 
-    override suspend fun processIntent(intent: ItineraryMapIntent) {
-        when (intent) {
-            is ItineraryMapIntent.LoadMapData -> loadMapData(intent.itineraryId)
-            is ItineraryMapIntent.SelectMarker -> selectMarker(intent.marker)
-            is ItineraryMapIntent.FilterByDate -> filterByDate(intent.date)
-            is ItineraryMapIntent.DismissError -> updateState { copy(error = null) }
+    override fun processIntent(intent: ItineraryMapIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                is ItineraryMapIntent.LoadMapData -> loadMapData(intent.itineraryId)
+                is ItineraryMapIntent.SelectMarker -> selectMarker(intent.marker)
+                is ItineraryMapIntent.FilterByDate -> filterByDate(intent.date)
+                is ItineraryMapIntent.DismissError -> updateState { copy(error = null) }
+            }
         }
     }
 

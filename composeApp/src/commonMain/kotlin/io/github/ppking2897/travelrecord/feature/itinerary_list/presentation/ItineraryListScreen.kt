@@ -86,7 +86,7 @@ fun ItineraryListScreen(
     var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }
 
     LifecycleResumeEffect(Unit) {
-        viewModel.handleIntent(ItineraryListIntent.LoadItineraries)
+        viewModel.processIntent(ItineraryListIntent.LoadItineraries)
         onPauseOrDispose { }
     }
 
@@ -111,7 +111,7 @@ fun ItineraryListScreen(
         isLoading = state.isLoading,
         isRefreshing = state.isRefreshing,
         error = state.error,
-        onSearchChange = { viewModel.handleIntent(ItineraryListIntent.Search(it)) },
+        onSearchChange = { viewModel.processIntent(ItineraryListIntent.Search(it)) },
         onItineraryClick = onItineraryClick,
         onEditClick = onEditClick,
         onDeleteClick = { itinerary ->
@@ -120,7 +120,7 @@ fun ItineraryListScreen(
         },
         onAddClick = onAddClick,
         onHistoryClick = onHistoryClick,
-        onRefresh = { viewModel.handleIntent(ItineraryListIntent.Refresh) }
+        onRefresh = { viewModel.processIntent(ItineraryListIntent.Refresh) }
     )
 
     if (showDeleteDialog && itineraryToDelete != null) {
@@ -128,7 +128,7 @@ fun ItineraryListScreen(
             title = "刪除行程",
             message = "確定要刪除「${itineraryToDelete!!.title}」嗎？這個動作無法復原。",
             onConfirm = {
-                viewModel.handleIntent(ItineraryListIntent.DeleteItinerary(itineraryToDelete!!.id))
+                viewModel.processIntent(ItineraryListIntent.DeleteItinerary(itineraryToDelete!!.id))
                 showDeleteDialog = false
                 itineraryToDelete = null
             },

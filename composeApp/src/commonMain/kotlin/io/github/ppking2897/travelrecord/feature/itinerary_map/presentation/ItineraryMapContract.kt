@@ -2,9 +2,6 @@ package io.github.ppking2897.travelrecord.feature.itinerary_map.presentation
 
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 import kotlinx.datetime.LocalDate
 
 /**
@@ -18,12 +15,12 @@ data class ItineraryMapState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val hasNoMarkersToShow: Boolean = false
-) : UiState
+)
 
 /**
  * 地圖畫面的使用者意圖
  */
-sealed class ItineraryMapIntent : UiIntent {
+sealed class ItineraryMapIntent {
     data class LoadMapData(val itineraryId: String) : ItineraryMapIntent()
     data class SelectMarker(val marker: MapMarker?) : ItineraryMapIntent()
     data class FilterByDate(val date: LocalDate?) : ItineraryMapIntent()
@@ -33,7 +30,7 @@ sealed class ItineraryMapIntent : UiIntent {
 /**
  * 地圖畫面的單次事件
  */
-sealed class ItineraryMapEvent : UiEvent {
+sealed class ItineraryMapEvent {
     object NavigateBack : ItineraryMapEvent()
     data class NavigateToEditItem(val itemId: String) : ItineraryMapEvent()
     data class ShowError(val message: String) : ItineraryMapEvent()

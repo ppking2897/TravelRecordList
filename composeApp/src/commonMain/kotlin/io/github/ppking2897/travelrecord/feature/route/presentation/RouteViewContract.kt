@@ -1,9 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.route.presentation
 
 import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
-import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 
 /**
  * RouteView 畫面的 MVI Contract
@@ -17,12 +14,12 @@ data class RouteViewState(
     val isLoading: Boolean = false,
     val isExporting: Boolean = false,
     val error: String? = null
-) : UiState
+)
 
 /**
  * RouteView Intent
  */
-sealed class RouteViewIntent : UiIntent {
+sealed class RouteViewIntent {
     data class LoadRoute(val routeId: String) : RouteViewIntent()
     data class ExportRoute(val routeId: String) : RouteViewIntent()
 }
@@ -30,7 +27,7 @@ sealed class RouteViewIntent : UiIntent {
 /**
  * RouteView Event
  */
-sealed class RouteViewEvent : UiEvent {
+sealed class RouteViewEvent {
     object NavigateBack : RouteViewEvent()
     data class ExportSuccess(val json: String) : RouteViewEvent()
     data class ShowError(val message: String) : RouteViewEvent()

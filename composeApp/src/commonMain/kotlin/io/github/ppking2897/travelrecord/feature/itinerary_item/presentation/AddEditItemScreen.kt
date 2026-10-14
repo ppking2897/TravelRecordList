@@ -47,12 +47,12 @@ fun AddEditItemScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(itineraryId) {
-        viewModel.handleIntent(AddEditItemIntent.LoadItinerary(itineraryId))
+        viewModel.processIntent(AddEditItemIntent.LoadItinerary(itineraryId))
     }
 
     LaunchedEffect(defaultDate, state.itinerary) {
         if (defaultDate != null && state.itinerary != null && state.selectedDate == null) {
-            viewModel.handleIntent(AddEditItemIntent.UpdateDate(defaultDate))
+            viewModel.processIntent(AddEditItemIntent.UpdateDate(defaultDate))
         }
     }
 
@@ -94,7 +94,7 @@ fun AddEditItemScreen(
 
     AddEditItemScreenContent(
         state = state,
-        onIntent = { viewModel.handleIntent(it) },
+        onIntent = { viewModel.processIntent(it) },
         onNavigateBack = onBack,
         onNavigateToEditItinerary = onNavigateToEditItinerary,
         locationSearchService = locationSearchService

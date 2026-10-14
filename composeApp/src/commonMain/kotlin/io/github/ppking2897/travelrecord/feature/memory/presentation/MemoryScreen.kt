@@ -66,7 +66,7 @@ fun MemoryScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
-        viewModel.handleIntent(MemoryIntent.Load)
+        viewModel.processIntent(MemoryIntent.Load)
     }
 
     LaunchedEffect(Unit) {
@@ -80,8 +80,8 @@ fun MemoryScreen(
     MemoryScreenContent(
         state = state,
         modifier = modifier,
-        onRefresh = { viewModel.handleIntent(MemoryIntent.Refresh) },
-        onToggleExpanded = { viewModel.handleIntent(MemoryIntent.ToggleExpanded(it)) }
+        onRefresh = { viewModel.processIntent(MemoryIntent.Refresh) },
+        onToggleExpanded = { viewModel.processIntent(MemoryIntent.ToggleExpanded(it)) }
     )
 }
 

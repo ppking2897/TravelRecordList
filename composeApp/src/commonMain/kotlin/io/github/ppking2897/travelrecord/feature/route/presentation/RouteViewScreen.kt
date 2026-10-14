@@ -63,7 +63,7 @@ fun RouteViewScreen(
     
     // 載入路線
     LaunchedEffect(routeId) {
-        viewModel.handleIntent(RouteViewIntent.LoadRoute(routeId))
+        viewModel.processIntent(RouteViewIntent.LoadRoute(routeId))
     }
     
     RouteViewScreenContent(
@@ -73,7 +73,7 @@ fun RouteViewScreen(
         error = state.error,
         onNavigateBack = onNavigateBack,
         onExportClick = {
-            viewModel.handleIntent(RouteViewIntent.ExportRoute(routeId))
+            viewModel.processIntent(RouteViewIntent.ExportRoute(routeId))
         },
         onOpenMapClick = { location ->
             val query = if (location.latitude != null && location.longitude != null) {

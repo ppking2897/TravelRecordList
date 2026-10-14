@@ -1,24 +1,28 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 package io.github.ppking2897.travelrecord.feature.memory.presentation
 
+import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import io.github.ppking2897.travelrecord.feature.memory.domain.usecase.GetMemoriesUseCase
+import kotlinx.coroutines.launch
 
 class MemoryViewModel(
     private val getMemoriesUseCase: GetMemoriesUseCase
-) : BaseViewModel<MemoryState, MemoryIntent, MemoryEvent>(
+) : BaseViewModel<MemoryIntent, MemoryState, MemoryEvent>(
     initialState = MemoryState()
 ) {
-    override suspend fun processIntent(intent: MemoryIntent) {
-        when (intent) {
-            MemoryIntent.Load -> load(showLoadingWhenEmpty = true)
-            MemoryIntent.Refresh -> load(showLoadingWhenEmpty = false)
-            is MemoryIntent.ToggleExpanded -> toggleExpanded(intent.tripId)
+    override fun processIntent(intent: MemoryIntent) {
+        viewModelScope.launch {
+            when (intent) {
+                MemoryIntent.Load -> load(showLoadingWhenEmpty = true)
+                MemoryIntent.Refresh -> load(showLoadingWhenEmpty = false)
+                is MemoryIntent.ToggleExpanded -> toggleExpanded(intent.tripId)
+            }
         }
     }
 
     private suspend fun load(showLoadingWhenEmpty: Boolean) {
-        val hasData = currentState.memories.isNotEmpty()
+        val hasData = state.value.memories.isNotEmpty()
         if (showLoadingWhenEmpty && !hasData) {
             updateState { copy(isLoading = true, error = null) }
         }

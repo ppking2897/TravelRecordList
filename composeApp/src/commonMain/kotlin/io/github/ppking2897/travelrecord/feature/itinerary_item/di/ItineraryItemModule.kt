@@ -25,7 +25,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.U
 import io.github.ppking2897.travelrecord.feature.itinerary_item.presentation.AddEditItemViewModel
 import io.github.ppking2897.travelrecord.feature.itinerary_item.presentation.EditItemViewModel
 import kotlin.time.ExperimentalTime
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 @ExperimentalTime
@@ -54,19 +54,6 @@ val itineraryItemModule = module {
     factory { BatchUpdateItemsUseCase(get()) }
 
     // ViewModels
-    viewModel {
-        AddEditItemViewModel(
-            addItemUseCase = get(),
-            getItineraryUseCase = get(),
-            imageStorageService = get()
-        )
-    }
-    viewModel {
-        EditItemViewModel(
-            updateItemUseCase = get(),
-            getItineraryItemUseCase = get(),
-            getItineraryUseCase = get(),
-            imageStorageService = get()
-        )
-    }
+    viewModelOf(::AddEditItemViewModel)
+    viewModelOf(::EditItemViewModel)
 }
