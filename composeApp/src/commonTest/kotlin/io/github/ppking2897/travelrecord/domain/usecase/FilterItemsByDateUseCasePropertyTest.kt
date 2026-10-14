@@ -1,8 +1,8 @@
-package com.example.myapplication.domain.usecase
+package io.github.ppking2897.travelrecord.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
-import com.example.myapplication.test.itineraryItem
-import com.example.myapplication.test.localDate
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
+import io.github.ppking2897.travelrecord.test.itineraryItem
+import io.github.ppking2897.travelrecord.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize

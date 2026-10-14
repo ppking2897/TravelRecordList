@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_item.data.model
+package io.github.ppking2897.travelrecord.feature.itinerary_item.data.model
 
 import kotlinx.serialization.Serializable
 

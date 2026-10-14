@@ -1,6 +1,6 @@
-package com.example.myapplication.data.storage
+package io.github.ppking2897.travelrecord.data.storage
 
-import com.example.myapplication.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import platform.Foundation.NSUserDefaults
 
 /**

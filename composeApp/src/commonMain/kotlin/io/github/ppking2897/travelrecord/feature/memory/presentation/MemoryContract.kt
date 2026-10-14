@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.memory.presentation
+package io.github.ppking2897.travelrecord.feature.memory.presentation
 
-import com.example.myapplication.core.presentation.mvi.UiEvent
-import com.example.myapplication.core.presentation.mvi.UiIntent
-import com.example.myapplication.core.presentation.mvi.UiState
-import com.example.myapplication.feature.memory.domain.model.TripMemory
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.TripMemory
 
 data class MemoryState(
     val isLoading: Boolean = false,

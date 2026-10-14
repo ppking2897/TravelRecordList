@@ -1,12 +1,12 @@
-package com.example.myapplication.core.data.remote
+package io.github.ppking2897.travelrecord.core.data.remote
 
-import com.example.myapplication.config.ApiKeyProvider
-import com.example.myapplication.core.data.remote.GooglePlace
-import com.example.myapplication.core.data.remote.GoogleTextSearchRequest
-import com.example.myapplication.core.data.remote.GoogleTextSearchResponse
-import com.example.myapplication.core.domain.service.LocationDetails
-import com.example.myapplication.core.domain.service.LocationSearchService
-import com.example.myapplication.core.domain.service.LocationSuggestion
+import io.github.ppking2897.travelrecord.config.ApiKeyProvider
+import io.github.ppking2897.travelrecord.core.data.remote.GooglePlace
+import io.github.ppking2897.travelrecord.core.data.remote.GoogleTextSearchRequest
+import io.github.ppking2897.travelrecord.core.data.remote.GoogleTextSearchResponse
+import io.github.ppking2897.travelrecord.core.domain.service.LocationDetails
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

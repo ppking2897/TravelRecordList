@@ -1,6 +1,6 @@
-package com.example.myapplication.util
+package io.github.ppking2897.travelrecord.util
 
-import com.example.myapplication.test.localDate
+import io.github.ppking2897.travelrecord.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize

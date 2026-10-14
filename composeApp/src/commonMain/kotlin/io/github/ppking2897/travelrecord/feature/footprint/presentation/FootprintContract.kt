@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.footprint.presentation
+package io.github.ppking2897.travelrecord.feature.footprint.presentation
 
-import com.example.myapplication.core.presentation.mvi.UiEvent
-import com.example.myapplication.core.presentation.mvi.UiIntent
-import com.example.myapplication.core.presentation.mvi.UiState
-import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.TripFootprintGroup
 
 data class FootprintState(
     val isLoading: Boolean = false,

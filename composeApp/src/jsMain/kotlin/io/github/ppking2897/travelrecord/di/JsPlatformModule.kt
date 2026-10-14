@@ -1,8 +1,8 @@
-package com.example.myapplication.di
+package io.github.ppking2897.travelrecord.di
 
-import com.example.myapplication.core.data.local.StorageService
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.data.storage.LocalStorageStorageService
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.data.storage.LocalStorageStorageService
 import org.koin.core.module.Module
 
 actual fun Module.registerPlatformStorageService() {

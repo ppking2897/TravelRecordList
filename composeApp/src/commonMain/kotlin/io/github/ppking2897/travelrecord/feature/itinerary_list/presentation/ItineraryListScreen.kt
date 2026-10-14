@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_list.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,18 +53,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.example.myapplication.core.presentation.components.DefaultCoverPlaceholder
-import com.example.myapplication.core.presentation.components.DeleteConfirmDialog
-import com.example.myapplication.core.presentation.components.LocalImage
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.model.TravelPhase
-import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.core.presentation.components.DefaultCoverPlaceholder
+import io.github.ppking2897.travelrecord.core.presentation.components.DeleteConfirmDialog
+import io.github.ppking2897.travelrecord.core.presentation.components.LocalImage
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.TravelPhase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

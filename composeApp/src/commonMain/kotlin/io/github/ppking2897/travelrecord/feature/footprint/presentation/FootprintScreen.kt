@@ -1,5 +1,5 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.footprint.presentation
+package io.github.ppking2897.travelrecord.feature.footprint.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -40,14 +40,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import com.example.myapplication.LocalSnackbarHostState
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
-import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.TripFootprintGroup
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.VisitedPlace
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
 import androidx.compose.ui.tooling.preview.Preview

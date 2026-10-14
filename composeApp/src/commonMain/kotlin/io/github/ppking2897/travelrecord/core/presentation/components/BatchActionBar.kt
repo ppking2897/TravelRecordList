@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -19,8 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 
 /**
  * 批量操作工具列

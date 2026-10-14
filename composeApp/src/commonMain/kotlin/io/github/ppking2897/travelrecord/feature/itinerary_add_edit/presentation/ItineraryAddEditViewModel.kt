@@ -1,17 +1,17 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 
-package com.example.myapplication.feature.itinerary_add_edit.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
 import kotlinx.datetime.LocalDate
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.feature.draft.domain.model.DraftType
-import com.example.myapplication.feature.itinerary.domain.usecase.CreateItineraryUseCase
-import com.example.myapplication.feature.draft.domain.usecase.DeleteDraftUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
-import com.example.myapplication.feature.draft.domain.usecase.LoadDraftUseCase
-import com.example.myapplication.feature.draft.domain.usecase.SaveDraftUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.UpdateItineraryUseCase
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.CreateItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.DeleteDraftUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.LoadDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.SaveDraftUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.UpdateItineraryUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Clock
 

@@ -1,11 +1,11 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.core.data.local
+package io.github.ppking2897.travelrecord.core.data.local
 
-import com.example.myapplication.feature.draft.data.model.DraftResponse
-import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
-import com.example.myapplication.feature.itinerary_item.data.model.ItineraryItemResponse
-import com.example.myapplication.feature.route.data.model.RouteResponse
-import com.example.myapplication.core.data.sync.SyncMarker
+import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftResponse
+import io.github.ppking2897.travelrecord.feature.itinerary.data.model.ItineraryResponse
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.ItineraryItemResponse
+import io.github.ppking2897.travelrecord.feature.route.data.model.RouteResponse
+import io.github.ppking2897.travelrecord.core.data.sync.SyncMarker
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer

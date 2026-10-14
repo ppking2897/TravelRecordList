@@ -1,9 +1,9 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 
-package com.example.myapplication.test
+package io.github.ppking2897.travelrecord.test
 
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import kotlin.time.Clock

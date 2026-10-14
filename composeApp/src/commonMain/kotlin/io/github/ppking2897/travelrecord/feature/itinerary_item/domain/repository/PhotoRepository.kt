@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary_item.domain.repository
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
 
 /**
  * 照片 Repository 介面

@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.draft.domain.model
+package io.github.ppking2897.travelrecord.feature.draft.domain.model
 
 /**
  * 草稿類型

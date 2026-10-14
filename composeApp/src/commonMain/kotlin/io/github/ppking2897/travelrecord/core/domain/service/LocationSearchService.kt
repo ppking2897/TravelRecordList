@@ -1,4 +1,4 @@
-package com.example.myapplication.core.domain.service
+package io.github.ppking2897.travelrecord.core.domain.service
 
 /**
  * 地點搜尋服務介面

@@ -1,4 +1,4 @@
-package com.example.myapplication.core.domain.error
+package io.github.ppking2897.travelrecord.core.domain.error
 
 /**
  * 旅遊應用程式領域錯誤類型

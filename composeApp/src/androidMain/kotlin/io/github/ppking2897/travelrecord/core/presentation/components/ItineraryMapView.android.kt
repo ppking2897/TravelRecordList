@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import android.content.Intent
 import android.net.Uri
@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.presentation.theme.DateColorPalette
-import com.example.myapplication.feature.route.domain.model.MapMarker
+import io.github.ppking2897.travelrecord.core.presentation.theme.DateColorPalette
+import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 
 /**
  * Android 地圖視圖

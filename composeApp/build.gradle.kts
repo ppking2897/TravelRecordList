@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 }
 
 buildkonfig {
-    packageName = "com.example.myapplication.config"
+    packageName = "io.github.ppking2897.travelrecord.config"
 
     defaultConfigs {
         buildConfigField(
@@ -31,7 +31,7 @@ buildkonfig {
 
 kotlin {
     androidLibrary {
-        namespace = "com.example.myapplication.composeapp"
+        namespace = "io.github.ppking2897.travelrecord.composeapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
         androidResources.enable = true

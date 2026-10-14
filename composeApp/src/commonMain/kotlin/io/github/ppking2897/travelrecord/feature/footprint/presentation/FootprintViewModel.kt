@@ -1,10 +1,10 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.footprint.presentation
+package io.github.ppking2897.travelrecord.feature.footprint.presentation
 
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
-import com.example.myapplication.feature.footprint.domain.model.TripFootprintGroup
-import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
-import com.example.myapplication.feature.footprint.domain.usecase.GetVisitedPlacesUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.TripFootprintGroup
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.VisitedPlace
+import io.github.ppking2897.travelrecord.feature.footprint.domain.usecase.GetVisitedPlacesUseCase
 
 class FootprintViewModel(
     private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase

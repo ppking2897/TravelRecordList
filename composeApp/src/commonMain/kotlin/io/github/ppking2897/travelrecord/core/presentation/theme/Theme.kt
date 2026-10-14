@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.theme
+package io.github.ppking2897.travelrecord.core.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

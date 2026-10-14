@@ -1,4 +1,4 @@
-package com.example.myapplication.util
+package io.github.ppking2897.travelrecord.util
 
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate

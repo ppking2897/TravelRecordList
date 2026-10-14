@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.itinerary_list.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.core.presentation.mvi.UiEvent
-import com.example.myapplication.core.presentation.mvi.UiIntent
-import com.example.myapplication.core.presentation.mvi.UiState
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 
 /**
  * ItineraryList 畫面的 MVI Contract

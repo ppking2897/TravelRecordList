@@ -1,8 +1,8 @@
-package com.example.myapplication.core.data.remote
+package io.github.ppking2897.travelrecord.core.data.remote
 
-import com.example.myapplication.core.domain.service.LocationDetails
-import com.example.myapplication.core.domain.service.LocationSearchService
-import com.example.myapplication.core.domain.service.LocationSuggestion
+import io.github.ppking2897.travelrecord.core.domain.service.LocationDetails
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

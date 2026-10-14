@@ -1,4 +1,4 @@
-package com.example.myapplication.di
+package io.github.ppking2897.travelrecord.di
 
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module

@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.route.domain.model
+package io.github.ppking2897.travelrecord.feature.route.domain.model
 
 import kotlinx.datetime.LocalDate
 

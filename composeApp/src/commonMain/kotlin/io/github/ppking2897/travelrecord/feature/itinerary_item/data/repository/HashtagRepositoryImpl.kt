@@ -1,10 +1,10 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.itinerary_item.data.repository
+package io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Hashtag
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.repository.HashtagRepository
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.HashtagRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import kotlin.time.Clock
 
 /**

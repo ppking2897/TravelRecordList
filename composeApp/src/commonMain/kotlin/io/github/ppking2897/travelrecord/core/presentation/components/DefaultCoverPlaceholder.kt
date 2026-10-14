@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,9 +22,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.presentation.theme.AppGradients
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.core.presentation.theme.AppGradients
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
 import androidx.compose.ui.tooling.preview.Preview
 
 /**

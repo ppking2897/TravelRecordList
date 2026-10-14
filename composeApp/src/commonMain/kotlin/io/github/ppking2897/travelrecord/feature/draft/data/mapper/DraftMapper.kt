@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.draft.data.mapper
+package io.github.ppking2897.travelrecord.feature.draft.data.mapper
 
-import com.example.myapplication.feature.draft.data.model.DraftResponse
-import com.example.myapplication.feature.draft.data.model.DraftTypeResponse
-import com.example.myapplication.feature.draft.domain.model.Draft
-import com.example.myapplication.feature.draft.domain.model.DraftType
+import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftResponse
+import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftTypeResponse
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.Draft
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
 
 /**
  * DraftType Response ↔ Domain 轉換

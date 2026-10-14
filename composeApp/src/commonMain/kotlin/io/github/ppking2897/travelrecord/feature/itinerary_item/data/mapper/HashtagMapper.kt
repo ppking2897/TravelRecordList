@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary_item.data.mapper
+package io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper
 
-import com.example.myapplication.feature.itinerary_item.data.model.HashtagResponse
-import com.example.myapplication.feature.itinerary_item.domain.model.Hashtag
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.HashtagResponse
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
 
 /**
  * Hashtag Response ↔ Domain 轉換

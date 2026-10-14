@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary.domain.repository
+package io.github.ppking2897.travelrecord.feature.itinerary.domain.repository
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 
 /**
  * 行程資料存取介面

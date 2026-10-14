@@ -1,14 +1,14 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.itinerary_item.data.repository
+package io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository
 
-import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
-import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
-import com.example.myapplication.feature.itinerary_item.domain.repository.PhotoRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDto
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.PhotoRepository
 import kotlin.time.Clock
 
 /**

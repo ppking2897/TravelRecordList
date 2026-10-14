@@ -1,4 +1,4 @@
-package com.example.myapplication.core.data.local
+package io.github.ppking2897.travelrecord.core.data.local
 
 /**
  * 記憶體內的 StorageService 實作

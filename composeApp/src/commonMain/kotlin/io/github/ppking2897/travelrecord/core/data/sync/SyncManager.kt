@@ -1,9 +1,9 @@
-package com.example.myapplication.core.data.sync
+package io.github.ppking2897.travelrecord.core.data.sync
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.core.data.local.JsonSerializer
-import com.example.myapplication.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 

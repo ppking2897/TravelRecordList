@@ -1,4 +1,4 @@
-package com.example.myapplication.core.data.remote
+package io.github.ppking2897.travelrecord.core.data.remote
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

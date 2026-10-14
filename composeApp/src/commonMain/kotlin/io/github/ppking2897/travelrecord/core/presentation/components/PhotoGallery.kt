@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
 
 /**
  * 照片網格元件 (含預覽功能)

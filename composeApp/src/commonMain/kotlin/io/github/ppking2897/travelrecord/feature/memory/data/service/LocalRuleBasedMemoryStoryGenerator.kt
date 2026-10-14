@@ -1,11 +1,11 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.data.service
+package io.github.ppking2897.travelrecord.feature.memory.data.service
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.memory.domain.model.DailyHighlight
-import com.example.myapplication.feature.memory.domain.model.MemoryStory
-import com.example.myapplication.feature.memory.domain.service.MemoryStoryGenerator
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.DailyHighlight
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.MemoryStory
+import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
 import kotlinx.datetime.LocalDate
 
 /**

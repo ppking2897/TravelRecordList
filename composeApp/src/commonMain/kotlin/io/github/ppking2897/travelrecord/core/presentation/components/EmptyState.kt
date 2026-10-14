@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

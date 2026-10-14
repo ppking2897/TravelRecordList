@@ -1,10 +1,10 @@
-package com.example.myapplication.domain.usecase
+package io.github.ppking2897.travelrecord.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
-import com.example.myapplication.test.itineraryItem
-import com.example.myapplication.test.localDate
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
+import io.github.ppking2897.travelrecord.test.itineraryItem
+import io.github.ppking2897.travelrecord.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe

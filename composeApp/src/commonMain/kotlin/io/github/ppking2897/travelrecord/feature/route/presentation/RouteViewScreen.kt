@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.route.presentation
+package io.github.ppking2897.travelrecord.feature.route.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import com.example.myapplication.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
 import androidx.compose.runtime.*
@@ -24,13 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.presentation.components.LoadingContent
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.route.domain.model.Route
-import com.example.myapplication.feature.route.domain.model.RouteLocation
+import io.github.ppking2897.travelrecord.core.presentation.components.LoadingContent
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
 import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 

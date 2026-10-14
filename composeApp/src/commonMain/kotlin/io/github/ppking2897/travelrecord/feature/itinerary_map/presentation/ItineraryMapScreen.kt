@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_map.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_map.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -22,12 +22,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.feature.route.domain.model.MapMarker
-import com.example.myapplication.core.presentation.components.ErrorContent
-import com.example.myapplication.core.presentation.components.ItineraryMapView
-import com.example.myapplication.core.presentation.components.LoadingContent
-import com.example.myapplication.core.presentation.components.MapInfoCard
-import com.example.myapplication.core.presentation.theme.AppGradients
+import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
+import io.github.ppking2897.travelrecord.core.presentation.components.ErrorContent
+import io.github.ppking2897.travelrecord.core.presentation.components.ItineraryMapView
+import io.github.ppking2897.travelrecord.core.presentation.components.LoadingContent
+import io.github.ppking2897.travelrecord.core.presentation.components.MapInfoCard
+import io.github.ppking2897.travelrecord.core.presentation.theme.AppGradients
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus

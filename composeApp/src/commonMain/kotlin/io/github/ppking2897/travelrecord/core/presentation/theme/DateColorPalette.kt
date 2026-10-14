@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.theme
+package io.github.ppking2897.travelrecord.core.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

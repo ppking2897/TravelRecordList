@@ -1,14 +1,14 @@
-package com.example.myapplication.feature.route.data.repository
+package io.github.ppking2897.travelrecord.feature.route.data.repository
 
-import com.example.myapplication.feature.route.data.mapper.toDto
-import com.example.myapplication.feature.route.data.mapper.toDomain
-import com.example.myapplication.core.data.local.JsonSerializer
-import com.example.myapplication.core.data.local.StorageService
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.route.domain.model.Route
-import com.example.myapplication.feature.route.domain.model.RouteLocation
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
-import com.example.myapplication.feature.route.domain.repository.RouteRepository
+import io.github.ppking2897.travelrecord.feature.route.data.mapper.toDto
+import io.github.ppking2897.travelrecord.feature.route.data.mapper.toDomain
+import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
 
 /**
  * RouteRepository 實作

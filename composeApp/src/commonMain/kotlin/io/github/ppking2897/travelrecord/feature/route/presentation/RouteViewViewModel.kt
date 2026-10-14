@@ -1,8 +1,8 @@
-package com.example.myapplication.feature.route.presentation
+package io.github.ppking2897.travelrecord.feature.route.presentation
 
-import com.example.myapplication.feature.route.domain.usecase.ExportRouteUseCase
-import com.example.myapplication.feature.route.domain.usecase.GetRouteUseCase
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 
 /**
  * RouteView 畫面的 ViewModel

@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_item.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,10 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.myapplication.LocalSnackbarHostState
-import com.example.myapplication.core.domain.service.LocationSearchService
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel

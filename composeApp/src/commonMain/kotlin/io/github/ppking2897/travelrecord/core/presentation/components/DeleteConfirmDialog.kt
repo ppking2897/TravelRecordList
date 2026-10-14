@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme

@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.route.domain.repository
+package io.github.ppking2897.travelrecord.feature.route.domain.repository
 
-import com.example.myapplication.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
 
 /**
  * 路線資料存取介面

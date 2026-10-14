@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -29,11 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.feature.itinerary_item.domain.usecase.ItemsByDate
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TimelineDimensions
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.util.toDateList
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.util.toDateList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn

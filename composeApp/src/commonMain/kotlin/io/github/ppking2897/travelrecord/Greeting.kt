@@ -1,4 +1,4 @@
-package com.example.myapplication
+package io.github.ppking2897.travelrecord
 
 class Greeting {
     private val platform = getPlatform()

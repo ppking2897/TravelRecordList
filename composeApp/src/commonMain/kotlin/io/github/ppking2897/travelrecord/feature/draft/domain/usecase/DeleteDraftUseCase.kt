@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.draft.domain.usecase
+package io.github.ppking2897.travelrecord.feature.draft.domain.usecase
 
-import com.example.myapplication.feature.draft.domain.model.DraftType
-import com.example.myapplication.feature.draft.domain.repository.DraftRepository
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
+import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRepository
 
 class DeleteDraftUseCase(
     private val repository: DraftRepository

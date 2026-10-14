@@ -1,10 +1,10 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.di
+package io.github.ppking2897.travelrecord.feature.memory.di
 
-import com.example.myapplication.feature.memory.data.service.LocalRuleBasedMemoryStoryGenerator
-import com.example.myapplication.feature.memory.domain.service.MemoryStoryGenerator
-import com.example.myapplication.feature.memory.domain.usecase.GetMemoriesUseCase
-import com.example.myapplication.feature.memory.presentation.MemoryViewModel
+import io.github.ppking2897.travelrecord.feature.memory.data.service.LocalRuleBasedMemoryStoryGenerator
+import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
+import io.github.ppking2897.travelrecord.feature.memory.domain.usecase.GetMemoriesUseCase
+import io.github.ppking2897.travelrecord.feature.memory.presentation.MemoryViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

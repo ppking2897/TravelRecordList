@@ -1,10 +1,10 @@
-package com.example.myapplication
+package io.github.ppking2897.travelrecord
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 
 import androidx.compose.ui.window.ComposeViewport
 
-import com.example.myapplication.di.initKoin
+import io.github.ppking2897.travelrecord.di.initKoin
 
 import kotlin.time.ExperimentalTime
 

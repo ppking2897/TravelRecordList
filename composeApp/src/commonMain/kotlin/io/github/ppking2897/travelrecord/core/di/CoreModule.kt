@@ -1,8 +1,8 @@
-package com.example.myapplication.core.di
+package io.github.ppking2897.travelrecord.core.di
 
-import com.example.myapplication.core.data.remote.GooglePlacesService
-import com.example.myapplication.core.data.sync.SyncManager
-import com.example.myapplication.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.data.remote.GooglePlacesService
+import io.github.ppking2897.travelrecord.core.data.sync.SyncManager
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json

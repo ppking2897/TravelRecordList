@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.model.TravelPhase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.TravelPhase
 import kotlinx.datetime.LocalDate
 
 class GetItineraryPhaseUseCase {

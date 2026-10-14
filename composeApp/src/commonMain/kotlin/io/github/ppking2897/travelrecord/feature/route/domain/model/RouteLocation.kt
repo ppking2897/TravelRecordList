@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.route.domain.model
+package io.github.ppking2897.travelrecord.feature.route.domain.model
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import kotlin.time.Duration
 
 /**

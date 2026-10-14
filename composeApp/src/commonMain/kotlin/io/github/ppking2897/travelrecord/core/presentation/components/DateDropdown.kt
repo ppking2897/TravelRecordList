@@ -1,12 +1,12 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.myapplication.util.toDateList
-import com.example.myapplication.util.toFriendlyString
+import io.github.ppking2897.travelrecord.util.toDateList
+import io.github.ppking2897.travelrecord.util.toFriendlyString
 import kotlinx.datetime.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)

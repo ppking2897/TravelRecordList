@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary_list.di
+package io.github.ppking2897.travelrecord.feature.itinerary_list.di
 
-import com.example.myapplication.feature.itinerary_list.presentation.ItineraryListViewModel
+import io.github.ppking2897.travelrecord.feature.itinerary_list.presentation.ItineraryListViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

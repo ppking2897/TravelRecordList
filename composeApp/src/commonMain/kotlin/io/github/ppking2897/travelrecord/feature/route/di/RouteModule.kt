@@ -1,12 +1,12 @@
-package com.example.myapplication.feature.route.di
+package io.github.ppking2897.travelrecord.feature.route.di
 
-import com.example.myapplication.feature.route.data.repository.RouteRepositoryImpl
-import com.example.myapplication.feature.route.domain.repository.RouteRepository
-import com.example.myapplication.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
-import com.example.myapplication.feature.route.domain.usecase.ExportRouteUseCase
-import com.example.myapplication.feature.route.domain.usecase.GetMapMarkersUseCase
-import com.example.myapplication.feature.route.domain.usecase.GetRouteUseCase
-import com.example.myapplication.feature.route.presentation.RouteViewViewModel
+import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
+import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetMapMarkersUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteUseCase
+import io.github.ppking2897.travelrecord.feature.route.presentation.RouteViewViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

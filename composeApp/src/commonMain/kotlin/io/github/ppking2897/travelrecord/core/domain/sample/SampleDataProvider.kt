@@ -1,10 +1,10 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.core.domain.sample
+package io.github.ppking2897.travelrecord.core.domain.sample
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime

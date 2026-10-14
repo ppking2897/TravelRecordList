@@ -1,4 +1,4 @@
-package com.example.myapplication.core.domain.service
+package io.github.ppking2897.travelrecord.core.domain.service
 
 /**
  * 圖片儲存服務介面

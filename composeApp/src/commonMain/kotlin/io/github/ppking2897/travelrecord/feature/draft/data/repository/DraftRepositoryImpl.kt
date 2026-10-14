@@ -1,13 +1,13 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.draft.data.repository
+package io.github.ppking2897.travelrecord.feature.draft.data.repository
 
-import com.example.myapplication.feature.draft.data.mapper.toDto
-import com.example.myapplication.feature.draft.data.mapper.toDomain
-import com.example.myapplication.core.data.local.JsonSerializer
-import com.example.myapplication.core.data.local.StorageService
-import com.example.myapplication.feature.draft.domain.model.Draft
-import com.example.myapplication.feature.draft.domain.model.DraftType
-import com.example.myapplication.feature.draft.domain.repository.DraftRepository
+import io.github.ppking2897.travelrecord.feature.draft.data.mapper.toDto
+import io.github.ppking2897.travelrecord.feature.draft.data.mapper.toDomain
+import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.Draft
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
+import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRepository
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 

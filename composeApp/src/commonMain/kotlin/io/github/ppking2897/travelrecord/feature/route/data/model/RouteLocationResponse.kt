@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.route.data.model
+package io.github.ppking2897.travelrecord.feature.route.data.model
 
-import com.example.myapplication.feature.itinerary_item.data.model.LocationResponse
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.LocationResponse
 import kotlin.time.Duration
 import kotlinx.serialization.Serializable
 

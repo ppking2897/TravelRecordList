@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
-import com.example.myapplication.core.presentation.theme.CornerRadius
+import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
 
 /**
  * 閃爍骨架動畫。以透明度在 surfaceVariant 上來回漸變，模擬載入中的內容佔位。

@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.mvi
+package io.github.ppking2897.travelrecord.core.presentation.mvi
 
 /**
  * 標記介面，所有 UI Event 都應實作此介面

@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.mvi
+package io.github.ppking2897.travelrecord.core.presentation.mvi
 
 /**
  * 通用的載入狀態包裝

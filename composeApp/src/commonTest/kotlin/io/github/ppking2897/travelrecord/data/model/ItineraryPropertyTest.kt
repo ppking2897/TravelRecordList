@@ -1,6 +1,6 @@
-package com.example.myapplication.data.model
+package io.github.ppking2897.travelrecord.data.model
 
-import com.example.myapplication.test.localDate
+import io.github.ppking2897.travelrecord.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb

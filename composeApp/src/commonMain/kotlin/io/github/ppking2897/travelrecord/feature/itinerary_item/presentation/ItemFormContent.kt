@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_item.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,15 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.domain.service.LocationSearchService
-import com.example.myapplication.core.domain.service.LocationSuggestion
-import com.example.myapplication.core.presentation.components.DateDropdown
-import com.example.myapplication.core.presentation.components.LocalImage
-import com.example.myapplication.core.presentation.components.LocationSearchField
-import com.example.myapplication.core.presentation.components.SimplePhotoPreviewDialog
-import com.example.myapplication.core.presentation.components.TimePickerDialog
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
+import io.github.ppking2897.travelrecord.core.presentation.components.DateDropdown
+import io.github.ppking2897.travelrecord.core.presentation.components.LocalImage
+import io.github.ppking2897.travelrecord.core.presentation.components.LocationSearchField
+import io.github.ppking2897.travelrecord.core.presentation.components.SimplePhotoPreviewDialog
+import io.github.ppking2897.travelrecord.core.presentation.components.TimePickerDialog
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.datetime.LocalDate

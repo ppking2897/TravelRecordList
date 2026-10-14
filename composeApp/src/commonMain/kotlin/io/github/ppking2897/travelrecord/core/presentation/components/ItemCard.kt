@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -35,17 +35,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.core.presentation.theme.AppGradients
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.CompletedStateColors
-import com.example.myapplication.core.presentation.theme.ComponentSize
-import com.example.myapplication.core.presentation.theme.CornerRadius
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TimelineDimensions
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.core.presentation.theme.AppGradients
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.CompletedStateColors
+import io.github.ppking2897.travelrecord.core.presentation.theme.ComponentSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
 
 /**
  * 時間軸風格的行程項目卡片

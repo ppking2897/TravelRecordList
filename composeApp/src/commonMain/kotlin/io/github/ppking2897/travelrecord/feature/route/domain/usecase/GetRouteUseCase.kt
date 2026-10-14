@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.route.domain.usecase
+package io.github.ppking2897.travelrecord.feature.route.domain.usecase
 
-import com.example.myapplication.feature.route.domain.model.Route
-import com.example.myapplication.feature.route.domain.repository.RouteRepository
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
 
 class GetRouteUseCase(
     private val repository: RouteRepository

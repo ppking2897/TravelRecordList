@@ -1,11 +1,11 @@
-package com.example.myapplication.feature.today.presentation
+package io.github.ppking2897.travelrecord.feature.today.presentation
 
-import com.example.myapplication.core.domain.service.LocationSuggestion
-import com.example.myapplication.core.presentation.mvi.UiEvent
-import com.example.myapplication.core.presentation.mvi.UiIntent
-import com.example.myapplication.core.presentation.mvi.UiState
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 

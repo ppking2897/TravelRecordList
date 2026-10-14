@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary_detail.di
+package io.github.ppking2897.travelrecord.feature.itinerary_detail.di
 
-import com.example.myapplication.feature.itinerary_detail.presentation.ItineraryDetailViewModel
+import io.github.ppking2897.travelrecord.feature.itinerary_detail.presentation.ItineraryDetailViewModel
 import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

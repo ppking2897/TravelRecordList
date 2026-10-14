@@ -1,7 +1,7 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.domain.model
+package io.github.ppking2897.travelrecord.feature.memory.domain.model
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 
 data class TripMemory(
     val itinerary: Itinerary,

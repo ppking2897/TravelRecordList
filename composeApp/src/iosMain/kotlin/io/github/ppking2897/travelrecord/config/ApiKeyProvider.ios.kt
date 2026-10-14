@@ -1,4 +1,4 @@
-package com.example.myapplication.config
+package io.github.ppking2897.travelrecord.config
 
 /**
  * iOS 平台的 API Key 提供者

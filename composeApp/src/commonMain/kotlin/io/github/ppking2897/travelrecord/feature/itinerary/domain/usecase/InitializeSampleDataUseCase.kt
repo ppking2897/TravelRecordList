@@ -1,8 +1,8 @@
-package com.example.myapplication.feature.itinerary.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase
 
-import com.example.myapplication.core.domain.sample.SampleDataProvider
-import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.core.domain.sample.SampleDataProvider
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 
 /**
  * 初始化範例資料 UseCase

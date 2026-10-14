@@ -1,12 +1,12 @@
-package com.example.myapplication.feature.itinerary_list.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.usecase.DeleteItineraryUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.SearchItinerariesUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 
 /**
  * ItineraryList 畫面的 ViewModel（MVI 架構）

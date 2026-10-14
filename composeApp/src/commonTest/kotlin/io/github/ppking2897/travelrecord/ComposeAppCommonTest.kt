@@ -1,4 +1,4 @@
-package com.example.myapplication
+package io.github.ppking2897.travelrecord
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

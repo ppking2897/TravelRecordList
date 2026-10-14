@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.memory.domain.model
+package io.github.ppking2897.travelrecord.feature.memory.domain.model
 
 import kotlinx.datetime.LocalDate
 

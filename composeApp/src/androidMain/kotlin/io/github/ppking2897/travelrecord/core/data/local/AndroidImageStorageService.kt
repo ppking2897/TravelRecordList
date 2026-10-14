@@ -1,7 +1,7 @@
-package com.example.myapplication.core.data.local
+package io.github.ppking2897.travelrecord.core.data.local
 
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.core.domain.service.ImageStorageError
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageError
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

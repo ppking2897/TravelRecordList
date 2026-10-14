@@ -1,5 +1,5 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.presentation
+package io.github.ppking2897.travelrecord.feature.memory.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -39,16 +39,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
-import com.example.myapplication.LocalSnackbarHostState
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.IconSize
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.memory.domain.model.DailyHighlight
-import com.example.myapplication.feature.memory.domain.model.MemoryStory
-import com.example.myapplication.feature.memory.domain.model.TripMemory
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.DailyHighlight
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.MemoryStory
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.TripMemory
 import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime

@@ -1,18 +1,18 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 
-package com.example.myapplication.feature.today.presentation
+package io.github.ppking2897.travelrecord.feature.today.presentation
 
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.itinerary_item.domain.usecase.AddItineraryItemUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.AddPhotoUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddItineraryItemUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddPhotoUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -135,7 +135,7 @@ class TodayViewModel(
         }
     }
 
-    private fun selectQuickLocation(suggestion: com.example.myapplication.core.domain.service.LocationSuggestion?) {
+    private fun selectQuickLocation(suggestion: io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion?) {
         updateState {
             if (suggestion == null) {
                 copy(

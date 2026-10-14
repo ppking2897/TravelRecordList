@@ -8,7 +8,7 @@
 - `composeApp`：共用程式碼（KMP library，Android + iOS target）
 - `androidApp`：Android 殼（application module）
 - `iosApp`：iOS 殼
-- package `com.example.myapplication`（模板預設，未改）
+- package `io.github.ppking2897.travelrecord`；Android `applicationId`、iOS bundle ID 同名
 
 ## 建置指令
 
@@ -71,7 +71,7 @@ BaseViewModel 是全專案共用的基底，新舊寫法不能並存，所以要
 
 ## Skill 配置
 
-- **Code root**: `composeApp/src/commonMain/kotlin/com/example/myapplication`
+- **Code root**: `composeApp/src/commonMain/kotlin/io/github/ppking2897/travelrecord`
 - **Code repo**: `TravelRecordList`
 - **Doc dir**: `.claude/docs/`
 - **Integration branch**: `master`

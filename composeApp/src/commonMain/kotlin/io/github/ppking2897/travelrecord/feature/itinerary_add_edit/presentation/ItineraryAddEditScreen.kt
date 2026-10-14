@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.myapplication.feature.itinerary_add_edit.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,8 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import com.example.myapplication.LocalSnackbarHostState
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.coroutines.launch

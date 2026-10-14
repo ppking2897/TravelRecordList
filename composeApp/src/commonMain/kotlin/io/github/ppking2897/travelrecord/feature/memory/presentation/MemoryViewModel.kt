@@ -1,8 +1,8 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.presentation
+package io.github.ppking2897.travelrecord.feature.memory.presentation
 
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
-import com.example.myapplication.feature.memory.domain.usecase.GetMemoriesUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.memory.domain.usecase.GetMemoriesUseCase
 
 class MemoryViewModel(
     private val getMemoriesUseCase: GetMemoriesUseCase

@@ -1,7 +1,7 @@
-package com.example.myapplication
+package io.github.ppking2897.travelrecord
 
 import android.app.Application
-import com.example.myapplication.di.initKoin
+import io.github.ppking2897.travelrecord.di.initKoin
 import kotlin.time.ExperimentalTime
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger

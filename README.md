@@ -27,7 +27,7 @@ Kotlin Multiplatform 旅遊行程記事應用程式
 
 ```
 composeApp/src/
-├── commonMain/kotlin/com/example/myapplication/
+├── commonMain/kotlin/io/github/ppking2897/travelrecord/
 │   ├── data/           # 資料層 (Model, Repository, Storage)
 │   ├── domain/         # 業務邏輯層 (Use Cases)
 │   ├── ui/             # 展示層 (MVI, Screen, Component)

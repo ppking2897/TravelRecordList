@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_list.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.presentation.components.SkeletonLine
-import com.example.myapplication.core.presentation.components.shimmer
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.CornerRadius
-import com.example.myapplication.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.components.SkeletonLine
+import io.github.ppking2897.travelrecord.core.presentation.components.shimmer
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 
 /**
  * 行程列表載入中的骨架佔位，模擬 ItineraryDashboardCard 的佈局。

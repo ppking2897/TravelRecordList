@@ -1,9 +1,9 @@
-package com.example.myapplication.core.domain.validation
+package io.github.ppking2897.travelrecord.core.domain.validation
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.core.domain.error.TravelAppError
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.core.domain.error.TravelAppError
 import kotlinx.datetime.LocalDate
 
 /**

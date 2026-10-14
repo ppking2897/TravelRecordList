@@ -1,8 +1,8 @@
-package com.example.myapplication.feature.route.domain.usecase
+package io.github.ppking2897.travelrecord.feature.route.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.route.domain.model.MapMarker
-import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 
 /**
  * 取得行程項目的地圖標記

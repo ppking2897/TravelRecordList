@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_add_edit.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -23,7 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.core.presentation.components.CoverPhotoSection
+import io.github.ppking2897.travelrecord.core.presentation.components.CoverPhotoSection
 import kotlinx.datetime.LocalDate
 
 /**

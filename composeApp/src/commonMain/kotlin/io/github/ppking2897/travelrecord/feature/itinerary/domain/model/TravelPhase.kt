@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary.domain.model
+package io.github.ppking2897.travelrecord.feature.itinerary.domain.model
 
 enum class TravelPhase(
     val label: String

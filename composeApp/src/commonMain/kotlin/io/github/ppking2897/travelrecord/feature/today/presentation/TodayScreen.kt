@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.today.presentation
+package io.github.ppking2897.travelrecord.feature.today.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,17 +57,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.LocalSnackbarHostState
-import com.example.myapplication.core.domain.service.LocationSearchService
-import com.example.myapplication.core.presentation.components.LocationSearchField
-import com.example.myapplication.core.presentation.theme.CardStyle
-import com.example.myapplication.core.presentation.theme.Spacing
-import com.example.myapplication.core.presentation.theme.TravelRecordTheme
-import com.example.myapplication.core.presentation.util.DateTimeFormatter
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.presentation.components.LocationSearchField
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
 import com.preat.peekaboo.image.picker.SelectionMode
 import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
 import kotlinx.datetime.LocalDate
@@ -490,7 +490,7 @@ private fun QuickRecordSheet(
     onDismiss: () -> Unit,
     onActivityChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
-    onLocationSelected: (com.example.myapplication.core.domain.service.LocationSuggestion?) -> Unit,
+    onLocationSelected: (io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion?) -> Unit,
     onNotesChange: (String) -> Unit,
     onAddPhotos: () -> Unit,
     onSave: () -> Unit,

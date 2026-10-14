@@ -21,7 +21,7 @@ tools: ["Bash", "Read", "Edit", "mcp__mobile-mcp__mobile_list_elements_on_screen
 - Android emulator `emulator-5554` 已開機
 - `adb.exe` 路徑：`C:\Users\{USERNAME}\AppData\Local\Android\Sdk\platform-tools\adb.exe`（Git Bash：`/c/Users/.../adb.exe`）
 - 網路連線可用（Google Places 搜尋會用到）
-- 若目前 device 有裝 `com.example.myapplication`，會被 uninstall
+- 若目前 device 有裝 `io.github.ppking2897.travelrecord`，會被 uninstall
 
 ## When to Use vs When NOT to Use
 
@@ -57,14 +57,14 @@ uninstall → (可選) 關 seed → build+install → launch
 
 ### Step 0 — Clean slate
 
-若要完全空白（連 seed 資料都不要），**先** 編輯 `composeApp/src/commonMain/kotlin/com/example/myapplication/feature/itinerary_list/presentation/ItineraryListViewModel.kt`，把 `initializeSampleDataUseCase()` 暫時註解掉。**走完流程務必還原**（這個 skill 最後會強制提醒）。
+若要完全空白（連 seed 資料都不要），**先** 編輯 `composeApp/src/commonMain/kotlin/io/github/ppking2897/travelrecord/feature/itinerary_list/presentation/ItineraryListViewModel.kt`，把 `initializeSampleDataUseCase()` 暫時註解掉。**走完流程務必還原**（這個 skill 最後會強制提醒）。
 
 ```bash
 ADB="/c/Users/EF11409254/AppData/Local/Android/Sdk/platform-tools/adb.exe"
-"$ADB" uninstall com.example.myapplication
+"$ADB" uninstall io.github.ppking2897.travelrecord
 cd "D:/My Data/EF11409254/Bianca/Android/Project/TravelApp/main"
 ./gradlew :androidApp:installDebug
-"$ADB" shell monkey -p com.example.myapplication -c android.intent.category.LAUNCHER 1
+"$ADB" shell monkey -p io.github.ppking2897.travelrecord -c android.intent.category.LAUNCHER 1
 ```
 
 > **Gradle task 注意**：install 任務只在 `:androidApp` 模組，不在 `:composeApp`。`:composeApp:installDebug` 不存在。
@@ -207,7 +207,7 @@ cd "D:/My Data/EF11409254/Bianca/Android/Project/TravelApp/main"
 走完 **一定要還原** `ItineraryListViewModel.kt` 裡被註解掉的 `initializeSampleDataUseCase()`，否則下次別人 clone 專案會遇到永遠空白的假 bug。
 
 ```bash
-# 檔案：composeApp/src/commonMain/kotlin/com/example/myapplication/feature/itinerary_list/presentation/ItineraryListViewModel.kt
+# 檔案：composeApp/src/commonMain/kotlin/io/github/ppking2897/travelrecord/feature/itinerary_list/presentation/ItineraryListViewModel.kt
 # 把這行還原：
 # initializeSampleDataUseCase()
 ```

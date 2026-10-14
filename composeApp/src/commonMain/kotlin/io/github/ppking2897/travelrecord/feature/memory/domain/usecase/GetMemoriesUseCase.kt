@@ -1,12 +1,12 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.memory.domain.usecase
+package io.github.ppking2897.travelrecord.feature.memory.domain.usecase
 
-import com.example.myapplication.feature.itinerary.domain.model.TravelPhase
-import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
-import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
-import com.example.myapplication.feature.memory.domain.model.TripMemory
-import com.example.myapplication.feature.memory.domain.service.MemoryStoryGenerator
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.TravelPhase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.memory.domain.model.TripMemory
+import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

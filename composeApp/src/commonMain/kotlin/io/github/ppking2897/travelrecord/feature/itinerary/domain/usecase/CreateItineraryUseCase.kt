@@ -1,8 +1,8 @@
-package com.example.myapplication.feature.itinerary.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase
 
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.core.domain.validation.Validation
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.core.domain.validation.Validation
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import kotlinx.datetime.LocalDate
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

@@ -1,5 +1,5 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.draft.data.model
+package io.github.ppking2897.travelrecord.feature.draft.data.model
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual

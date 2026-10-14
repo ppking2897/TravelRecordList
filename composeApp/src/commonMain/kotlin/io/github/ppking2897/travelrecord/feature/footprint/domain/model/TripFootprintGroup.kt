@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.footprint.domain.model
+package io.github.ppking2897.travelrecord.feature.footprint.domain.model
 
 import kotlinx.datetime.LocalDate
 

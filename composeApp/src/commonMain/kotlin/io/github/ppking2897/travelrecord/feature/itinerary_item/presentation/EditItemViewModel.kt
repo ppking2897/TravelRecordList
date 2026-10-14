@@ -1,19 +1,19 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 
-package com.example.myapplication.feature.itinerary_item.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_item.presentation
 
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
-import com.example.myapplication.core.domain.service.LocationSuggestion
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import com.example.myapplication.feature.itinerary_item.domain.model.Location
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
-import com.example.myapplication.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary_item.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Photo
-import com.example.myapplication.feature.itinerary_item.domain.repository.PhotoRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.PhotoRepository
 
 /**
  * 新增照片 Use Case

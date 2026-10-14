@@ -1,9 +1,9 @@
-package com.example.myapplication.di
+package io.github.ppking2897.travelrecord.di
 
-import com.example.myapplication.core.data.local.AndroidImageStorageService
-import com.example.myapplication.core.data.local.AndroidStorageService
-import com.example.myapplication.core.domain.service.ImageStorageService
-import com.example.myapplication.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.core.data.local.AndroidImageStorageService
+import io.github.ppking2897.travelrecord.core.data.local.AndroidStorageService
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 

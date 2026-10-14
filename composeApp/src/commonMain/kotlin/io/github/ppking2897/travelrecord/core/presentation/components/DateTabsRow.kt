@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -7,8 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.util.toDateList
-import com.example.myapplication.util.toShortString
+import io.github.ppking2897.travelrecord.util.toDateList
+import io.github.ppking2897.travelrecord.util.toShortString
 import kotlinx.datetime.LocalDate
 
 @Composable

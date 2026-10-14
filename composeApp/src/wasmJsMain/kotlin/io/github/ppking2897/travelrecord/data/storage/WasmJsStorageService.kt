@@ -1,4 +1,4 @@
-package com.example.myapplication.data.storage
+package io.github.ppking2897.travelrecord.data.storage
 
 import kotlinx.browser.localStorage
 

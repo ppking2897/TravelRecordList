@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.itinerary.data.mapper
+package io.github.ppking2897.travelrecord.feature.itinerary.data.mapper
 
-import com.example.myapplication.feature.itinerary.data.model.ItineraryResponse
-import com.example.myapplication.feature.itinerary.domain.model.Itinerary
-import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
-import com.example.myapplication.feature.itinerary_item.data.mapper.toDomain
+import io.github.ppking2897.travelrecord.feature.itinerary.data.model.ItineraryResponse
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDto
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDomain
 
 /**
  * Itinerary Response ↔ Domain 轉換

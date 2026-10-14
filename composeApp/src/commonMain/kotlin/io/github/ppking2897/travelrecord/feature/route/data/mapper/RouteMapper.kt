@@ -1,11 +1,11 @@
-package com.example.myapplication.feature.route.data.mapper
+package io.github.ppking2897.travelrecord.feature.route.data.mapper
 
-import com.example.myapplication.feature.route.data.model.RouteResponse
-import com.example.myapplication.feature.route.data.model.RouteLocationResponse
-import com.example.myapplication.feature.route.domain.model.Route
-import com.example.myapplication.feature.route.domain.model.RouteLocation
-import com.example.myapplication.feature.itinerary_item.data.mapper.toDomain
-import com.example.myapplication.feature.itinerary_item.data.mapper.toDto
+import io.github.ppking2897.travelrecord.feature.route.data.model.RouteResponse
+import io.github.ppking2897.travelrecord.feature.route.data.model.RouteLocationResponse
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDomain
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDto
 
 /**
  * RouteLocation Response ↔ Domain 轉換

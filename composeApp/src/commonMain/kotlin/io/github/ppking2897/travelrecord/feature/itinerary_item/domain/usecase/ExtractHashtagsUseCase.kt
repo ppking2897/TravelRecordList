@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary_item.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Hashtag
-import com.example.myapplication.feature.itinerary_item.domain.repository.HashtagRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.HashtagRepository
 
 /**
  * 提取標籤 Use Case

@@ -1,10 +1,10 @@
-package com.example.myapplication.feature.draft.di
+package io.github.ppking2897.travelrecord.feature.draft.di
 
-import com.example.myapplication.feature.draft.data.repository.DraftRepositoryImpl
-import com.example.myapplication.feature.draft.domain.repository.DraftRepository
-import com.example.myapplication.feature.draft.domain.usecase.DeleteDraftUseCase
-import com.example.myapplication.feature.draft.domain.usecase.LoadDraftUseCase
-import com.example.myapplication.feature.draft.domain.usecase.SaveDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.data.repository.DraftRepositoryImpl
+import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRepository
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.DeleteDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.LoadDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.SaveDraftUseCase
 import kotlin.time.ExperimentalTime
 import org.koin.dsl.module
 

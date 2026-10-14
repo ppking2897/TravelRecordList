@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.util
+package io.github.ppking2897.travelrecord.core.presentation.util
 
 /**
  * 圖片選擇器介面

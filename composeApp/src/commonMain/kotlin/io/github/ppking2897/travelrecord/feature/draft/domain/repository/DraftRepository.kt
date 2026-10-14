@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.draft.domain.repository
+package io.github.ppking2897.travelrecord.feature.draft.domain.repository
 
-import com.example.myapplication.feature.draft.domain.model.Draft
-import com.example.myapplication.feature.draft.domain.model.DraftType
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.Draft
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.DraftType
 
 /**
  * 草稿資料存取介面

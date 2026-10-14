@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary_item.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.repository.ItineraryItemRepository
-import com.example.myapplication.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import kotlin.time.ExperimentalTime
 
 /**

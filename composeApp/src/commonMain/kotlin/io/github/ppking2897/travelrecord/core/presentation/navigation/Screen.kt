@@ -1,4 +1,4 @@
-package com.example.myapplication.core.presentation.navigation
+package io.github.ppking2897.travelrecord.core.presentation.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

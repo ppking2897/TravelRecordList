@@ -1,4 +1,4 @@
-package com.example.myapplication.feature.itinerary_item.domain.model
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model
 
 /**
  * 地點領域模型

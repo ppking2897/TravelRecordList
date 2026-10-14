@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.itinerary_item.domain.usecase
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import kotlinx.datetime.LocalDate
 
 /**

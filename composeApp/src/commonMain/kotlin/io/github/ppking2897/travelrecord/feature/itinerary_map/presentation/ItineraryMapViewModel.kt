@@ -1,10 +1,10 @@
-package com.example.myapplication.feature.itinerary_map.presentation
+package io.github.ppking2897.travelrecord.feature.itinerary_map.presentation
 
-import com.example.myapplication.feature.route.domain.model.MapMarker
+import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 import kotlinx.datetime.LocalDate
-import com.example.myapplication.feature.itinerary.domain.usecase.GetItineraryUseCase
-import com.example.myapplication.feature.route.domain.usecase.GetMapMarkersUseCase
-import com.example.myapplication.core.presentation.mvi.BaseViewModel
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetMapMarkersUseCase
+import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 
 /**
  * 地圖畫面的 ViewModel

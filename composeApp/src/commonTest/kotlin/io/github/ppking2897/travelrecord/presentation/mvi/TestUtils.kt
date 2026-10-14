@@ -1,4 +1,4 @@
-package com.example.myapplication.presentation.mvi
+package io.github.ppking2897.travelrecord.presentation.mvi
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList

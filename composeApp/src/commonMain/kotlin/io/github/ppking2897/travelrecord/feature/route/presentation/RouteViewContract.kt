@@ -1,9 +1,9 @@
-package com.example.myapplication.feature.route.presentation
+package io.github.ppking2897.travelrecord.feature.route.presentation
 
-import com.example.myapplication.feature.route.domain.model.Route
-import com.example.myapplication.core.presentation.mvi.UiEvent
-import com.example.myapplication.core.presentation.mvi.UiIntent
-import com.example.myapplication.core.presentation.mvi.UiState
+import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiEvent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiIntent
+import io.github.ppking2897.travelrecord.core.presentation.mvi.UiState
 
 /**
  * RouteView 畫面的 MVI Contract

@@ -1,6 +1,6 @@
-package com.example.myapplication.feature.today.di
+package io.github.ppking2897.travelrecord.feature.today.di
 
-import com.example.myapplication.feature.today.presentation.TodayViewModel
+import io.github.ppking2897.travelrecord.feature.today.presentation.TodayViewModel
 import kotlin.time.ExperimentalTime
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

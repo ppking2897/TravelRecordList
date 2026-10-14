@@ -1,7 +1,7 @@
-package com.example.myapplication.feature.itinerary_item.domain.repository
+package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository
 
-import com.example.myapplication.feature.itinerary_item.domain.model.Hashtag
-import com.example.myapplication.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 
 /**
  * Hashtag Repository 介面

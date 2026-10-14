@@ -1,8 +1,8 @@
-package com.example.myapplication.core.presentation.components
+package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.myapplication.feature.route.domain.model.MapMarker
+import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 
 /**
  * 行程地圖視圖（跨平台）

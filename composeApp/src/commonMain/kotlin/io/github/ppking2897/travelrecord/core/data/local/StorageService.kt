@@ -1,4 +1,4 @@
-package com.example.myapplication.core.data.local
+package io.github.ppking2897.travelrecord.core.data.local
 
 /**
  * 平台無關的儲存服務介面

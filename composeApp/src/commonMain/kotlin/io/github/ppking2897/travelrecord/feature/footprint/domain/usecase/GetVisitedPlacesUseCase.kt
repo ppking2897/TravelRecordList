@@ -1,9 +1,9 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
-package com.example.myapplication.feature.footprint.domain.usecase
+package io.github.ppking2897.travelrecord.feature.footprint.domain.usecase
 
-import com.example.myapplication.feature.footprint.domain.model.VisitedPlace
-import com.example.myapplication.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
-import com.example.myapplication.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.footprint.domain.model.VisitedPlace
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 
 class GetVisitedPlacesUseCase(
     private val getAllItinerariesUseCase: GetAllItinerariesUseCase,
