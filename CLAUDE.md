@@ -21,15 +21,24 @@
 
 ## 與外層 kmp rules 不同的寫法
 
-外層 `.claude/rules/kmp-*` 會依路徑自動套用，以下幾點**照本專案現有 code 寫**：
+外層 `.claude/rules/kmp-*` 比本專案的寫法新（rules 4–7 月更新，本專案寫法 4/9 定型）。原則：**「怎麼寫」以 rules 為準，「專案裡有什麼」以專案為準。**
+
+### 待遷移（rules 較新；遷移完成前照現有 code 寫）
+
+BaseViewModel 是全專案共用的基底，新舊寫法不能並存，所以要整批遷移，不在寫新功能時順手改。遷移排在改善計畫的地基項目。
+
+| 面向 | 外層 rules（目標） | 本專案現況 |
+|---|---|---|
+| BaseViewModel | `BaseViewModel<Intent, State, Event>`，Screen 呼 `processIntent` | `BaseViewModel<S : UiState, I : UiIntent, E : UiEvent>`（`core/presentation/mvi/`）；Screen 呼 `handleIntent(intent)`，子類實作 `suspend processIntent`；`sendEvent` 是 suspend |
+| Contract | Intent / State / Event 不掛介面 | 各自實作 `UiIntent` / `UiState` / `UiEvent`（跟 BaseViewModel 一起遷移） |
+| ViewModel 註冊 | `viewModelOf(::XxxViewModel)` | `viewModel { XxxViewModel(get(), …) }` |
+
+### 本專案不適用（rules 的前提跟本專案不同）
 
 | 面向 | 外層 rules | 本專案 |
 |---|---|---|
-| Repository 回傳 | `Flow<ApiResult<T>>` | 讀寫資料的方法用 `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）|
-| BaseViewModel | `BaseViewModel<Intent, State, Event>`，Screen 呼 `processIntent` | `BaseViewModel<S : UiState, I : UiIntent, E : UiEvent>`（`core/presentation/mvi/`）；Screen 呼 `handleIntent(intent)`，子類實作 `suspend processIntent`；`sendEvent` 是 suspend |
-| Contract | Intent / State / Event 不掛介面 | 各自實作 `UiIntent` / `UiState` / `UiEvent` |
-| ViewModel 註冊 | `viewModelOf(::XxxViewModel)` | `viewModel { XxxViewModel(get(), …) }` |
 | 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：Repository 透過 `StorageService`（`core/data/local/`）存本機 JSON，`data/model/*Response` 是儲存格式。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
+| Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | 讀寫資料的方法用 `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。換 Room 時再決定要不要改 |
 
 ## Feature 之間的關係
 
@@ -53,6 +62,12 @@
 
 - **Phase 進度與 UX 待辦**：`.claude/docs/uiux-fix-plan.md`（「執行狀態」段）——挑下一個任務前先讀。
 - 其他 `.claude/docs/*.md`（product-analysis、ui-review、ux-improvements）是一次性分析報告，不是 feature-doc 格式。
+
+## 等待標記
+
+等外部而先不做的地方（帳號設定、需要 Mac 才能驗證等），標成 `TODO(等外部): 剩什麼；移除條件：…`，移除條件要能直接驗證。`/blocked` 只搜這個寫法；一般 `TODO` 是自己還沒做的事，不算等外部。
+
+> `uiux-fix-plan.md` 的 ⏸ 意思是「待做」不是「被擋」，`/blocked` 會把它列成卡點，看結果時要扣掉。
 
 ## Skill 配置
 
