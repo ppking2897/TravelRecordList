@@ -20,6 +20,6 @@ val coreModule = module {
             }
         }
     }
-    single<LocationSearchService> { GooglePlacesService(get()) }
+    single<LocationSearchService> { GooglePlacesService(get(), get()) }
     single { SyncManager(get()) }
 }

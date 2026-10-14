@@ -4,6 +4,8 @@ import io.github.ppking2897.travelrecord.core.data.local.AndroidImageStorageServ
 import io.github.ppking2897.travelrecord.core.data.local.AndroidStorageService
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.core.data.remote.AndroidAppIdentity
+import io.github.ppking2897.travelrecord.core.data.remote.AppIdentity
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 
@@ -13,4 +15,8 @@ actual fun Module.registerPlatformStorageService() {
 
 actual fun Module.registerPlatformImageStorageService() {
     single<ImageStorageService> { AndroidImageStorageService(androidContext()) }
+}
+
+actual fun Module.registerPlatformAppIdentity() {
+    single<AppIdentity> { AndroidAppIdentity(androidContext()) }
 }

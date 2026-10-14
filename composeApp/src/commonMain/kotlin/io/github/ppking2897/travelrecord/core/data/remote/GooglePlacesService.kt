@@ -26,9 +26,14 @@ import io.ktor.http.contentType
  * - 需要有效的 API Key
  * - 每月有 $200 免費額度
  * - 使用 Field Mask 減少回傳資料量以節省費用
+ * - 每個請求附上 [AppIdentity]，對應 key 的應用程式限制
+ *
+ * TODO(等外部): Google Cloud Console 為 key 設定 Android 應用程式限制（套件名稱 + 每台開發機的 debug 簽章 SHA-1）、API 限制只開 Places API (New)、每日配額上限；移除條件：帶錯誤的 X-Android-Package 呼叫 places:searchText 回 403，且 App 內地點搜尋有結果
  */
 class GooglePlacesService(
     private val httpClient: HttpClient,
+    private val appIdentity: AppIdentity,
+    private val apiKeyProvider: () -> String = { ApiKeyProvider.googlePlacesApiKey },
 ) : LocationSearchService {
 
     companion object {
@@ -44,7 +49,7 @@ class GooglePlacesService(
     }
 
     private val apiKey: String
-        get() = ApiKeyProvider.googlePlacesApiKey
+        get() = apiKeyProvider()
 
     override suspend fun searchByName(query: String): Result<List<LocationSuggestion>> {
         if (apiKey.isBlank()) {
@@ -55,6 +60,7 @@ class GooglePlacesService(
             val lang = detectLanguage(query)
             val response: GoogleTextSearchResponse = httpClient.post("$BASE_URL/places:searchText") {
                 header("X-Goog-Api-Key", apiKey)
+                appIdentity.requestHeaders.forEach { (name, value) -> header(name, value) }
                 header("X-Goog-FieldMask", TEXT_SEARCH_FIELD_MASK)
                 header("Accept-Language", lang)
                 contentType(ContentType.Application.Json)
@@ -78,6 +84,7 @@ class GooglePlacesService(
         return runCatching {
             val response: GooglePlace = httpClient.get("$BASE_URL/places/$placeId") {
                 header("X-Goog-Api-Key", apiKey)
+                appIdentity.requestHeaders.forEach { (name, value) -> header(name, value) }
                 header("X-Goog-FieldMask", PLACE_DETAILS_FIELD_MASK)
             }.body()
 
