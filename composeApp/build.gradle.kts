@@ -35,6 +35,9 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
         androidResources.enable = true
+
+        // AGP 9 的 KMP library 預設不建 Android 端測試，要明確開啟才有 androidHostTest 與 JVM 測試任務
+        withHostTest { }
     }
 
     listOf(
@@ -85,9 +88,18 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
             implementation(libs.kotest.framework.engine)
             implementation(libs.kotest.assertions.core)
             implementation(libs.kotest.property)
         }
+        getByName("androidHostTest").dependencies {
+            // Kotest 在 JVM 上靠 JUnit Platform 執行，只有 Android 端需要
+            implementation(libs.kotest.runner.junit5)
+        }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
