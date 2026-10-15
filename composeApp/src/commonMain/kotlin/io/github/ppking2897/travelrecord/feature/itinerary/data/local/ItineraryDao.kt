@@ -25,4 +25,7 @@ interface ItineraryDao {
     /** 依建立時間由新到舊；時間相同時保留新增順序 */
     @Query("SELECT * FROM itineraries ORDER BY createdAt DESC, rowid")
     suspend fun getAll(): List<ItineraryEntity>
+
+    @Query("SELECT COUNT(*) FROM itineraries")
+    suspend fun count(): Int
 }
