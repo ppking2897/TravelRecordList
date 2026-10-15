@@ -12,6 +12,7 @@ import kotlin.time.ExperimentalTime
 expect fun Module.registerPlatformStorageService()
 expect fun Module.registerPlatformImageStorageService()
 expect fun Module.registerPlatformAppIdentity()
+expect fun Module.registerPlatformDatabase()
 
 /**
  * 平台模組（commonMain 定義，各平台透過 expect fun 提供實作）
@@ -20,6 +21,7 @@ val platformModule = module {
     registerPlatformStorageService()
     registerPlatformImageStorageService()
     registerPlatformAppIdentity()
+    registerPlatformDatabase()
 }
 
 /**

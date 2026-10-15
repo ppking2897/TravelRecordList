@@ -3,8 +3,8 @@ package io.github.ppking2897.travelrecord.core.data.local.db
 import android.content.ContextWrapper
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.RoomItineraryRepository
-import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.RoomItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryImpl
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.ItineraryItemRepositoryImpl
 import io.github.ppking2897.travelrecord.test.TestRepositories
 import kotlinx.coroutines.Dispatchers
 
@@ -21,6 +21,6 @@ fun inMemoryAppDatabase(): AppDatabase =
         .build()
 
 fun AppDatabase.repositories() = TestRepositories(
-    itineraries = RoomItineraryRepository(this),
-    items = RoomItineraryItemRepository(this),
+    itineraries = ItineraryRepositoryImpl(this),
+    items = ItineraryItemRepositoryImpl(this),
 )

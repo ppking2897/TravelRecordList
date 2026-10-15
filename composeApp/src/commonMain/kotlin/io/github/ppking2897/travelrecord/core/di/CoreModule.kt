@@ -1,6 +1,8 @@
 package io.github.ppking2897.travelrecord.core.di
 
+import io.github.ppking2897.travelrecord.core.data.local.LegacyJsonImporter
 import io.github.ppking2897.travelrecord.core.data.remote.GooglePlacesService
+import io.github.ppking2897.travelrecord.core.domain.service.LegacyDataImporter
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -20,4 +22,5 @@ val coreModule = module {
         }
     }
     single<LocationSearchService> { GooglePlacesService(get(), get()) }
+    single<LegacyDataImporter> { LegacyJsonImporter(get(), get()) }
 }

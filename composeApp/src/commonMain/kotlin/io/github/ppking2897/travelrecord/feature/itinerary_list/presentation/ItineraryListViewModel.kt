@@ -3,8 +3,8 @@ package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.EnsureLocalDataReadyUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
-import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
@@ -17,7 +17,7 @@ class ItineraryListViewModel(
     private val getAllItinerariesUseCase: GetAllItinerariesUseCase,
     private val searchUseCase: SearchItinerariesUseCase,
     private val getItemsByItineraryUseCase: GetItemsByItineraryUseCase,
-    private val initializeSampleDataUseCase: InitializeSampleDataUseCase,
+    private val ensureLocalDataReadyUseCase: EnsureLocalDataReadyUseCase,
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
 ) : BaseViewModel<ItineraryListIntent, ItineraryListState, ItineraryListEvent>(
     initialState = ItineraryListState()
@@ -40,15 +40,16 @@ class ItineraryListViewModel(
     }
 
     /**
-     * 初始化預設資料並載入行程
+     * 準備本機資料（搬移舊資料、需要時寫入範例資料）後載入行程
      */
     private suspend fun initializeAndLoad() {
         updateState { copy(isLoading = true, error = null) }
 
-        // 先嘗試初始化預設資料（如果沒有資料的話）
-        initializeSampleDataUseCase()
+        ensureLocalDataReadyUseCase().onFailure { exception ->
+            updateState { copy(isLoading = false, error = "資料準備失敗：${exception.message}") }
+            return
+        }
 
-        // 再載入行程
         loadItineraries()
     }
 

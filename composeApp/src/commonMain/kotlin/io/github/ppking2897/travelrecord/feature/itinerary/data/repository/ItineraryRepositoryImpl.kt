@@ -1,152 +1,59 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
 package io.github.ppking2897.travelrecord.feature.itinerary.data.repository
 
-import io.github.ppking2897.travelrecord.feature.itinerary.data.mapper.toDto
-import io.github.ppking2897.travelrecord.feature.itinerary.data.mapper.toDomain
-import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
-import io.github.ppking2897.travelrecord.core.data.local.StorageService
+import io.github.ppking2897.travelrecord.core.data.local.db.AppDatabase
+import io.github.ppking2897.travelrecord.feature.itinerary.data.local.toDomain
+import io.github.ppking2897.travelrecord.feature.itinerary.data.local.toEntity
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.data.local.toDomain
 
 /**
- * ItineraryRepository 實作
- * 使用 StorageService 儲存資料
+ * 以 Room 實作的 ItineraryRepository
+ *
+ * 行程的 items 一律從項目表讀出，排序與 getItemsByItinerary 相同；寫入行程時忽略 items。
+ * 刪除行程時資料庫會連帶刪除它的項目。
  */
-class ItineraryRepositoryImpl(
-    private val storageService: StorageService
-) : ItineraryRepository {
+class ItineraryRepositoryImpl(database: AppDatabase) : ItineraryRepository {
 
-    companion object {
-        private const val ITINERARY_KEY_PREFIX = "itinerary:"
-        private const val ITINERARY_INDEX_KEY = "itinerary:index"
+    private val itineraryDao = database.itineraryDao()
+    private val itemDao = database.itineraryItemDao()
+
+    override suspend fun createItinerary(itinerary: Itinerary): Result<Itinerary> = runCatching {
+        itineraryDao.insert(itinerary.toEntity())
+        itinerary
     }
 
-    override suspend fun createItinerary(itinerary: Itinerary): Result<Itinerary> {
-        return try {
-            val key = "$ITINERARY_KEY_PREFIX${itinerary.id}"
-            val dto = itinerary.toDto()
-            val jsonData = JsonSerializer.serializeItinerary(dto)
-            storageService.save(key, jsonData).getOrThrow()
+    override suspend fun getItinerary(id: String): Result<Itinerary?> = runCatching {
+        itineraryDao.get(id)?.toDomain(items = itemDao.getByItinerary(id).map { it.toDomain() })
+    }
 
-            updateIndex { ids -> ids + itinerary.id }
+    override suspend fun getAllItineraries(): Result<List<Itinerary>> = runCatching {
+        val itemsByItinerary = itemDao.getAll().map { it.toDomain() }.groupBy { it.itineraryId }
+        itineraryDao.getAll().map { it.toDomain(items = itemsByItinerary[it.id].orEmpty()) }
+    }
 
-            Result.success(itinerary)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun updateItinerary(itinerary: Itinerary): Result<Itinerary> = runCatching {
+        if (itineraryDao.update(itinerary.toEntity()) == 0) {
+            throw NoSuchElementException("Itinerary not found: ${itinerary.id}")
         }
+        itinerary
     }
 
-    override suspend fun getItinerary(id: String): Result<Itinerary?> {
-        return try {
-            val key = "$ITINERARY_KEY_PREFIX$id"
-            val jsonData = storageService.load(key).getOrThrow()
-
-            if (jsonData == null) {
-                Result.success(null)
-            } else {
-                val dto = JsonSerializer.deserializeItinerary(jsonData)
-                Result.success(dto.toDomain())
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun deleteItinerary(id: String): Result<Unit> = runCatching {
+        itineraryDao.delete(id)
     }
 
-    override suspend fun getAllItineraries(): Result<List<Itinerary>> {
-        return try {
-            val ids = getItineraryIds()
-            val itineraries = mutableListOf<Itinerary>()
+    override suspend fun searchItineraries(query: String): Result<List<Itinerary>> = runCatching {
+        val all = getAllItineraries().getOrThrow()
+        if (query.isBlank()) return@runCatching all
 
-            for (id in ids) {
-                val result = getItinerary(id)
-                result.getOrNull()?.let { itineraries.add(it) }
-            }
-
-            val sorted = itineraries.sortedByDescending { it.createdAt }
-
-            Result.success(sorted)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateItinerary(itinerary: Itinerary): Result<Itinerary> {
-        return try {
-            if (getItinerary(itinerary.id).getOrNull() == null) {
-                return Result.failure(Exception("Itinerary not found: ${itinerary.id}"))
-            }
-
-            val key = "$ITINERARY_KEY_PREFIX${itinerary.id}"
-            val dto = itinerary.toDto()
-            val jsonData = JsonSerializer.serializeItinerary(dto)
-            storageService.save(key, jsonData).getOrThrow()
-
-            Result.success(itinerary)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun deleteItinerary(id: String): Result<Unit> {
-        return try {
-            val key = "$ITINERARY_KEY_PREFIX$id"
-            storageService.delete(key).getOrThrow()
-
-            updateIndex { ids -> ids - id }
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun searchItineraries(query: String): Result<List<Itinerary>> {
-        return try {
-            if (query.isBlank()) {
-                return getAllItineraries()
-            }
-
-            val allItineraries = getAllItineraries().getOrThrow()
-            val queryLower = query.lowercase()
-
-            val filtered = allItineraries.filter { itinerary ->
-                itinerary.title.lowercase().contains(queryLower) ||
-                    itinerary.description.lowercase().contains(queryLower) ||
-                    itinerary.items.any { item ->
-                        item.location.name.lowercase().contains(queryLower)
-                    } ||
-                    itinerary.items.any { item ->
-                        item.activity.lowercase().contains(queryLower)
-                    }
-            }
-
-            Result.success(filtered)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    private suspend fun getItineraryIds(): List<String> {
-        return try {
-            val jsonData = storageService.load(ITINERARY_INDEX_KEY).getOrNull()
-            if (jsonData == null) {
-                emptyList()
-            } else {
-                JsonSerializer.deserializeStringList(jsonData)
-            }
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
-    private suspend fun updateIndex(transform: (List<String>) -> List<String>) {
-        try {
-            val currentIds = getItineraryIds()
-            val newIds = transform(currentIds).distinct()
-            val jsonData = JsonSerializer.serializeStringList(newIds)
-            storageService.save(ITINERARY_INDEX_KEY, jsonData)
-        } catch (e: Exception) {
-            // 索引更新失敗不應影響主要邏輯
+        all.filter { itinerary ->
+            itinerary.title.contains(query, ignoreCase = true) ||
+                itinerary.description.contains(query, ignoreCase = true) ||
+                itinerary.items.any { item ->
+                    item.location.name.contains(query, ignoreCase = true) ||
+                        item.activity.contains(query, ignoreCase = true)
+                }
         }
     }
 }

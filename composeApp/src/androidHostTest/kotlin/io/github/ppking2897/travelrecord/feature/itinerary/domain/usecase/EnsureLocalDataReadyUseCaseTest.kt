@@ -5,7 +5,7 @@ import io.github.ppking2897.travelrecord.core.data.local.LegacyJsonImporter
 import io.github.ppking2897.travelrecord.core.data.local.db.inMemoryAppDatabase
 import io.github.ppking2897.travelrecord.core.data.local.db.repositories
 import io.github.ppking2897.travelrecord.core.domain.service.LegacyDataImporter
-import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryImpl
+import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryRepository
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
@@ -27,7 +27,7 @@ class EnsureLocalDataReadyUseCaseTest {
 
     @Test
     fun `有舊資料時搬過來，不寫範例資料`() = runTest {
-        ItineraryRepositoryImpl(legacyStorage).createItinerary(testItinerary(id = "my-trip")).getOrThrow()
+        LegacyJsonItineraryRepository(legacyStorage).createItinerary(testItinerary(id = "my-trip")).getOrThrow()
 
         ensure().getOrThrow()
 

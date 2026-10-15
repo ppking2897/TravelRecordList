@@ -1,17 +1,17 @@
 package io.github.ppking2897.travelrecord.core.data.local
 
 import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryContract
-import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryImpl
+import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.ItineraryItemRepositoryContract
-import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.ItineraryItemRepositoryImpl
+import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.TestRepositories
 
-/** 以 JSON 鍵值儲存（StorageService）實作的 Repository，資料放在記憶體中 */
+/** 舊版 JSON 鍵值儲存的 Repository（搬移測試用來產生舊格式資料），也必須符合同一份合約 */
 private fun jsonRepositories(): TestRepositories {
     val storage = InMemoryStorageService()
     return TestRepositories(
-        itineraries = ItineraryRepositoryImpl(storage),
-        items = ItineraryItemRepositoryImpl(storage),
+        itineraries = LegacyJsonItineraryRepository(storage),
+        items = LegacyJsonItineraryItemRepository(storage),
     )
 }
 

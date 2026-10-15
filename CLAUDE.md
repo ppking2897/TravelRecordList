@@ -35,8 +35,16 @@
 
 | 面向 | 外層 rules | 本專案 |
 |---|---|---|
-| 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：Repository 透過 `StorageService`（`core/data/local/`）存本機 JSON，`data/model/*Response` 是儲存格式。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
-| Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | 讀寫資料的方法用 `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。換 Room 時再決定要不要改 |
+| 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：行程與項目存 Room（見下方「本機資料」）；路線與草稿仍透過 `StorageService`（`core/data/local/`）存 JSON，`data/model/*Response` 是儲存格式。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
+| Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。換 Room 時維持不變：沒有畫面需要監聽資料變化，不改成 Flow |
+
+## 本機資料
+
+- **Room**（`core/data/local/db/AppDatabase`）：`itineraries`、`itinerary_items` 兩張表，表與 DAO 放在各 feature 的 `data/local/`。每個項目只存一份；讀行程時 `Itinerary.items` 從項目表帶出，寫入行程時忽略 `items`，刪除行程由外鍵連帶刪除項目。照片與標籤以 JSON 字串存在項目列中。
+- **改資料表**：升 `@Database(version)` 並提供 Migration，不用 destructive migration。schema 匯出在 `composeApp/schemas/`，跟程式一起 commit。
+- **版本固定**：Room 2.8.5、sqlite-bundled 2.6.2、KSP 2.3.12 是配合 Kotlin 2.2.20 的組合（原因寫在 `gradle/libs.versions.toml`），升 Kotlin 時一起檢查。
+- **舊版資料**：第一次啟動新版時由 `LegacyJsonImporter` 從鍵值儲存搬進 Room（`EnsureLocalDataReadyUseCase` 在行程列表啟動時呼叫），舊資料保留不刪。舊版的 JSON Repository 移到 `commonTest` 的 `core/data/local/legacy/`，只用來產生舊格式測試資料。
+- **測試**：Repository 的行為規格在 `commonTest`（`*RepositoryContract`、`DataLayerAcceptanceContract`），Room 版的綁定在 `androidHostTest`，用記憶體資料庫在 JVM 上跑。JVM 測試會從 `sqlite-bundled-jvm` 取出對應作業系統的原生程式庫，並開啟 `isReturnDefaultValues`（Android API 在測試中回傳預設值而不是丟錯）。
 
 ## Feature 之間的關係
 

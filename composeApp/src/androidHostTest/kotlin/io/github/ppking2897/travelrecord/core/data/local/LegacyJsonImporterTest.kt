@@ -6,11 +6,11 @@ import io.github.ppking2897.travelrecord.core.data.local.db.inMemoryAppDatabase
 import io.github.ppking2897.travelrecord.core.data.local.db.repositories
 import io.github.ppking2897.travelrecord.core.domain.sample.SampleDataProvider
 import io.github.ppking2897.travelrecord.feature.itinerary.data.mapper.toDto
-import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryImpl
+import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryRepository
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.HashtagRepositoryImpl
-import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.ItineraryItemRepositoryImpl
+import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryItemRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddItineraryItemUseCase
@@ -38,8 +38,8 @@ class LegacyJsonImporterTest {
 
     /** 舊版 App：JSON 鍵值儲存 + 原本的 use case */
     private class LegacyApp(val storage: StorageService = InMemoryStorageService()) {
-        val itineraries = ItineraryRepositoryImpl(storage)
-        val items = ItineraryItemRepositoryImpl(storage)
+        val itineraries = LegacyJsonItineraryRepository(storage)
+        val items = LegacyJsonItineraryItemRepository(storage)
         val addItem = AddItineraryItemUseCase(items, itineraries, ExtractHashtagsUseCase(HashtagRepositoryImpl()))
 
         suspend fun seedSamples() = InitializeSampleDataUseCase(itineraries, items)().getOrThrow()
