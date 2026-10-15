@@ -6,6 +6,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.Create
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.EnsureLocalDataReadyUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetCurrentTripUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
@@ -21,6 +22,7 @@ val itineraryModule = module {
     // Use Cases
     factory { GetItineraryUseCase(get()) }
     factory { GetAllItinerariesUseCase(get()) }
+    factory { GetCurrentTripUseCase(get()) }
     factory { CreateItineraryUseCase(get()) }
     factory { UpdateItineraryUseCase(get()) }
     factory { DeleteItineraryUseCase(get(), get()) }

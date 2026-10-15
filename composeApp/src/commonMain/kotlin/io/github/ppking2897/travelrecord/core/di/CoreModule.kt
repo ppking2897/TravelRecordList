@@ -4,11 +4,15 @@ import io.github.ppking2897.travelrecord.core.data.local.LegacyJsonImporter
 import io.github.ppking2897.travelrecord.core.data.remote.GooglePlacesService
 import io.github.ppking2897.travelrecord.core.domain.service.LegacyDataImporter
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
+import io.github.ppking2897.travelrecord.core.presentation.navigation.AppStartViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import kotlin.time.Clock
 
 val coreModule = module {
     single {
@@ -23,4 +27,7 @@ val coreModule = module {
     }
     single<LocationSearchService> { GooglePlacesService(get(), get()) }
     single<LegacyDataImporter> { LegacyJsonImporter(get(), get()) }
+    single<Clock> { Clock.System }
+    factory { TimeZone.currentSystemDefault() }
+    viewModelOf(::AppStartViewModel)
 }

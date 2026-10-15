@@ -5,8 +5,7 @@ package io.github.ppking2897.travelrecord.feature.today.presentation
 import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
-import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
-import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetCurrentTripUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddPhotoUseCase
@@ -25,7 +24,7 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 class TodayViewModel(
-    private val getAllItinerariesUseCase: GetAllItinerariesUseCase,
+    private val getCurrentTripUseCase: GetCurrentTripUseCase,
     private val getItemsByItineraryUseCase: GetItemsByItineraryUseCase,
     private val addItineraryItemUseCase: AddItineraryItemUseCase,
     private val updateItineraryItemUseCase: UpdateItineraryItemUseCase,
@@ -60,9 +59,8 @@ class TodayViewModel(
         val today = currentLocalDate()
         updateState { copy(isLoading = true, error = null, today = today) }
 
-        getAllItinerariesUseCase()
-            .onSuccess { itineraries ->
-                val currentTrip = findCurrentTrip(itineraries, today)
+        getCurrentTripUseCase(today)
+            .onSuccess { currentTrip ->
                 if (currentTrip == null) {
                     updateState {
                         copy(
@@ -313,16 +311,6 @@ class TodayViewModel(
                 editingNoteText = ""
             )
         }
-    }
-
-    private fun findCurrentTrip(itineraries: List<Itinerary>, today: LocalDate): Itinerary? {
-        return itineraries
-            .filter { itinerary ->
-                val startDate = itinerary.startDate
-                val endDate = itinerary.endDate
-                startDate != null && endDate != null && today in startDate..endDate
-            }
-            .minByOrNull { it.endDate.toString() }
     }
 
     private fun currentLocalDate(): LocalDate {

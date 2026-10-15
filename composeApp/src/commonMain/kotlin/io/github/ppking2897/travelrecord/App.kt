@@ -23,10 +23,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -36,6 +39,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import io.github.ppking2897.travelrecord.core.presentation.navigation.AppRoute
+import io.github.ppking2897.travelrecord.core.presentation.navigation.AppStartViewModel
+import io.github.ppking2897.travelrecord.core.presentation.navigation.AppTab
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
 import io.github.ppking2897.travelrecord.core.presentation.util.shareLauncher
@@ -61,15 +66,6 @@ val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
     error("No SnackbarHostState provided")
 }
 
-private enum class AppTab(
-    val label: String
-) {
-    Plan("行程"),
-    Today("今日"),
-    Footprints("足跡"),
-    Memories("回憶")
-}
-
 @ExperimentalTime
 @Composable
 @Preview
@@ -80,25 +76,37 @@ fun App() {
 @ExperimentalTime
 @Composable
 fun TravelApp() {
+    val appStartViewModel: AppStartViewModel = koinViewModel()
+    val appStartState by appStartViewModel.state.collectAsState()
     val planBackStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
-    var selectedTab by remember { mutableStateOf(AppTab.Plan) }
+    // null = 還在判斷啟動分頁；rememberSaveable 讓旋轉螢幕後留在使用者所在的分頁
+    var selectedTab by rememberSaveable { mutableStateOf<AppTab?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val shareLauncher = shareLauncher()
+
+    LaunchedEffect(appStartState.startTab) {
+        if (selectedTab == null) {
+            selectedTab = appStartState.startTab
+        }
+    }
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                val isPlanDeepLevel = selectedTab == AppTab.Plan && planBackStack.size > 1
-                if (!isPlanDeepLevel) {
+                val currentTab = selectedTab
+                val isPlanDeepLevel = currentTab == AppTab.Plan && planBackStack.size > 1
+                if (currentTab != null && !isPlanDeepLevel) {
                     TravelBottomNavigation(
-                        selectedTab = selectedTab,
+                        selectedTab = currentTab,
                         onTabSelected = { selectedTab = it }
                     )
                 }
             }
         ) { paddingValues ->
             when (selectedTab) {
+                null -> Unit
+
                 AppTab.Plan -> PlanNavHost(
                     backStack = planBackStack,
                     modifier = Modifier.padding(paddingValues),

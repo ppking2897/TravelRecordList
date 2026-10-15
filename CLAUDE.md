@@ -58,7 +58,7 @@
    - `when` 有 `else` 兜底：漏加**不會編譯失敗**，只會顯示 "Unknown route"
 3. DI：`feature/{name}/di/{Name}Module.kt`，再加進 `di/AppModule.kt` 的 `appModule` 加總
 
-底部四個分頁在 `App.kt` 的 `AppTab`。只有「行程」分頁有 back stack（`PlanNavHost`），其他分頁是單一畫面；要從別的分頁進深層頁，先切回行程分頁再 push（參考 `TodayScreen` 的 `onOpenCurrentTrip`）。
+底部四個分頁定義在 `core/presentation/navigation/AppTab.kt`，由 `App.kt` 顯示；打開 App 時停在哪一頁由同資料夾的 `AppStartViewModel` 決定（有進行中的旅行就停在「今日」，判斷規則是 `GetCurrentTripUseCase`）。只有「行程」分頁有 back stack（`PlanNavHost`），其他分頁是單一畫面；要從別的分頁進深層頁，先切回行程分頁再 push（參考 `TodayScreen` 的 `onOpenCurrentTrip`）。
 
 ## 環境
 
