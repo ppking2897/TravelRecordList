@@ -22,21 +22,6 @@ interface PhotoRepository {
     suspend fun setCoverPhoto(itemId: String, photoId: String): Result<Unit>
 
     /**
-     * 重新排序照片
-     */
-    suspend fun reorderPhotos(itemId: String, photoIds: List<String>): Result<Unit>
-
-    /**
-     * 取得行程項目的所有照片
-     */
-    suspend fun getPhotosByItem(itemId: String): Result<List<Photo>>
-
-    /**
-     * 載入照片資料
-     */
-    suspend fun loadPhotoData(photoPath: String): Result<ByteArray>
-
-    /**
      * 生成並儲存縮圖（更新 Photo 物件）
      */
     suspend fun generateAndSaveThumbnail(photo: Photo): Result<Photo>

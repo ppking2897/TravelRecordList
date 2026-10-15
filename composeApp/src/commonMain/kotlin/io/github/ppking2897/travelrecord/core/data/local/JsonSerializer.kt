@@ -5,7 +5,6 @@ import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftResponse
 import io.github.ppking2897.travelrecord.feature.itinerary.data.model.ItineraryResponse
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.ItineraryItemResponse
 import io.github.ppking2897.travelrecord.feature.route.data.model.RouteResponse
-import io.github.ppking2897.travelrecord.core.data.sync.SyncMarker
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -117,19 +116,5 @@ object JsonSerializer {
      */
     fun deserializeStringList(jsonString: String): List<String> {
         return json.decodeFromString(ListSerializer(String.serializer()), jsonString)
-    }
-
-    /**
-     * 將 SyncMarker 列表序列化為 JSON 字串
-     */
-    fun serializeSyncMarkers(markers: List<SyncMarker>): String {
-        return json.encodeToString(ListSerializer(SyncMarker.serializer()), markers)
-    }
-
-    /**
-     * 從 JSON 字串反序列化 SyncMarker 列表
-     */
-    fun deserializeSyncMarkers(jsonString: String): List<SyncMarker> {
-        return json.decodeFromString(ListSerializer(SyncMarker.serializer()), jsonString)
     }
 }

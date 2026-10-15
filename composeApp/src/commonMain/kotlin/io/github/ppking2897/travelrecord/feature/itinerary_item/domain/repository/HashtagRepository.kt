@@ -13,17 +13,7 @@ interface HashtagRepository {
     fun extractHashtags(text: String): List<Hashtag>
 
     /**
-     * 取得所有標籤及其使用次數
-     */
-    suspend fun getAllHashtags(): Result<List<Hashtag>>
-
-    /**
      * 根據標籤篩選項目
      */
     fun filterItemsByHashtag(items: List<ItineraryItem>, hashtag: String): List<ItineraryItem>
-
-    /**
-     * 取得標籤建議（前綴搜尋）
-     */
-    suspend fun getHashtagSuggestions(prefix: String): Result<List<Hashtag>>
 }

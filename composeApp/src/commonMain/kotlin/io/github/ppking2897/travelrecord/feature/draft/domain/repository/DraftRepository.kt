@@ -21,9 +21,4 @@ interface DraftRepository {
      * 刪除指定類型的草稿
      */
     suspend fun deleteDraft(type: DraftType): Result<Unit>
-
-    /**
-     * 刪除過期的草稿（超過 7 天）
-     */
-    suspend fun deleteExpiredDrafts(): Result<Unit>
 }

@@ -64,17 +64,6 @@ class DraftRepositoryImpl(
         }
     }
 
-    override suspend fun deleteExpiredDrafts(): Result<Unit> {
-        return try {
-            DraftType.entries.forEach { type ->
-                getDraft(type)
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     private fun getDraftKey(type: DraftType): String {
         return "$draftKeyPrefix${type.name.lowercase()}"
     }

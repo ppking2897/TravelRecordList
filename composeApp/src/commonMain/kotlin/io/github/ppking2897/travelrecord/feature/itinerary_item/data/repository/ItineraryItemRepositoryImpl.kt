@@ -7,7 +7,6 @@ import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
 import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
-import kotlinx.datetime.Instant
 
 /**
  * ItineraryItemRepository 實作
@@ -95,95 +94,6 @@ class ItineraryItemRepositoryImpl(
             )
 
             Result.success(sorted)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getItemsByLocation(locationName: String): Result<List<ItineraryItem>> {
-        return try {
-            val allItems = getAllItems()
-
-            val filtered = allItems.filter {
-                it.location.name.equals(locationName, ignoreCase = false)
-            }
-
-            val sorted = filtered.sortedWith(
-                compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.primaryTime() }
-            )
-
-            Result.success(sorted)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun toggleCompletion(
-        itemId: String,
-        currentTimestamp: Instant
-    ): Result<ItineraryItem> {
-        return try {
-            val key = "$ITEM_KEY_PREFIX$itemId"
-            val jsonData = storageService.load(key).getOrNull()
-                ?: return Result.failure(Exception("Item not found: $itemId"))
-
-            val dto = JsonSerializer.deserializeItineraryItem(jsonData)
-            val item = dto.toDomain()
-
-            val updatedItem = if (item.isCompleted) {
-                item.copy(
-                    isCompleted = false,
-                    completedAt = null,
-                    modifiedAt = currentTimestamp
-                )
-            } else {
-                item.copy(
-                    isCompleted = true,
-                    completedAt = currentTimestamp,
-                    modifiedAt = currentTimestamp
-                )
-            }
-
-            updateItem(updatedItem)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun calculateProgress(itineraryId: String): Result<Float> {
-        return try {
-            val items = getItemsByItinerary(itineraryId).getOrThrow()
-
-            if (items.isEmpty()) {
-                return Result.success(0f)
-            }
-
-            val completedCount = items.count { it.isCompleted }
-            val totalCount = items.size
-            val progress = (completedCount.toFloat() / totalCount.toFloat()) * 100f
-
-            Result.success(progress)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun reorderItems(itineraryId: String, itemIds: List<String>): Result<Unit> {
-        return try {
-            // itemIds 的順序即新的 order：依序指派 0, 1, 2, ...
-            // Caller 需保證 itemIds 屬於同一日期（order 定義為日內順序）
-            itemIds.forEachIndexed { newOrder, itemId ->
-                val key = "$ITEM_KEY_PREFIX$itemId"
-                val jsonData = storageService.load(key).getOrNull() ?: return@forEachIndexed
-                val item = JsonSerializer.deserializeItineraryItem(jsonData).toDomain()
-                if (item.order != newOrder) {
-                    val updatedDto = item.copy(order = newOrder).toDto()
-                    val updatedJson = JsonSerializer.serializeItineraryItem(updatedDto)
-                    storageService.save(key, updatedJson).getOrThrow()
-                }
-            }
-            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

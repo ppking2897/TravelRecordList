@@ -149,31 +149,6 @@ class PhotoRepositoryImpl(
         }
     }
 
-    override suspend fun reorderPhotos(itemId: String, photoIds: List<String>): Result<Unit> {
-        return try {
-            updateItemPhotos(itemId) { photos ->
-                photoIds.mapNotNull { id -> photos.find { it.id == id } }
-            }.getOrThrow()
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getPhotosByItem(itemId: String): Result<List<Photo>> {
-        return try {
-            val (_, item) = findItemById(itemId).getOrThrow()
-            Result.success(item.photos)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun loadPhotoData(photoPath: String): Result<ByteArray> {
-        return imageStorageService.loadImage(photoPath)
-    }
-
     override suspend fun generateAndSaveThumbnail(photo: Photo): Result<Photo> {
         return try {
             val originalData = imageStorageService.loadImage(photo.filePath).getOrThrow()

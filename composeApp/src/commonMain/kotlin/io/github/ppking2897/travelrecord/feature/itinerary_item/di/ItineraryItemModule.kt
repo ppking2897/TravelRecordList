@@ -19,7 +19,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.G
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ReorderPhotosUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.presentation.AddEditItemViewModel
@@ -33,7 +32,7 @@ val itineraryItemModule = module {
     // Repositories
     single<ItineraryItemRepository> { ItineraryItemRepositoryImpl(get()) }
     single<PhotoRepository> { PhotoRepositoryImpl(get(), get(), get()) }
-    single<HashtagRepository> { HashtagRepositoryImpl(get()) }
+    single<HashtagRepository> { HashtagRepositoryImpl() }
 
     // Use Cases
     factory { GetItemsByItineraryUseCase(get()) }
@@ -46,7 +45,6 @@ val itineraryItemModule = module {
     factory { GenerateThumbnailUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
     factory { SetCoverPhotoUseCase(get()) }
-    factory { ReorderPhotosUseCase(get()) }
     factory { FilterByHashtagUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }
