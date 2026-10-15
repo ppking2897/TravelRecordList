@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: 建置 APK 並執行 JVM 測試
+        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:assembleDebug --console=plain
+
+      # BUILD SUCCESSFUL 不代表有跑到測試：從結果檔加總測試數，0 個就判失敗
+      - name: 確認測試真的有執行
+        run: |
+          total=$(grep -ho '<testsuite [^>]*' composeApp/build/test-results/testAndroidHostTest/*.xml \
+            | grep -o ' tests="[0-9]*"' | grep -o '[0-9]*' | awk '{s+=$1} END {print s+0}')
+          echo "執行的測試數：$total"
+          [ "$total" -gt 0 ] || { echo "沒有執行到任何測試"; exit 1; }
