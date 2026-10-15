@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidxRoom)
 }
 
 val localProperties = Properties().apply {
@@ -37,7 +39,9 @@ kotlin {
         androidResources.enable = true
 
         // AGP 9 的 KMP library 預設不建 Android 端測試，要明確開啟才有 androidHostTest 與 JVM 測試任務
-        withHostTest { }
+        withHostTest {
+            isReturnDefaultValues = true
+        }
     }
 
     listOf(
@@ -62,6 +66,8 @@ kotlin {
             implementation("org.jetbrains.compose.ui:ui-tooling:1.10.3")
         }
         commonMain.dependencies {
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -103,6 +109,9 @@ kotlin {
 
 // peekaboo-ui 0.5.2（已無新版）帶進 CameraX 1.3.2，其原生程式庫未對齊 16 KB 分頁；在此統一拉高 CameraX 版本
 dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     constraints {
         listOf("camera-core", "camera-camera2", "camera-lifecycle", "camera-video", "camera-view").forEach { artifact ->
             add("androidMainImplementation", "androidx.camera:$artifact:${libs.versions.camerax.get()}")
@@ -110,6 +119,35 @@ dependencies {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+// JVM 測試用的 SQLite 原生程式庫：Android 版只附手機用的 .so，host test 改載入 sqlite-bundled-jvm 內對應作業系統的檔案
+val sqliteHostNative by configurations.creating { isTransitive = false }
+dependencies { sqliteHostNative("androidx.sqlite:sqlite-bundled-jvm:${libs.versions.sqlite.get()}") }
+val sqliteNativeDir = layout.buildDirectory.dir("sqlite-host-native")
+val sqliteNative: Pair<String, String> = run {
+    val os = System.getProperty("os.name").lowercase()
+    val arm = System.getProperty("os.arch").lowercase().let { it.contains("aarch64") || it.contains("arm") }
+    when {
+        os.contains("win") -> "natives/windows_x64/sqliteJni.dll" to "sqliteJni.dll"
+        os.contains("mac") -> "natives/osx_${if (arm) "arm64" else "x64"}/libsqliteJni.dylib" to "libsqliteJni.dylib"
+        else -> "natives/linux_${if (arm) "arm64" else "x64"}/libsqliteJni.so" to "libsqliteJni.so"
+    }
+}
+val extractSqliteHostNative by tasks.registering(Copy::class) {
+    from({ zipTree(sqliteHostNative.singleFile) }) {
+        include(sqliteNative.first)
+        eachFile { path = name }
+        includeEmptyDirs = false
+    }
+    into(sqliteNativeDir)
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    dependsOn(extractSqliteHostNative)
+    systemProperty("androidx.sqlite.driver.bundled.path", sqliteNativeDir.get().asFile.absolutePath)
+    systemProperty("androidx.sqlite.driver.bundled.name", sqliteNative.second)
 }

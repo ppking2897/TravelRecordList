@@ -1,4 +1,9 @@
 [versions]
+# Kotlin 2.2.20 只能用 Room 2.x：Room 3 與 sqlite 2.7.x 的 iOS 函式庫需要 Kotlin 2.3.20 以上
+room = "2.8.5"
+sqlite = "2.6.2"
+# KSP 2.3.12 之後的版本預計不再支援 Kotlin 2.2，升 Kotlin 前不要升
+ksp = "2.3.12"
 agp = "9.0.1"
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -27,6 +32,9 @@ buildkonfig = "0.18.0"
 camerax = "1.4.2"
 
 [libraries]
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 peekaboo-ui = { module = "io.github.onseok:peekaboo-ui", version.ref = "peekaboo" }
 peekaboo-image-picker = { module = "io.github.onseok:peekaboo-image-picker", version.ref = "peekaboo" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -65,6 +73,8 @@ maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.r
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage" }
 
 [plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidxRoom = { id = "androidx.room", version.ref = "room" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidKmpLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }

@@ -123,6 +123,29 @@ abstract class DataLayerAcceptanceContract {
     }
 
     @Test
+    fun `直接刪除行程會連帶刪除它的項目`() = runTest {
+        val app = App()
+        val (first) = app.createTripWithItems("伏見稲荷大社", "清水寺")
+
+        app.repos.itineraries.deleteItinerary("trip").getOrThrow()
+
+        app.repos.items.getItemsByItinerary("trip").getOrThrow() shouldBe emptyList()
+        app.repos.items.getItem(first.id).getOrThrow() shouldBe null
+    }
+
+    @Test
+    fun `寫入行程時不會改動它的項目`() = runTest {
+        val app = App()
+        app.createTripWithItems("伏見稲荷大社", "清水寺")
+        val trip = app.repos.itineraries.getItinerary("trip").getOrThrow()!!
+
+        app.repos.itineraries.updateItinerary(trip.copy(title = "改名", items = emptyList())).getOrThrow()
+
+        app.repos.itineraries.getItinerary("trip").getOrThrow()!!.items.size shouldBe 2
+        app.repos.items.getItemsByItinerary("trip").getOrThrow().size shouldBe 2
+    }
+
+    @Test
     fun `批次標記完成後再加照片，完成狀態維持`() = runTest {
         val app = App()
         val (item) = app.createTripWithItems("金閣寺")
