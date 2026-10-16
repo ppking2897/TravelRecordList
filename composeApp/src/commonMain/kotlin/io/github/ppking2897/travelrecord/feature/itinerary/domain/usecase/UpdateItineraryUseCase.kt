@@ -3,7 +3,7 @@ package io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.core.domain.validation.Validation
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * 更新行程的 Use Case

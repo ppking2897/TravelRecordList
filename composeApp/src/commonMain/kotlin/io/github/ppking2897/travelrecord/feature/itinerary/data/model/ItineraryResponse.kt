@@ -2,7 +2,7 @@
 package io.github.ppking2897.travelrecord.feature.itinerary.data.model
 
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.ItineraryItemResponse
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable

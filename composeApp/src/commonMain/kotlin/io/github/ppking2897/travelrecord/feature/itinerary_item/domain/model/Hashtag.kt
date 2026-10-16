@@ -1,7 +1,7 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * 標籤領域模型

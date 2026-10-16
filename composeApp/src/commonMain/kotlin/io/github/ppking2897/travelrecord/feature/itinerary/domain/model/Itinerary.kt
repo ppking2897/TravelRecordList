@@ -2,7 +2,7 @@
 package io.github.ppking2897.travelrecord.feature.itinerary.domain.model
 
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 
 /**

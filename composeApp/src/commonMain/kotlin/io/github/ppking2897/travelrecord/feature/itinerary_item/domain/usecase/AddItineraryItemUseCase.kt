@@ -29,7 +29,7 @@ class AddItineraryItemUseCase(
         activity: String,
         notes: String,
         photoPaths: List<String> = emptyList(),
-        currentTimestamp: kotlinx.datetime.Instant
+        currentTimestamp: kotlin.time.Instant
     ): Result<ItineraryItem> {
         return try {
             // 驗證 itinerary 存在

@@ -7,7 +7,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetIti
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.memory.domain.model.TripMemory
 import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

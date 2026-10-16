@@ -5,7 +5,7 @@ import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftResponse
 import io.github.ppking2897.travelrecord.feature.itinerary.data.model.ItineraryResponse
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.ItineraryItemResponse
 import io.github.ppking2897.travelrecord.feature.route.data.model.RouteResponse
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer

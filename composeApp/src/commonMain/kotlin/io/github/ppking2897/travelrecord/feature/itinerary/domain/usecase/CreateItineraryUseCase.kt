@@ -19,7 +19,7 @@ class CreateItineraryUseCase(
         description: String,
         startDate: LocalDate?,
         endDate: LocalDate?,
-        currentTimestamp: kotlinx.datetime.Instant,
+        currentTimestamp: kotlin.time.Instant,
         coverPhotoPath: String? = null
     ): Result<Itinerary> {
         return try {

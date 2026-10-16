@@ -65,7 +65,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerar
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.TravelPhase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

@@ -16,7 +16,7 @@ class UpdateItineraryItemUseCase(
 ) {
     suspend operator fun invoke(
         item: ItineraryItem,
-        currentTimestamp: kotlinx.datetime.Instant
+        currentTimestamp: kotlin.time.Instant
     ): Result<ItineraryItem> {
         return try {
             // 驗證輸入
