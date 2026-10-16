@@ -80,3 +80,9 @@ class FakeImageStorageService : ImageStorageService {
 
     override fun getImageDirectory(): String = "fake"
 }
+
+/** 存圖一律失敗，其餘行為同 [FakeImageStorageService] */
+class FailingSaveImageStorageService : ImageStorageService by FakeImageStorageService() {
+    override suspend fun saveImage(imageData: ByteArray, itemId: String): Result<String> =
+        Result.failure(IllegalStateException("存照片失敗"))
+}

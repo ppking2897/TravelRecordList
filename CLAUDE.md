@@ -45,6 +45,7 @@
 - **版本固定**：Room 2.8.5、sqlite-bundled 2.6.2、KSP 2.3.12 是配合 Kotlin 2.2.20 的組合（原因寫在 `gradle/libs.versions.toml`），升 Kotlin 時一起檢查。
 - **舊版資料**：第一次啟動新版時由 `LegacyJsonImporter` 從鍵值儲存搬進 Room（`EnsureLocalDataReadyUseCase` 在行程列表啟動時呼叫），舊資料保留不刪。舊版的 JSON Repository 移到 `commonTest` 的 `core/data/local/legacy/`，只用來產生舊格式測試資料。
 - **測試**：Repository 的行為規格在 `commonTest`（`*RepositoryContract`、`DataLayerAcceptanceContract`），Room 版的綁定在 `androidHostTest`，用記憶體資料庫在 JVM 上跑。JVM 測試會從 `sqlite-bundled-jvm` 取出對應作業系統的原生程式庫，並開啟 `isReturnDefaultValues`（Android API 在測試中回傳預設值而不是丟錯）。
+- **ViewModel 測試**：資料層用 `commonTest` 的 `test/InMemoryRepositories.kt`（記憶體版，綁在同一份合約與驗收測試上），由 `test/TestUseCases.kt` 照 App 的接法組成 use case。架構檢查也會掃測試檔，`presentation` 底下的測試不能 import `data` 層，組裝一律放在 `test` 套件。時間相關的 ViewModel 注入 `Clock` 與 `TimeZone`，測試給固定時鐘。
 
 ## Feature 之間的關係
 

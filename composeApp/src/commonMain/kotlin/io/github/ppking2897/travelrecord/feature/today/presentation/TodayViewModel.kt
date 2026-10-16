@@ -14,10 +14,10 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.G
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -30,7 +30,9 @@ class TodayViewModel(
     private val updateItineraryItemUseCase: UpdateItineraryItemUseCase,
     private val addPhotoUseCase: AddPhotoUseCase,
     private val generateThumbnailUseCase: GenerateThumbnailUseCase,
-    private val imageStorageService: ImageStorageService
+    private val imageStorageService: ImageStorageService,
+    private val clock: Clock,
+    private val timeZone: TimeZone,
 ) : BaseViewModel<TodayIntent, TodayState, TodayEvent>(
     initialState = TodayState()
 ) {
@@ -217,7 +219,7 @@ class TodayViewModel(
             activity = quickRecord.activity,
             notes = quickRecord.notes,
             photoPaths = quickRecord.photoPaths,
-            currentTimestamp = Clock.System.now()
+            currentTimestamp = clock.now()
         )
             .onSuccess {
                 updateState {
@@ -239,14 +241,14 @@ class TodayViewModel(
         val item = state.value.todayItems.find { it.id == itemId } ?: return
         val updated = item.copy(
             isCompleted = !item.isCompleted,
-            completedAt = if (item.isCompleted) null else Clock.System.now()
+            completedAt = if (item.isCompleted) null else clock.now()
         )
 
         updateState {
             copy(todayItems = todayItems.map { if (it.id == itemId) updated else it })
         }
 
-        updateItineraryItemUseCase(updated, Clock.System.now())
+        updateItineraryItemUseCase(updated, clock.now())
             .onFailure { exception ->
                 updateState {
                     copy(todayItems = todayItems.map { if (it.id == itemId) item else it })
@@ -288,7 +290,7 @@ class TodayViewModel(
         val item = state.value.todayItems.find { it.id == itemId } ?: return
         val updated = item.copy(notes = state.value.editingNoteText)
 
-        updateItineraryItemUseCase(updated, Clock.System.now())
+        updateItineraryItemUseCase(updated, clock.now())
             .onSuccess {
                 updateState {
                     copy(
@@ -313,14 +315,7 @@ class TodayViewModel(
         }
     }
 
-    private fun currentLocalDate(): LocalDate {
-        return Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .date
-    }
+    private fun currentLocalDate(): LocalDate = clock.todayIn(timeZone)
 
-    private fun currentLocalTime() =
-        Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .time
+    private fun currentLocalTime() = clock.now().toLocalDateTime(timeZone).time
 }
