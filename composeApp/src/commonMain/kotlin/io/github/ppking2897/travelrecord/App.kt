@@ -5,6 +5,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -113,29 +114,31 @@ fun TravelApp() {
                 }
             }
         ) { paddingValues ->
+            // 外框已讓出狀態列與底部分頁列的空間，標記為已處理，各頁的標題列與內容就不會再讓一次
+            val contentModifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues)
             when (selectedTab) {
                 null -> Unit
 
                 AppTab.Plan -> PlanNavHost(
                     backStack = planBackStack,
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = contentModifier,
                     onSwitchToFootprints = { selectedTab = AppTab.Footprints },
                     onShareRoute = { json -> shareLauncher.share(json, "分享行程路線") }
                 )
 
                 AppTab.Today -> TodayScreen(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = contentModifier,
                     onOpenCurrentTrip = openTripDetail,
                     onGoToPlan = { selectedTab = AppTab.Plan }
                 )
 
                 AppTab.Footprints -> FootprintScreen(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = contentModifier,
                     onOpenTrip = openTripDetail
                 )
 
                 AppTab.Memories -> MemoryScreen(
-                    modifier = Modifier.padding(paddingValues),
+                    modifier = contentModifier,
                     onOpenTrip = openTripDetail
                 )
             }
