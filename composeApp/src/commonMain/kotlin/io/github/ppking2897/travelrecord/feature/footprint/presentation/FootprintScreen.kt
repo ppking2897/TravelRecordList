@@ -58,6 +58,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun FootprintScreen(
     modifier: Modifier = Modifier,
+    onOpenTrip: (String) -> Unit,
     viewModel: FootprintViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -79,7 +80,8 @@ fun FootprintScreen(
         state = state,
         modifier = modifier,
         onRefresh = { viewModel.processIntent(FootprintIntent.Refresh) },
-        onToggleExpanded = { viewModel.processIntent(FootprintIntent.ToggleExpanded(it)) }
+        onToggleExpanded = { viewModel.processIntent(FootprintIntent.ToggleExpanded(it)) },
+        onOpenTrip = onOpenTrip
     )
 }
 
@@ -89,7 +91,8 @@ private fun FootprintScreenContent(
     state: FootprintState,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
-    onToggleExpanded: (String) -> Unit
+    onToggleExpanded: (String) -> Unit,
+    onOpenTrip: (String) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -142,7 +145,8 @@ private fun FootprintScreenContent(
                     TripFootprintCard(
                         group = group,
                         expanded = state.expandedTripId == group.tripId,
-                        onToggleExpanded = { onToggleExpanded(group.tripId) }
+                        onToggleExpanded = { onToggleExpanded(group.tripId) },
+                        onOpenTrip = { onOpenTrip(group.tripId) }
                     )
                 }
             }
@@ -220,9 +224,11 @@ private fun SummaryStat(
 private fun TripFootprintCard(
     group: TripFootprintGroup,
     expanded: Boolean,
-    onToggleExpanded: () -> Unit
+    onToggleExpanded: () -> Unit,
+    onOpenTrip: () -> Unit
 ) {
     Card(
+        onClick = onOpenTrip,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -403,7 +409,8 @@ private fun FootprintScreen_Collapsed_Preview() {
             FootprintScreenContent(
                 state = FootprintState(groups = previewGroups()),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }
@@ -421,7 +428,8 @@ private fun FootprintScreen_Expanded_Preview() {
                     expandedTripId = "trip-kyoto"
                 ),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }
@@ -436,7 +444,8 @@ private fun FootprintScreen_Empty_Preview() {
             FootprintScreenContent(
                 state = FootprintState(),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }

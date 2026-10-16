@@ -90,6 +90,15 @@ fun TravelApp() {
         }
     }
 
+    // 從其他分頁打開某趟行程：行程分頁回到列表後推入詳情，返回時回到列表
+    val openTripDetail: (String) -> Unit = { itineraryId ->
+        while (planBackStack.size > 1) {
+            planBackStack.removeLastOrNull()
+        }
+        planBackStack.add(AppRoute.ItineraryDetail(itineraryId))
+        selectedTab = AppTab.Plan
+    }
+
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -116,22 +125,18 @@ fun TravelApp() {
 
                 AppTab.Today -> TodayScreen(
                     modifier = Modifier.padding(paddingValues),
-                    onOpenCurrentTrip = { itineraryId ->
-                        while (planBackStack.size > 1) {
-                            planBackStack.removeLastOrNull()
-                        }
-                        planBackStack.add(AppRoute.ItineraryDetail(itineraryId))
-                        selectedTab = AppTab.Plan
-                    },
+                    onOpenCurrentTrip = openTripDetail,
                     onGoToPlan = { selectedTab = AppTab.Plan }
                 )
 
                 AppTab.Footprints -> FootprintScreen(
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    onOpenTrip = openTripDetail
                 )
 
                 AppTab.Memories -> MemoryScreen(
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    onOpenTrip = openTripDetail
                 )
             }
         }

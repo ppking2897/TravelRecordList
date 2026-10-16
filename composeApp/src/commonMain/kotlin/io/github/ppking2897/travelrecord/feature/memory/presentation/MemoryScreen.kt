@@ -60,6 +60,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MemoryScreen(
     modifier: Modifier = Modifier,
+    onOpenTrip: (String) -> Unit,
     viewModel: MemoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -81,7 +82,8 @@ fun MemoryScreen(
         state = state,
         modifier = modifier,
         onRefresh = { viewModel.processIntent(MemoryIntent.Refresh) },
-        onToggleExpanded = { viewModel.processIntent(MemoryIntent.ToggleExpanded(it)) }
+        onToggleExpanded = { viewModel.processIntent(MemoryIntent.ToggleExpanded(it)) },
+        onOpenTrip = onOpenTrip
     )
 }
 
@@ -91,7 +93,8 @@ private fun MemoryScreenContent(
     state: MemoryState,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
-    onToggleExpanded: (String) -> Unit
+    onToggleExpanded: (String) -> Unit,
+    onOpenTrip: (String) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -127,7 +130,8 @@ private fun MemoryScreenContent(
                     MemoryCard(
                         memory = memory,
                         expanded = state.expandedTripId == memory.itinerary.id,
-                        onToggleExpanded = { onToggleExpanded(memory.itinerary.id) }
+                        onToggleExpanded = { onToggleExpanded(memory.itinerary.id) },
+                        onOpenTrip = { onOpenTrip(memory.itinerary.id) }
                     )
                 }
             }
@@ -139,9 +143,11 @@ private fun MemoryScreenContent(
 private fun MemoryCard(
     memory: TripMemory,
     expanded: Boolean,
-    onToggleExpanded: () -> Unit
+    onToggleExpanded: () -> Unit,
+    onOpenTrip: () -> Unit
 ) {
     Card(
+        onClick = onOpenTrip,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -387,7 +393,8 @@ private fun MemoryScreen_WithData_Preview() {
             MemoryScreenContent(
                 state = MemoryState(memories = previewMemories()),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }
@@ -405,7 +412,8 @@ private fun MemoryScreen_Expanded_Preview() {
                     expandedTripId = "memory-preview"
                 ),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }
@@ -420,7 +428,8 @@ private fun MemoryScreen_Empty_Preview() {
             MemoryScreenContent(
                 state = MemoryState(),
                 onRefresh = {},
-                onToggleExpanded = {}
+                onToggleExpanded = {},
+                onOpenTrip = {}
             )
         }
     }
