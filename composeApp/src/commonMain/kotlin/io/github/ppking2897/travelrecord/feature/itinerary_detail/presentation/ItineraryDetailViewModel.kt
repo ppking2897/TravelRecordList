@@ -12,6 +12,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.G
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GroupItemsByDateUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
@@ -42,8 +43,9 @@ class ItineraryDetailViewModel(
     private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
     private val generateThumbnailUseCase: GenerateThumbnailUseCase,
     private val batchDeleteItemsUseCase: BatchDeleteItemsUseCase,
-    private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase
-) : BaseViewModel<ItineraryDetailIntent, ItineraryDetailState, ItineraryDetailEvent>(
+    private val batchUpdateItemsUseCase: BatchUpdateItemsUseCase,
+    private val clock: Clock,
+) :BaseViewModel<ItineraryDetailIntent, ItineraryDetailState, ItineraryDetailEvent>(
     initialState = ItineraryDetailState()
 ) {
 
@@ -156,15 +158,15 @@ class ItineraryDetailViewModel(
         if (currentItem != null) {
             val optimisticUpdate = currentItem.copy(
                 isCompleted = !currentItem.isCompleted,
-                completedAt = if (!currentItem.isCompleted) Clock.System.now() else null
+                completedAt = if (!currentItem.isCompleted) clock.now() else null
             )
             updateItemInState(itemId) { optimisticUpdate }
 
             val updatedItem = currentItem.copy(
                 isCompleted = !currentItem.isCompleted,
-                completedAt = if (!currentItem.isCompleted) Clock.System.now() else null
+                completedAt = if (!currentItem.isCompleted) clock.now() else null
             )
-            updateItemUseCase(updatedItem, Clock.System.now())
+            updateItemUseCase(updatedItem, clock.now())
                 .onFailure { exception ->
                     updateItemInState(itemId) { currentItem }
                     sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "更新失敗"))
@@ -220,18 +222,16 @@ class ItineraryDetailViewModel(
     }
 
     /**
-     * 只更新 State 中特定的 item，避免重新載入整個列表
+     * 只更新 State 中特定的 item，避免重新載入整個列表；列表與時間軸用的分組一起更新
      */
     private fun updateItemInState(itemId: String, updater: (ItineraryItem) -> ItineraryItem) {
+        fun List<ItemsByDate>.withUpdatedItem() = map { group ->
+            group.copy(items = group.items.map { item -> if (item.id == itemId) updater(item) else item })
+        }
         updateState {
             copy(
-                groupedItems = groupedItems.map { group ->
-                    group.copy(
-                        items = group.items.map { item ->
-                            if (item.id == itemId) updater(item) else item
-                        }
-                    )
-                }
+                groupedItems = groupedItems.withUpdatedItem(),
+                allGroupedItems = allGroupedItems.withUpdatedItem()
             )
         }
     }
