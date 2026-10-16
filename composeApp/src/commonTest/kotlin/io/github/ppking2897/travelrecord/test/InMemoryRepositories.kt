@@ -110,3 +110,37 @@ class FailingUpdateItemRepository(
     override suspend fun updateItem(item: ItineraryItem): Result<ItineraryItem> =
         Result.failure(IllegalStateException("存檔失敗"))
 }
+
+/** 讀取所有行程可以中途改成失敗（[failReads] 設為 true 後，原因是「讀取失敗」），其餘行為同 [base] */
+class SwitchableReadItineraryRepository(
+    private val base: ItineraryRepository
+) : ItineraryRepository by base {
+    var failReads = false
+
+    override suspend fun getAllItineraries(): Result<List<Itinerary>> =
+        if (failReads) Result.failure(IllegalStateException("讀取失敗")) else base.getAllItineraries()
+}
+
+/** 刪除行程一律失敗，其餘行為同 [base] */
+class FailingDeleteItineraryRepository(
+    private val base: ItineraryRepository
+) : ItineraryRepository by base {
+    override suspend fun deleteItinerary(id: String): Result<Unit> =
+        Result.failure(IllegalStateException("刪除失敗"))
+}
+
+/** 讀取某行程的項目一律失敗，其餘行為同 [base] */
+class FailingReadItemRepository(
+    private val base: ItineraryItemRepository
+) : ItineraryItemRepository by base {
+    override suspend fun getItemsByItinerary(itineraryId: String): Result<List<ItineraryItem>> =
+        Result.failure(IllegalStateException("讀取項目失敗"))
+}
+
+/** 刪除項目一律失敗，其餘行為同 [base] */
+class FailingDeleteItemRepository(
+    private val base: ItineraryItemRepository
+) : ItineraryItemRepository by base {
+    override suspend fun deleteItem(id: String): Result<Unit> =
+        Result.failure(IllegalStateException("刪除失敗"))
+}

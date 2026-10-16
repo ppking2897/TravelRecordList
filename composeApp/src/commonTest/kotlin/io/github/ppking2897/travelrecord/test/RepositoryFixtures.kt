@@ -7,6 +7,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerar
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Photo
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -56,6 +57,17 @@ fun testItem(
     location = Location(name = locationName),
     activity = activity,
     createdAt = instantAt(0),
+    modifiedAt = instantAt(0),
+)
+
+fun testPhoto(id: String, itemId: String, order: Int = 0) = Photo(
+    id = id,
+    itemId = itemId,
+    fileName = "$id.jpg",
+    filePath = "fake/$id.jpg",
+    order = order,
+    fileSize = 1024,
+    uploadedAt = instantAt(0),
     modifiedAt = instantAt(0),
 )
 

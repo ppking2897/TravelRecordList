@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import io.github.ppking2897.travelrecord.core.presentation.components.DefaultCoverPlaceholder
 import io.github.ppking2897.travelrecord.core.presentation.components.DeleteConfirmDialog
 import io.github.ppking2897.travelrecord.core.presentation.components.LocalImage
@@ -60,11 +61,9 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
-import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.TravelPhase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryPhaseUseCase
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -82,6 +81,7 @@ fun ItineraryListScreen(
     viewModel: ItineraryListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = LocalSnackbarHostState.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var itineraryToDelete by remember { mutableStateOf<Itinerary?>(null) }
 
@@ -100,7 +100,7 @@ fun ItineraryListScreen(
                     itineraryToDelete = event.itinerary
                     showDeleteDialog = true
                 }
-                is ItineraryListEvent.ShowError -> Unit
+                is ItineraryListEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
             }
         }
     }
@@ -161,46 +161,9 @@ private fun ItineraryPlanningDashboard(
     val today = rememberToday()
     val phaseUseCase = remember { GetItineraryPhaseUseCase() }
 
-    val filteredItineraries = remember(itineraries, searchQuery, selectedFilter, today) {
-        val phaseFiltered = when (selectedFilter) {
-            ItineraryFilter.All -> itineraries
-            ItineraryFilter.Planning -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.Planning }
-            ItineraryFilter.InProgress -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.InProgress }
-            ItineraryFilter.Completed -> itineraries.filter { phaseUseCase(it, today) == TravelPhase.Completed }
-        }
-
-        if (searchQuery.isBlank()) {
-            phaseFiltered
-        } else {
-            val query = searchQuery.trim()
-            phaseFiltered.filter { itinerary ->
-                itinerary.title.contains(query, ignoreCase = true) ||
-                    itinerary.description.contains(query, ignoreCase = true) ||
-                    itinerary.items.any { item ->
-                        item.activity.contains(query, ignoreCase = true) ||
-                            item.location.name.contains(query, ignoreCase = true)
-                    }
-            }
-        }
+    val dashboard = remember(itineraries, searchQuery, selectedFilter, today) {
+        buildItineraryDashboard(itineraries, searchQuery, selectedFilter, today)
     }
-
-    val currentTrips = remember(filteredItineraries, today) {
-        filteredItineraries
-            .filter { phaseUseCase(it, today) == TravelPhase.InProgress }
-            .sortedBy { it.endDate?.toString() ?: "9999-12-31" }
-    }
-    val upcomingTrips = remember(filteredItineraries, today) {
-        filteredItineraries
-            .filter { phaseUseCase(it, today) == TravelPhase.Planning }
-            .sortedBy { it.startDate?.toString() ?: "9999-12-31" }
-            .take(3)
-    }
-    val recentTrips = remember(filteredItineraries) {
-        filteredItineraries
-            .sortedByDescending { it.modifiedAt }
-            .take(3)
-    }
-    val shouldShowRecentTrips = recentTrips.isNotEmpty() && filteredItineraries.size > 1
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -244,9 +207,9 @@ private fun ItineraryPlanningDashboard(
             ) {
                 item {
                     PlanningHeader(
-                        currentCount = currentTrips.size,
-                        upcomingCount = upcomingTrips.size,
-                        completedCount = filteredItineraries.count { phaseUseCase(it, today) == TravelPhase.Completed }
+                        currentCount = dashboard.currentCount,
+                        upcomingCount = dashboard.upcomingCount,
+                        completedCount = dashboard.completedCount
                     )
                 }
 
@@ -289,14 +252,18 @@ private fun ItineraryPlanningDashboard(
                     item {
                         ItineraryListSkeleton()
                     }
-                } else if (filteredItineraries.isEmpty()) {
+                } else if (dashboard.emptyState == DashboardEmptyState.NoItineraries) {
                     item {
                         EmptyPlanningState(onAddClick = onAddClick)
                     }
+                } else if (dashboard.emptyState == DashboardEmptyState.NoMatch) {
+                    item {
+                        NoMatchState()
+                    }
                 } else {
-                    if (currentTrips.isNotEmpty()) {
+                    if (dashboard.currentTrips.isNotEmpty()) {
                         item { SectionHeader("現在旅行中", "今天可以直接進入每日規劃") }
-                        items(currentTrips, key = { "current_${it.id}" }) { itinerary ->
+                        items(dashboard.currentTrips, key = { "current_${it.id}" }) { itinerary ->
                             ItineraryDashboardCard(
                                 itinerary = itinerary,
                                 phase = phaseUseCase(itinerary, today),
@@ -308,9 +275,9 @@ private fun ItineraryPlanningDashboard(
                         }
                     }
 
-                    if (upcomingTrips.isNotEmpty()) {
+                    if (dashboard.upcomingTrips.isNotEmpty()) {
                         item { SectionHeader("即將出發", "出發前先把每日地點安排好") }
-                        items(upcomingTrips, key = { "upcoming_${it.id}" }) { itinerary ->
+                        items(dashboard.upcomingTrips, key = { "upcoming_${it.id}" }) { itinerary ->
                             ItineraryDashboardCard(
                                 itinerary = itinerary,
                                 phase = phaseUseCase(itinerary, today),
@@ -321,9 +288,9 @@ private fun ItineraryPlanningDashboard(
                         }
                     }
 
-                    if (shouldShowRecentTrips) {
+                    if (dashboard.recentTrips.isNotEmpty()) {
                         item { SectionHeader("最近編輯", "快速回到剛調整過的行程") }
-                        items(recentTrips, key = { "recent_${it.id}" }) { itinerary ->
+                        items(dashboard.recentTrips, key = { "recent_${it.id}" }) { itinerary ->
                             ItineraryDashboardCard(
                                 itinerary = itinerary,
                                 phase = phaseUseCase(itinerary, today),
@@ -335,8 +302,8 @@ private fun ItineraryPlanningDashboard(
                         }
                     }
 
-                    item { SectionHeader("全部行程", "${filteredItineraries.size} 筆行程") }
-                    items(filteredItineraries, key = { "all_${it.id}" }) { itinerary ->
+                    item { SectionHeader("全部行程", "${dashboard.allTrips.size} 筆行程") }
+                    items(dashboard.allTrips, key = { "all_${it.id}" }) { itinerary ->
                         ItineraryDashboardCard(
                             itinerary = itinerary,
                             phase = phaseUseCase(itinerary, today),
@@ -434,7 +401,7 @@ private fun ItineraryDashboardCard(
     compact: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val stats = remember(itinerary.items) { itinerary.stats() }
+    val stats = remember(itinerary.items) { itinerary.cardStats() }
 
     Card(
         modifier = modifier
@@ -494,7 +461,7 @@ private fun ItineraryDashboardCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                extractMainLocation(itinerary.items)?.let { location ->
+                mainLocationOf(itinerary.items)?.let { location ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                         verticalAlignment = Alignment.CenterVertically
@@ -638,17 +605,30 @@ private fun EmptyPlanningState(
     }
 }
 
-private data class ItineraryStats(
-    val itemCount: Int,
-    val completedCount: Int,
-    val photoCount: Int
-)
-
-private enum class ItineraryFilter(val label: String) {
-    All("全部"),
-    Planning("規劃中"),
-    InProgress("旅行中"),
-    Completed("已結束")
+/** 有行程，但搜尋或篩選後沒有符合的 */
+@Composable
+private fun NoMatchState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            modifier = Modifier.size(IconSize.xxl),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(Spacing.lg))
+        Text(
+            text = "沒有符合的行程",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @OptIn(kotlin.time.ExperimentalTime::class)
@@ -658,29 +638,6 @@ private fun rememberToday(): LocalDate {
         Instant.fromEpochMilliseconds(kotlin.time.Clock.System.now().toEpochMilliseconds())
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
-    }
-}
-
-private fun Itinerary.stats(): ItineraryStats {
-    return ItineraryStats(
-        itemCount = items.size,
-        completedCount = items.count { it.isCompleted },
-        photoCount = items.sumOf { it.photos.size }
-    )
-}
-
-private fun extractMainLocation(items: List<ItineraryItem>): String? {
-    if (items.isEmpty()) return null
-    return items.groupingBy { it.location.name }.eachCount().maxByOrNull { it.value }?.key
-}
-
-private fun formatDateRange(startDate: LocalDate?, endDate: LocalDate?): String? {
-    return when {
-        startDate != null && endDate != null ->
-            "${DateTimeFormatter.formatDate(startDate)} - ${DateTimeFormatter.formatDate(endDate)}"
-        startDate != null -> "開始：${DateTimeFormatter.formatDate(startDate)}"
-        endDate != null -> "結束：${DateTimeFormatter.formatDate(endDate)}"
-        else -> null
     }
 }
 
