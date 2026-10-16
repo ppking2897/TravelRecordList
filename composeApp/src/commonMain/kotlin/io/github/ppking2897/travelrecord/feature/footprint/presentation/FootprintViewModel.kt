@@ -15,7 +15,7 @@ class FootprintViewModel(
     private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase,
     private val clock: Clock,
     private val timeZone: TimeZone,
-) :BaseViewModel<FootprintIntent, FootprintState, FootprintEvent>(
+) : BaseViewModel<FootprintIntent, FootprintState, FootprintEvent>(
     initialState = FootprintState()
 ) {
     override fun processIntent(intent: FootprintIntent) {
