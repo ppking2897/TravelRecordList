@@ -347,7 +347,7 @@ private fun EmptyFootprintState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "在行程裡新增地點後，這裡會按旅行收攏你的足跡。",
+                text = "打卡或旅行日期過了之後，這裡會按旅行收攏你去過的地方。",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

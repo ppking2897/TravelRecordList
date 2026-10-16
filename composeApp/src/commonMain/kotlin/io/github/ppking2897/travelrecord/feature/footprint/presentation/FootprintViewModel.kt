@@ -7,10 +7,15 @@ import io.github.ppking2897.travelrecord.feature.footprint.domain.model.TripFoot
 import io.github.ppking2897.travelrecord.feature.footprint.domain.model.VisitedPlace
 import io.github.ppking2897.travelrecord.feature.footprint.domain.usecase.GetVisitedPlacesUseCase
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 class FootprintViewModel(
-    private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase
-) : BaseViewModel<FootprintIntent, FootprintState, FootprintEvent>(
+    private val getVisitedPlacesUseCase: GetVisitedPlacesUseCase,
+    private val clock: Clock,
+    private val timeZone: TimeZone,
+) :BaseViewModel<FootprintIntent, FootprintState, FootprintEvent>(
     initialState = FootprintState()
 ) {
     override fun processIntent(intent: FootprintIntent) {
@@ -29,7 +34,7 @@ class FootprintViewModel(
             updateState { copy(isLoading = true, error = null) }
         }
 
-        val result = getVisitedPlacesUseCase()
+        val result = getVisitedPlacesUseCase(clock.todayIn(timeZone))
         val places = result.getOrNull()
         if (places != null) {
             val groups = places.groupByTrip()
