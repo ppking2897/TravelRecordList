@@ -84,6 +84,7 @@ fun ItineraryDetailScreen(
     var showDeleteItemDialog by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<ItineraryItem?>(null) }
     var showBatchDeleteDialog by remember { mutableStateOf(false) }
+    var showDeleteItineraryDialog by remember { mutableStateOf(false) }
     var selectedItemIdForPhoto by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -141,7 +142,7 @@ fun ItineraryDetailScreen(
         },
         onEditItemClick = onEditItemClick,
         onEditItineraryClick = onEditItineraryClick,
-        onDeleteItineraryClick = { viewModel.processIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId)) },
+        onDeleteItineraryClick = { showDeleteItineraryDialog = true },
         onGenerateRouteClick = { viewModel.processIntent(ItineraryDetailIntent.GenerateRoute) },
         onSelectDate = { viewModel.processIntent(ItineraryDetailIntent.SelectDate(it)) },
         onToggleItemCompletion = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemCompletion(it)) },
@@ -183,6 +184,19 @@ fun ItineraryDetailScreen(
                 showDeleteItemDialog = false
                 itemToDelete = null
             }
+        )
+    }
+
+    // 刪除行程確認 Dialog
+    if (showDeleteItineraryDialog && itinerary != null) {
+        DeleteConfirmDialog(
+            title = "刪除行程",
+            message = "確定要刪除「${itinerary.title}」嗎？這個動作無法復原。",
+            onConfirm = {
+                viewModel.processIntent(ItineraryDetailIntent.DeleteItinerary(itineraryId))
+                showDeleteItineraryDialog = false
+            },
+            onDismiss = { showDeleteItineraryDialog = false }
         )
     }
 
