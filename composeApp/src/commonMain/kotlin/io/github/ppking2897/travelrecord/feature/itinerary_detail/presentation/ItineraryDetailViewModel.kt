@@ -7,7 +7,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.B
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.DeleteItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.DeletePhotoUseCase
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterByHashtagUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
@@ -38,7 +37,6 @@ class ItineraryDetailViewModel(
     private val deleteItemUseCase: DeleteItineraryItemUseCase,
     private val groupItemsByDateUseCase: GroupItemsByDateUseCase,
     private val filterItemsByDateUseCase: FilterItemsByDateUseCase,
-    private val filterByHashtagUseCase: FilterByHashtagUseCase,
     private val addPhotoUseCase: AddPhotoUseCase,
     private val deletePhotoUseCase: DeletePhotoUseCase,
     private val setCoverPhotoUseCase: SetCoverPhotoUseCase,
@@ -62,12 +60,10 @@ class ItineraryDetailViewModel(
                 is ItineraryDetailIntent.AddPhoto -> addPhoto(intent.itemId, intent.imageData)
                 is ItineraryDetailIntent.DeletePhoto -> deletePhoto(intent.photoId)
                 is ItineraryDetailIntent.SetCoverPhoto -> setCoverPhoto(intent.itemId, intent.photoId)
-                is ItineraryDetailIntent.FilterByHashtag -> filterByHashtag(intent.hashtag)
                 is ItineraryDetailIntent.QuickAddItem -> quickAddItem(intent.afterDayIndex)
                 // 批量操作相關
                 is ItineraryDetailIntent.ToggleSelectionMode -> toggleSelectionMode()
                 is ItineraryDetailIntent.ToggleItemSelection -> toggleItemSelection(intent.itemId)
-                is ItineraryDetailIntent.SelectAll -> selectAll()
                 is ItineraryDetailIntent.ClearSelection -> clearSelection()
                 is ItineraryDetailIntent.BatchDelete -> batchDelete()
                 is ItineraryDetailIntent.BatchMarkComplete -> batchMarkComplete()
@@ -297,34 +293,6 @@ class ItineraryDetailViewModel(
             }
     }
 
-    private suspend fun filterByHashtag(hashtag: String?) {
-        updateState { copy(selectedHashtag = hashtag) }
-
-        state.value.itinerary?.let { itinerary ->
-            getItemsByItineraryUseCase(itinerary.id)
-                .onSuccess { items ->
-                    val filtered = if (hashtag != null) {
-                        filterByHashtagUseCase(items, hashtag)
-                    } else {
-                        items
-                    }
-
-                    val dateFiltered = state.value.selectedDate?.let { date ->
-                        filterItemsByDateUseCase(filtered, date)
-                    } ?: filtered
-
-                    val grouped = groupItemsByDateUseCase(dateFiltered)
-                    val allGrouped = groupItemsByDateUseCase(items)
-                    updateState {
-                        copy(
-                            groupedItems = grouped,
-                            allGroupedItems = allGrouped
-                        )
-                    }
-                }
-        }
-    }
-
     private suspend fun quickAddItem(dayIndex: Int) {
         val dateRange = state.value.dateRange ?: return
         val startDate = dateRange.start
@@ -363,16 +331,6 @@ class ItineraryDetailViewModel(
                 selectedItemIds + itemId
             }
             copy(selectedItemIds = newSelection)
-        }
-    }
-
-    private fun selectAll() {
-        val allItemIds = state.value.groupedItems
-            .flatMap { it.items }
-            .map { it.id }
-            .toSet()
-        updateState {
-            copy(selectedItemIds = allItemIds)
         }
     }
 

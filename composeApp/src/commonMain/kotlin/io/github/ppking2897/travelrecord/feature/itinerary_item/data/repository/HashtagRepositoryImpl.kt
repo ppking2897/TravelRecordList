@@ -2,7 +2,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository
 
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.HashtagRepository
 import kotlin.time.Clock
 
@@ -26,11 +25,5 @@ class HashtagRepositoryImpl : HashtagRepository {
                 lastUsed = now
             )
         }.distinctBy { it.tag }.toList()
-    }
-
-    override fun filterItemsByHashtag(items: List<ItineraryItem>, hashtag: String): List<ItineraryItem> {
-        return items.filter { item ->
-            item.hashtags.any { it.tag.equals(hashtag, ignoreCase = true) }
-        }
     }
 }

@@ -7,14 +7,13 @@ import kotlinx.datetime.LocalDate
 
 data class ItineraryDetailState(
     val itinerary: Itinerary? = null,
-    /** 套用日期 / hashtag 過濾後的分組，供 LazyColumn 渲染用 */
+    /** 套用日期過濾後的分組，供 LazyColumn 渲染用 */
     val groupedItems: List<ItemsByDate> = emptyList(),
     /** 未套用任何過濾的完整分組，供 TimelineNavigator 顯示每日計數用 */
     val allGroupedItems: List<ItemsByDate> = emptyList(),
     val selectedDate: LocalDate? = null,
     val dateRange: ClosedRange<LocalDate>? = null,
     val expandedItemIds: Set<String> = emptySet(),
-    val selectedHashtag: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
     // 批量操作相關狀態
@@ -52,13 +51,11 @@ sealed class ItineraryDetailIntent {
 
     data class DeletePhoto(val photoId: String) : ItineraryDetailIntent()
     data class SetCoverPhoto(val itemId: String, val photoId: String) : ItineraryDetailIntent()
-    data class FilterByHashtag(val hashtag: String?) : ItineraryDetailIntent()
     data class QuickAddItem(val afterDayIndex: Int) : ItineraryDetailIntent()
 
     // 批量操作相關 Intent
     object ToggleSelectionMode : ItineraryDetailIntent()
     data class ToggleItemSelection(val itemId: String) : ItineraryDetailIntent()
-    object SelectAll : ItineraryDetailIntent()
     object ClearSelection : ItineraryDetailIntent()
     object BatchDelete : ItineraryDetailIntent()
     object BatchMarkComplete : ItineraryDetailIntent()

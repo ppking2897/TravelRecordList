@@ -13,7 +13,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.B
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.DeleteItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.DeletePhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ExtractHashtagsUseCase
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterByHashtagUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
@@ -45,7 +44,6 @@ val itineraryItemModule = module {
     factory { GenerateThumbnailUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
     factory { SetCoverPhotoUseCase(get()) }
-    factory { FilterByHashtagUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }
     factory { BatchDeleteItemsUseCase(get()) }
