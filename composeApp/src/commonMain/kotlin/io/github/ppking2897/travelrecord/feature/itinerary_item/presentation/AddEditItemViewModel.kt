@@ -195,7 +195,7 @@ class AddEditItemViewModel(
                 }
             }
             .onFailure {
-                // Handle save error if needed
+                sendEvent(AddEditItemEvent.ShowError("照片加入失敗"))
             }
     }
 

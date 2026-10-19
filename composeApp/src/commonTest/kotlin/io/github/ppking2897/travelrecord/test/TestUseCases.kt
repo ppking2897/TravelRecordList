@@ -25,6 +25,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.D
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ExtractHashtagsUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItemsByItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GetItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
@@ -56,6 +57,7 @@ class TestUseCases(
     val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items))
 
     val getItemsByItinerary = GetItemsByItineraryUseCase(items)
+    val getItem = GetItineraryItemUseCase(items)
     val addItem = AddItineraryItemUseCase(items, itineraries, extractHashtags)
     val updateItem = UpdateItineraryItemUseCase(items, itineraries, extractHashtags)
     val deleteItem = DeleteItineraryItemUseCase(items, itineraries, imageStorage)
