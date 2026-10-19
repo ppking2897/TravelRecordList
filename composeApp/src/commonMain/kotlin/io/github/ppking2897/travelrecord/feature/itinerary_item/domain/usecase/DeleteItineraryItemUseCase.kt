@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import kotlin.time.ExperimentalTime
@@ -10,15 +11,17 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 class DeleteItineraryItemUseCase(
     private val itemRepository: ItineraryItemRepository,
-    private val itineraryRepository: ItineraryRepository
+    private val itineraryRepository: ItineraryRepository,
+    private val imageStorageService: ImageStorageService
 ) {
     suspend operator fun invoke(itemId: String): Result<Unit> {
         return try {
             // 1. 取得 Item 以知道它屬於哪個 Itinerary
             val item = itemRepository.getItem(itemId).getOrThrow() ?: return Result.failure(Exception("Item not found"))
 
-            // 2. 刪除 Item
+            // 2. 刪除 Item，紀錄刪掉後再刪它的照片檔
             itemRepository.deleteItem(itemId).getOrThrow()
+            imageStorageService.deletePhotoFiles(listOf(item))
 
             // 3. 更新 Itinerary
             val itinerary = itineraryRepository.getItinerary(item.itineraryId).getOrThrow()

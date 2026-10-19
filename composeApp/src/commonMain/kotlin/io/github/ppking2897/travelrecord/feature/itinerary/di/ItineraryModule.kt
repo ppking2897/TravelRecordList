@@ -25,7 +25,7 @@ val itineraryModule = module {
     factory { GetCurrentTripUseCase(get()) }
     factory { CreateItineraryUseCase(get()) }
     factory { UpdateItineraryUseCase(get()) }
-    factory { DeleteItineraryUseCase(get(), get()) }
+    factory { DeleteItineraryUseCase(get(), get(), get()) }
     factory { SearchItinerariesUseCase(get()) }
     factory { InitializeSampleDataUseCase(get(), get()) }
     factory { EnsureLocalDataReadyUseCase(get(), get()) }

@@ -39,14 +39,14 @@ val itineraryItemModule = module {
     factory { ExtractHashtagsUseCase(get()) }
     factory { AddItineraryItemUseCase(get(), get(), get()) }
     factory { UpdateItineraryItemUseCase(get(), get(), get()) }
-    factory { DeleteItineraryItemUseCase(get(), get()) }
+    factory { DeleteItineraryItemUseCase(get(), get(), get()) }
     factory { AddPhotoUseCase(get()) }
     factory { GenerateThumbnailUseCase(get()) }
     factory { DeletePhotoUseCase(get()) }
     factory { SetCoverPhotoUseCase(get()) }
     factory { GroupItemsByDateUseCase() }
     factory { FilterItemsByDateUseCase() }
-    factory { BatchDeleteItemsUseCase(get()) }
+    factory { BatchDeleteItemsUseCase(get(), get()) }
     factory { BatchUpdateItemsUseCase(get()) }
 
     // ViewModels

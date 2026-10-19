@@ -17,6 +17,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.A
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.BatchDeleteItemsUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.BatchUpdateItemsUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ExtractHashtagsUseCase
+import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.instantAt
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.kotest.matchers.shouldBe
@@ -95,7 +96,7 @@ class LegacyJsonImporterTest {
     fun `批次刪除過的項目不會被救回來`() = runTest {
         val legacy = LegacyApp()
         val (deleted, kept) = legacy.createTrip("trip", 0, "嵐山竹林", "奈良公園")
-        BatchDeleteItemsUseCase(legacy.items)(listOf(deleted.id)).getOrThrow()
+        BatchDeleteItemsUseCase(legacy.items, FakeImageStorageService())(listOf(deleted.id)).getOrThrow()
 
         importFrom(legacy).getOrThrow()
 
@@ -117,7 +118,7 @@ class LegacyJsonImporterTest {
     fun `找不到所屬行程的項目不搬`() = runTest {
         val legacy = LegacyApp().apply { seedSamples() }
         val sampleId = SampleDataProvider.getSampleItinerary().id
-        DeleteItineraryUseCase(legacy.itineraries, legacy.items)(sampleId).getOrThrow()
+        DeleteItineraryUseCase(legacy.itineraries, legacy.items, FakeImageStorageService())(sampleId).getOrThrow()
 
         importFrom(legacy).getOrThrow()
 

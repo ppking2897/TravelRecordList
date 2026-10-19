@@ -98,3 +98,28 @@ class FailingSaveImageStorageService : ImageStorageService by FakeImageStorageSe
     override suspend fun saveImage(imageData: ByteArray, itemId: String): Result<String> =
         Result.failure(IllegalStateException("存照片失敗"))
 }
+
+/** 刪圖一律失敗（例如檔案早就不在），其餘行為同 [FakeImageStorageService] */
+class FailingDeleteImageStorageService : ImageStorageService by FakeImageStorageService() {
+    override suspend fun deleteImage(imagePath: String): Result<Unit> =
+        Result.failure(IllegalStateException("檔案不存在"))
+}
+
+/** 記下存過、刪過哪些圖片檔，其餘行為同 [FakeImageStorageService] */
+class RecordingImageStorageService(
+    private val base: ImageStorageService = FakeImageStorageService()
+) : ImageStorageService by base {
+    /** 存過的檔，依存檔順序 */
+    val saved = mutableListOf<String>()
+
+    /** 刪過的檔，依刪除順序 */
+    val deleted = mutableListOf<String>()
+
+    override suspend fun saveImage(imageData: ByteArray, itemId: String): Result<String> =
+        base.saveImage(imageData, itemId).onSuccess { saved += it }
+
+    override suspend fun deleteImage(imagePath: String): Result<Unit> {
+        deleted += imagePath
+        return base.deleteImage(imagePath)
+    }
+}

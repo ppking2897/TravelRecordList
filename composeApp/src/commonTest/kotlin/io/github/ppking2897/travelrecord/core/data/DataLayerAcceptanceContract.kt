@@ -49,10 +49,10 @@ abstract class DataLayerAcceptanceContract {
         val initializeSampleData = InitializeSampleDataUseCase(repos.itineraries, repos.items)
         val createRoute = CreateRouteFromItineraryUseCase(routes)
         val addPhoto = AddPhotoUseCase(photos)
-        val deleteItinerary = DeleteItineraryUseCase(repos.itineraries, repos.items)
+        val deleteItinerary = DeleteItineraryUseCase(repos.itineraries, repos.items, FakeImageStorageService())
         val search = SearchItinerariesUseCase(repos.itineraries)
         val batchUpdate = BatchUpdateItemsUseCase(repos.items)
-        val batchDelete = BatchDeleteItemsUseCase(repos.items)
+        val batchDelete = BatchDeleteItemsUseCase(repos.items, FakeImageStorageService())
         val addItem = AddItineraryItemUseCase(repos.items, repos.itineraries, ExtractHashtagsUseCase(HashtagRepositoryImpl()))
 
         /** 照使用者操作的路徑建立行程與項目 */

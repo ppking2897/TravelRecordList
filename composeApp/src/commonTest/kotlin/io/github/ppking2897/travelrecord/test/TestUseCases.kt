@@ -52,14 +52,14 @@ class TestUseCases(
     val getAllItineraries = GetAllItinerariesUseCase(itineraries)
     val getItinerary = GetItineraryUseCase(itineraries)
     val searchItineraries = SearchItinerariesUseCase(itineraries)
-    val deleteItinerary = DeleteItineraryUseCase(itineraries, items)
+    val deleteItinerary = DeleteItineraryUseCase(itineraries, items, imageStorage)
     val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items))
 
     val getItemsByItinerary = GetItemsByItineraryUseCase(items)
     val addItem = AddItineraryItemUseCase(items, itineraries, extractHashtags)
     val updateItem = UpdateItineraryItemUseCase(items, itineraries, extractHashtags)
-    val deleteItem = DeleteItineraryItemUseCase(items, itineraries)
-    val batchDeleteItems = BatchDeleteItemsUseCase(items)
+    val deleteItem = DeleteItineraryItemUseCase(items, itineraries, imageStorage)
+    val batchDeleteItems = BatchDeleteItemsUseCase(items, imageStorage)
     val batchUpdateItems = BatchUpdateItemsUseCase(items)
 
     val addPhoto = AddPhotoUseCase(photos)

@@ -1,6 +1,8 @@
 package io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase
 
+import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.deletePhotoFiles
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 
 /**
@@ -11,7 +13,8 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.Iti
 @OptIn(kotlin.time.ExperimentalTime::class)
 class DeleteItineraryUseCase(
     private val itineraryRepository: ItineraryRepository,
-    private val itemRepository: ItineraryItemRepository
+    private val itemRepository: ItineraryItemRepository,
+    private val imageStorageService: ImageStorageService
 ) {
     suspend operator fun invoke(id: String): Result<Unit> {
         return try {
@@ -24,8 +27,12 @@ class DeleteItineraryUseCase(
                 itemRepository.deleteItem(item.id)
             }
             
-            // 刪除行程
+            // 刪除行程，紀錄刪掉後再刪照片與封面檔
             itineraryRepository.deleteItinerary(id)
+                .onSuccess {
+                    imageStorageService.deletePhotoFiles(itinerary.items)
+                    itinerary.coverPhotoPath?.let { imageStorageService.deleteImage(it) }
+                }
         } catch (e: Exception) {
             Result.failure(e)
         }
