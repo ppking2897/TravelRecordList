@@ -14,6 +14,7 @@ import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.LoadDraftU
 import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.SaveDraftUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.UpdateItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlin.time.Clock
 
@@ -33,6 +34,12 @@ class ItineraryAddEditViewModel(
 ) : BaseViewModel<ItineraryAddEditIntent, ItineraryAddEditState, ItineraryAddEditEvent>(
     initialState = ItineraryAddEditState()
 ) {
+
+    /** 等待中的自動存草稿；輸入時重新計時 */
+    private var draftSaveJob: Job? = null
+
+    /** 「已自動儲存草稿」的隱藏倒數 */
+    private var draftHintJob: Job? = null
 
     override fun processIntent(intent: ItineraryAddEditIntent) {
         viewModelScope.launch {
@@ -125,6 +132,7 @@ class ItineraryAddEditViewModel(
                 titleError = null
             )
         }
+        scheduleDraftSave()
     }
 
     /**
@@ -132,6 +140,7 @@ class ItineraryAddEditViewModel(
      */
     private fun updateDescription(description: String) {
         updateState { copy(description = description) }
+        scheduleDraftSave()
     }
 
     /**
@@ -144,6 +153,7 @@ class ItineraryAddEditViewModel(
                 dateError = null
             )
         }
+        scheduleDraftSave()
     }
 
     /**
@@ -155,6 +165,20 @@ class ItineraryAddEditViewModel(
                 endDate = date,
                 dateError = null
             )
+        }
+        scheduleDraftSave()
+    }
+
+    /**
+     * 新增模式下，停止輸入一段時間後自動存草稿；期間有新的輸入就重新計時，只存最後一次
+     */
+    private fun scheduleDraftSave() {
+        if (state.value.isEditMode) return
+
+        draftSaveJob?.cancel()
+        draftSaveJob = viewModelScope.launch {
+            delay(DRAFT_SAVE_DELAY_MS)
+            saveDraft()
         }
     }
 
@@ -169,10 +193,7 @@ class ItineraryAddEditViewModel(
 
         imageStorageService.saveImage(imageData, coverId)
             .onSuccess { path ->
-                // 刪除舊的封面照片（如果有）
-                state.value.coverPhotoPath?.let { oldPath ->
-                    imageStorageService.deleteImage(oldPath)
-                }
+                deleteUnsavedCover()
                 updateState { copy(coverPhotoPath = path, isLoading = false) }
             }
             .onFailure { exception ->
@@ -189,10 +210,22 @@ class ItineraryAddEditViewModel(
      * 移除封面照片
      */
     private suspend fun removeCoverPhoto() {
-        val coverPath = state.value.coverPhotoPath ?: return
+        if (state.value.coverPhotoPath == null) return
 
-        imageStorageService.deleteImage(coverPath)
+        deleteUnsavedCover()
         updateState { copy(coverPhotoPath = null) }
+    }
+
+    /**
+     * 刪掉這次挑了、還沒存進行程的封面檔
+     *
+     * 行程原本的封面要等儲存成功才刪，不然沒儲存就離開時，行程會指著已經不在的檔案。
+     */
+    private suspend fun deleteUnsavedCover() {
+        val current = state.value.coverPhotoPath ?: return
+        if (current != state.value.itinerary?.coverPhotoPath) {
+            imageStorageService.deleteImage(current)
+        }
     }
 
     /**
@@ -213,6 +246,8 @@ class ItineraryAddEditViewModel(
             return
         }
 
+        // 要存行程了，還沒存的草稿不用再存；不然建立成功清掉草稿後，草稿又會被存回去
+        draftSaveJob?.cancel()
         updateState { copy(isLoading = true, error = null) }
 
         val currentTimestamp = Clock.System.now()
@@ -229,6 +264,11 @@ class ItineraryAddEditViewModel(
 
             updateItineraryUseCase(updatedItinerary, currentTimestamp)
                 .onSuccess { itinerary ->
+                    // 封面換掉或移除了，存好之後才刪原本的檔
+                    val originalCover = snapshot.itinerary.coverPhotoPath
+                    if (originalCover != null && originalCover != snapshot.coverPhotoPath) {
+                        imageStorageService.deleteImage(originalCover)
+                    }
                     updateState { copy(isLoading = false) }
                     sendEvent(ItineraryAddEditEvent.SaveSuccess(itinerary.id))
                 }
@@ -288,10 +328,28 @@ class ItineraryAddEditViewModel(
             .onSuccess {
                 updateState { copy(showDraftSaved = true) }
                 sendEvent(ItineraryAddEditEvent.DraftSaved)
-
-                // 3秒後隱藏指示器
-                delay(3000)
-                updateState { copy(showDraftSaved = false) }
+                hideDraftSavedHintLater()
             }
+    }
+
+    /**
+     * 「已自動儲存草稿」顯示一段時間後隱藏；連續存檔時從最後一次重新計時
+     *
+     * 另外計時，不放在存草稿的流程裡：存草稿會被新的輸入取消，提示就會一直留著。
+     */
+    private fun hideDraftSavedHintLater() {
+        draftHintJob?.cancel()
+        draftHintJob = viewModelScope.launch {
+            delay(DRAFT_SAVED_HINT_MS)
+            updateState { copy(showDraftSaved = false) }
+        }
+    }
+
+    private companion object {
+        /** 停止輸入多久後自動存草稿 */
+        const val DRAFT_SAVE_DELAY_MS = 1_000L
+
+        /** 「已自動儲存草稿」顯示多久 */
+        const val DRAFT_SAVED_HINT_MS = 3_000L
     }
 }

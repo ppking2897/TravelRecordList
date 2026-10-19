@@ -2,6 +2,8 @@
 
 package io.github.ppking2897.travelrecord.test
 
+import io.github.ppking2897.travelrecord.feature.draft.domain.model.Draft
+import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRepository
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
@@ -127,6 +129,27 @@ class FailingDeleteItineraryRepository(
 ) : ItineraryRepository by base {
     override suspend fun deleteItinerary(id: String): Result<Unit> =
         Result.failure(IllegalStateException("刪除失敗"))
+}
+
+/** 記下存過幾次草稿，其餘行為同 [base] */
+class CountingDraftRepository(
+    private val base: DraftRepository
+) : DraftRepository by base {
+    var saveCount = 0
+        private set
+
+    override suspend fun saveDraft(draft: Draft): Result<Unit> {
+        saveCount++
+        return base.saveDraft(draft)
+    }
+}
+
+/** 更新行程一律失敗，其餘行為同 [base] */
+class FailingUpdateItineraryRepository(
+    private val base: ItineraryRepository
+) : ItineraryRepository by base {
+    override suspend fun updateItinerary(itinerary: Itinerary): Result<Itinerary> =
+        Result.failure(IllegalStateException("存檔失敗"))
 }
 
 /** 讀取某行程的項目一律失敗，其餘行為同 [base] */

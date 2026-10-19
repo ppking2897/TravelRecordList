@@ -5,7 +5,13 @@ package io.github.ppking2897.travelrecord.test
 import io.github.ppking2897.travelrecord.core.data.local.InMemoryStorageService
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.core.domain.service.LegacyDataImporter
+import io.github.ppking2897.travelrecord.feature.draft.data.repository.DraftRepositoryImpl
+import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRepository
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.DeleteDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.LoadDraftUseCase
+import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.SaveDraftUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.CreateItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.EnsureLocalDataReadyUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetAllItinerariesUseCase
@@ -13,6 +19,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetCur
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.UpdateItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.HashtagRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.PhotoRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
@@ -42,6 +49,8 @@ class TestUseCases(
     val items: ItineraryItemRepository,
     val imageStorage: ImageStorageService = FakeImageStorageService(),
     legacyDataImporter: LegacyDataImporter = FakeLegacyDataImporter(Result.success(Unit)),
+    /** 草稿存在記憶體；同一個 [TestUseCases] 建立的 ViewModel 讀得到彼此存的草稿 */
+    drafts: DraftRepository = inMemoryDraftRepository(),
 ) {
     private val extractHashtags = ExtractHashtagsUseCase(HashtagRepositoryImpl())
     private val photos = PhotoRepositoryImpl(imageStorage, itineraries, items)
@@ -52,6 +61,8 @@ class TestUseCases(
     val getCurrentTrip = GetCurrentTripUseCase(itineraries)
     val getAllItineraries = GetAllItinerariesUseCase(itineraries)
     val getItinerary = GetItineraryUseCase(itineraries)
+    val createItinerary = CreateItineraryUseCase(itineraries)
+    val updateItinerary = UpdateItineraryUseCase(itineraries)
     val searchItineraries = SearchItinerariesUseCase(itineraries)
     val deleteItinerary = DeleteItineraryUseCase(itineraries, items, imageStorage)
     val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items))
@@ -70,7 +81,14 @@ class TestUseCases(
     val generateThumbnail = GenerateThumbnailUseCase(photos)
 
     val createRoute = CreateRouteFromItineraryUseCase(routes)
+
+    val saveDraft = SaveDraftUseCase(drafts)
+    val loadDraft = LoadDraftUseCase(drafts)
+    val deleteDraft = DeleteDraftUseCase(drafts)
 }
+
+/** App 用的草稿 Repository，底層換成記憶體儲存 */
+fun inMemoryDraftRepository(): DraftRepository = DraftRepositoryImpl(InMemoryStorageService())
 
 /** 舊資料搬移一律回傳指定的結果 */
 class FakeLegacyDataImporter(private val result: Result<Unit>) : LegacyDataImporter {
