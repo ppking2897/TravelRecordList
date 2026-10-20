@@ -44,9 +44,7 @@ class AddItineraryItemUseCase(
             }
 
             // 驗證時間邏輯
-            if (arrivalTime != null && departureTime != null && departureTime < arrivalTime) {
-                return Result.failure(Exception("Departure time must be after arrival time"))
-            }
+            Validation.validateTimeOrder(arrivalTime, departureTime).getOrElse { return Result.failure(it) }
 
             // 提取標籤
             val hashtags = extractHashtagsUseCase(notes)

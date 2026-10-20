@@ -89,7 +89,7 @@ class RouteRepositoryImpl(
 
             if (uniqueLocations.size < 2) {
                 return Result.failure(
-                    Exception("Itinerary must contain at least two unique locations to create a route")
+                    Exception("至少要有兩個不同的地點才能生成路線")
                 )
             }
 

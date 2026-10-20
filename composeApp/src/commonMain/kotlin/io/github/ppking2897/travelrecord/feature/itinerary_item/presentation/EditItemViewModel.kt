@@ -16,6 +16,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetIti
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
+import io.github.ppking2897.travelrecord.core.domain.validation.Validation
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -258,6 +259,15 @@ class EditItemViewModel(
 
         if (snapshot.item == null) {
             updateState { copy(error = "項目資訊遺失") }
+            return
+        }
+
+        // 只在表單儲存時檢查：標記完成、加照片等也走同一個更新流程，
+        // 放進更新流程會讓修正前已存成離開早於到達的項目連完成都標不了
+        Validation.validateTimeOrder(snapshot.arrivalTime, snapshot.departureTime).onFailure { exception ->
+            val message = exception.message ?: "儲存失敗"
+            updateState { copy(error = message) }
+            sendEvent(EditItemEvent.ShowError(message))
             return
         }
 

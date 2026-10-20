@@ -328,7 +328,8 @@ class ItineraryDetailViewModelTest {
 
         act(viewModel, ItineraryDetailIntent.GenerateRoute)
 
-        events.filterIsInstance<ItineraryDetailEvent.ShowError>() shouldHaveSize 1
+        events.filterIsInstance<ItineraryDetailEvent.ShowError>() shouldBe
+            listOf(ItineraryDetailEvent.ShowError("至少要有兩個不同的地點才能生成路線"))
         events.filterIsInstance<ItineraryDetailEvent.NavigateToRoute>().shouldBeEmpty()
     }
 

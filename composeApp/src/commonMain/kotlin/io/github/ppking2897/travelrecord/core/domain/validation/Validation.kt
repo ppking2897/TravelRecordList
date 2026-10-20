@@ -5,6 +5,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Iti
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import io.github.ppking2897.travelrecord.core.domain.error.TravelAppError
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 /**
  * 驗證函數集合，用於驗證領域模型的欄位
@@ -110,6 +111,24 @@ object Validation {
         validateLatitude(location.latitude).getOrElse { return Result.failure(it) }
         validateLongitude(location.longitude).getOrElse { return Result.failure(it) }
         return Result.success(Unit)
+    }
+
+    /**
+     * 驗證離開時間不早於到達時間；任一個沒填就不檢查，兩者相同視為有效
+     *
+     * 錯誤訊息會直接顯示在畫面上。
+     */
+    fun validateTimeOrder(arrivalTime: LocalTime?, departureTime: LocalTime?): Result<Unit> {
+        return if (arrivalTime != null && departureTime != null && departureTime < arrivalTime) {
+            Result.failure(
+                TravelAppError.ValidationError(
+                    field = "departureTime",
+                    message = "離開時間不能早於到達時間"
+                )
+            )
+        } else {
+            Result.success(Unit)
+        }
     }
 
     /**
