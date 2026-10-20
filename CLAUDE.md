@@ -56,7 +56,7 @@
 
 1. 路由：`core/presentation/navigation/Screen.kt` 的 `AppRoute`（檔名是 `Screen.kt`，內容是 `sealed interface AppRoute : NavKey`）
 2. 畫面入口：`App.kt` → `PlanNavHost` 的 `entryProvider` 加 `is AppRoute.Xxx -> NavEntry(key) { … }`
-   - `when` 有 `else` 兜底：漏加**不會編譯失敗**，只會顯示 "Unknown route"
+   - `when` 沒有 `else`：漏加會編譯失敗。路由要標 `@Serializable`，行程分頁的 back stack 靠它存檔（旋轉螢幕後留在原頁）
 3. DI：`feature/{name}/di/{Name}Module.kt`，再加進 `di/AppModule.kt` 的 `appModule` 加總
 
 底部四個分頁定義在 `core/presentation/navigation/AppTab.kt`，由 `App.kt` 顯示；打開 App 時停在哪一頁由同資料夾的 `AppStartViewModel` 決定（有進行中的旅行就停在「今日」，判斷規則是 `GetCurrentTripUseCase`）。只有「行程」分頁有 back stack（`PlanNavHost`），其他分頁是單一畫面；要從別的分頁進深層頁，先切回行程分頁再 push（參考 `App.kt` 的 `openTripDetail`，今日、足跡、回憶都用它打開行程詳情）。

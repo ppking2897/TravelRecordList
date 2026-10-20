@@ -27,17 +27,19 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.serialization.NavBackStackSerializer
 import androidx.navigation3.ui.NavDisplay
 import io.github.ppking2897.travelrecord.core.presentation.navigation.AppRoute
 import io.github.ppking2897.travelrecord.core.presentation.navigation.AppStartViewModel
@@ -79,7 +81,10 @@ fun App() {
 fun TravelApp() {
     val appStartViewModel: AppStartViewModel = koinViewModel()
     val appStartState by appStartViewModel.state.collectAsState()
-    val planBackStack = remember { mutableStateListOf<Any>(AppRoute.ItineraryList) }
+    // 行程分頁開到哪一頁跟著畫面存檔，旋轉螢幕或 App 在背景被系統收掉後回來，仍停在原頁
+    val planBackStack = rememberSerializable(serializer = NavBackStackSerializer(AppRoute.serializer())) {
+        NavBackStack<AppRoute>(AppRoute.ItineraryList)
+    }
     // null = 還在判斷啟動分頁；rememberSaveable 讓旋轉螢幕後留在使用者所在的分頁
     var selectedTab by rememberSaveable { mutableStateOf<AppTab?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -176,7 +181,7 @@ private fun TravelBottomNavigation(
 @ExperimentalTime
 @Composable
 private fun PlanNavHost(
-    backStack: MutableList<Any>,
+    backStack: MutableList<AppRoute>,
     modifier: Modifier = Modifier,
     onSwitchToFootprints: () -> Unit,
     onShareRoute: (String) -> Unit
@@ -303,10 +308,6 @@ private fun PlanNavHost(
                         onNavigateBack = { backStack.removeLastOrNull() },
                         onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) }
                     )
-                }
-
-                else -> NavEntry(Unit) {
-                    Text("Unknown route")
                 }
             }
         }
