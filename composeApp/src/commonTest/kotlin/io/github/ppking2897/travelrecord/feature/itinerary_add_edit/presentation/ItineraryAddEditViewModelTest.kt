@@ -17,8 +17,10 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -256,6 +258,53 @@ class ItineraryAddEditViewModelTest {
         drafts.saveCount shouldBe 0
     }
 
+    // ── 捨棄：清掉草稿再離開 ──
+
+    @Test
+    fun `按捨棄後清掉草稿`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val first = viewModelWith(useCases)
+        val events = eventsOf(first)
+        act(first, ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.UpdateTitle("京都大阪 5 日遊"))
+        useCases.loadDraft(DraftType.ITINERARY).getOrThrow()?.get("title") shouldBe "京都大阪 5 日遊"
+
+        act(first, ItineraryAddEditIntent.Discard)
+
+        events.last() shouldBe ItineraryAddEditEvent.NavigateBack
+        val second = viewModelWith(useCases)
+        act(second, ItineraryAddEditIntent.LoadDraft)
+        second.state.value.title shouldBe ""
+    }
+
+    @Test
+    fun `打字後馬上捨棄`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val first = viewModelWith(useCases)
+        val events = eventsOf(first)
+        act(first, ItineraryAddEditIntent.LoadDraft)
+        type(first, "京都大阪 5 日遊")
+
+        act(first, ItineraryAddEditIntent.Discard)
+
+        events.last() shouldBe ItineraryAddEditEvent.NavigateBack
+        val second = viewModelWith(useCases)
+        act(second, ItineraryAddEditIntent.LoadDraft)
+        second.state.value.title shouldBe ""
+    }
+
+    @Test
+    fun `編輯行程時捨棄不動新增行程的草稿`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        act(viewModelWith(useCases), ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.UpdateTitle("京都大阪 5 日遊"))
+        val editing = viewModelWith(useCases)
+        val events = eventsOf(editing)
+
+        act(editing, ItineraryAddEditIntent.LoadItinerary("kyoto"), ItineraryAddEditIntent.Discard)
+
+        events.last() shouldBe ItineraryAddEditEvent.NavigateBack
+        useCases.loadDraft(DraftType.ITINERARY).getOrThrow()?.get("title") shouldBe "京都大阪 5 日遊"
+    }
+
     // ── 測試工具 ──
 
     private val photoBytes = byteArrayOf(1, 2, 3)
@@ -284,6 +333,13 @@ class ItineraryAddEditViewModelTest {
         deleteDraftUseCase = useCases.deleteDraft,
         imageStorageService = useCases.imageStorage,
     )
+
+    /** 從現在起收集 [viewModel] 發出的事件 */
+    private fun TestScope.eventsOf(viewModel: ItineraryAddEditViewModel): List<ItineraryAddEditEvent> {
+        val events = mutableListOf<ItineraryAddEditEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.event.collect { events += it } }
+        return events
+    }
 
     /** 依序送出指令，每送一個就把排程跑完 */
     private fun TestScope.act(viewModel: ItineraryAddEditViewModel, vararg intents: ItineraryAddEditIntent) {

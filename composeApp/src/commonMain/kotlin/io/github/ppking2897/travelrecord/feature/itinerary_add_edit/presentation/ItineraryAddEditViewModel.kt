@@ -54,6 +54,7 @@ class ItineraryAddEditViewModel(
                 is ItineraryAddEditIntent.RemoveCoverPhoto -> removeCoverPhoto()
                 is ItineraryAddEditIntent.Save -> save()
                 is ItineraryAddEditIntent.SaveDraft -> saveDraft()
+                is ItineraryAddEditIntent.Discard -> discard()
             }
         }
     }
@@ -330,6 +331,20 @@ class ItineraryAddEditViewModel(
                 sendEvent(ItineraryAddEditEvent.DraftSaved)
                 hideDraftSavedHintLater()
             }
+    }
+
+    /**
+     * 捨棄這次輸入的內容並離開
+     *
+     * 新增模式下連草稿一起清掉，下次開啟才不會又帶回來。刪草稿失敗也照樣離開。
+     */
+    private suspend fun discard() {
+        // 還沒存的草稿不用再存；不然清掉草稿後，草稿又會被存回去
+        draftSaveJob?.cancel()
+        if (!state.value.isEditMode) {
+            deleteDraftUseCase(DraftType.ITINERARY)
+        }
+        sendEvent(ItineraryAddEditEvent.NavigateBack)
     }
 
     /**

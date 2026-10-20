@@ -68,6 +68,7 @@ fun ItineraryAddEditScreen(
                     snackbarHostState.showSnackbar(event.message)
                 }
                 is ItineraryAddEditEvent.DraftSaved -> { /* 已顯示在 state.showDraftSaved */ }
+                is ItineraryAddEditEvent.NavigateBack -> onNavigateBack()
             }
         }
     }
@@ -157,7 +158,7 @@ fun ItineraryAddEditScreen(
             title = { Text("捨棄變更？") },
             text = { Text("您有未儲存的變更，確定要離開嗎？") },
             confirmButton = {
-                TextButton(onClick = { onNavigateBack() }) {
+                TextButton(onClick = { viewModel.processIntent(ItineraryAddEditIntent.Discard) }) {
                     Text("捨棄")
                 }
             },

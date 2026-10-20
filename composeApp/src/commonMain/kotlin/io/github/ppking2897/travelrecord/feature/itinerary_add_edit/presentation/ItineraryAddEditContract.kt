@@ -39,6 +39,7 @@ sealed class ItineraryAddEditIntent {
     object RemoveCoverPhoto : ItineraryAddEditIntent()
     object Save : ItineraryAddEditIntent()
     object SaveDraft : ItineraryAddEditIntent()
+    object Discard : ItineraryAddEditIntent()
 }
 
 /**
@@ -48,4 +49,5 @@ sealed class ItineraryAddEditEvent {
     data class SaveSuccess(val itineraryId: String) : ItineraryAddEditEvent()
     data class ShowError(val message: String) : ItineraryAddEditEvent()
     object DraftSaved : ItineraryAddEditEvent()
+    object NavigateBack : ItineraryAddEditEvent()
 }
