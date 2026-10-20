@@ -3,19 +3,23 @@ package io.github.ppking2897.travelrecord.core.presentation.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
+import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
 
 /**
  * 標籤列表元件
+ *
+ * 只顯示、不能點：依標籤篩選的功能拿掉了，做成按鈕的樣子會讓人以為點了有反應。
  */
 @Composable
 fun HashtagRow(
     hashtags: List<Hashtag>,
-    onHashtagClick: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -23,30 +27,29 @@ fun HashtagRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(hashtags) { hashtag ->
-            HashtagChip(
-                hashtag = hashtag,
-                onClick = onHashtagClick
-            )
+            HashtagChip(hashtag = hashtag)
         }
     }
 }
 
 /**
- * 單個標籤 Chip
+ * 單個標籤
  */
 @Composable
 fun HashtagChip(
     hashtag: Hashtag,
-    onClick: ((String) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
-    AssistChip(
-        onClick = { onClick?.invoke(hashtag.tag) },
-        label = { Text("#${hashtag.tag}") },
+    Surface(
         modifier = modifier,
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = RoundedCornerShape(CornerRadius.xs)
+    ) {
+        Text(
+            text = "#${hashtag.tag}",
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
-    )
+    }
 }

@@ -265,10 +265,7 @@ fun ItemCard(
                 // 標籤列（Hashtags）
                 if (item.hashtags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(Spacing.sm))
-                    HashtagRow(
-                        hashtags = item.hashtags,
-                        onHashtagClick = { /* 篩選功能 */ }
-                    )
+                    HashtagRow(hashtags = item.hashtags)
                 }
 
                 // 備註預覽（未展開時）

@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -60,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
 import io.github.ppking2897.travelrecord.core.presentation.components.LocationSearchField
+import io.github.ppking2897.travelrecord.core.presentation.components.LocationTag
 import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
@@ -382,17 +382,7 @@ private fun TodayItemCard(
                 }
             }
 
-            AssistChip(
-                onClick = {},
-                label = { Text(item.location.name) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Place,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            )
+            LocationTag(location = item.location.name, icon = Icons.Default.Place)
 
             if (item.notes.isNotBlank()) {
                 Text(
