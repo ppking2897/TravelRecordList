@@ -39,6 +39,7 @@ val Red80 = Color(0xFFEF9A9A)
 val Red90 = Color(0xFFFFEBEE)
 
 // Neutral - 中性色
+// Gray10、Gray99 也是 Android 的啟動底色（androidApp 的 res/values*/themes.xml），改這兩個要一起改那裡
 val Gray10 = Color(0xFF1A1A1A)
 val Gray20 = Color(0xFF2D2D2D)
 val Gray80 = Color(0xFFC9C9C9)
