@@ -1,8 +1,5 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,8 +40,6 @@ fun ItineraryFormContent(
     dateError: String?,
     error: String?,
     isLoading: Boolean,
-    isEditMode: Boolean,
-    showDraftSaved: Boolean,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onStartDateClick: () -> Unit,
@@ -119,18 +114,6 @@ fun ItineraryFormContent(
                 text = it,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        AnimatedVisibility(
-            visible = showDraftSaved && !isEditMode,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Text(
-                text = "✓ 已自動儲存草稿",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
             )
         }
 

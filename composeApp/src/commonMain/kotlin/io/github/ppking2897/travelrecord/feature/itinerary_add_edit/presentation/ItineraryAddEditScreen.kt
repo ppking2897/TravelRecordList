@@ -2,6 +2,10 @@
 
 package io.github.ppking2897.travelrecord.feature.itinerary_add_edit.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -25,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -116,7 +121,23 @@ fun ItineraryAddEditScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(if (state.isEditMode) "編輯行程" else "新增行程") },
+                title = {
+                    // 草稿提示放在標題下方，不佔表單空間，出現或消失時儲存按鈕不會跟著移動
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(if (state.isEditMode) "編輯行程" else "新增行程")
+                        AnimatedVisibility(
+                            visible = state.showDraftSaved && !state.isEditMode,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Text(
+                                text = "✓ 已自動儲存草稿",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
@@ -135,8 +156,6 @@ fun ItineraryAddEditScreen(
             dateError = state.dateError,
             error = state.error,
             isLoading = state.isLoading,
-            isEditMode = state.isEditMode,
-            showDraftSaved = state.showDraftSaved,
             onTitleChange = { viewModel.processIntent(ItineraryAddEditIntent.UpdateTitle(it)) },
             onDescriptionChange = { viewModel.processIntent(ItineraryAddEditIntent.UpdateDescription(it)) },
             onStartDateClick = { showStartDatePicker = true },
@@ -246,8 +265,6 @@ private fun ItineraryAddEditScreenPreview() {
                     dateError = null,
                     error = null,
                     isLoading = false,
-                    isEditMode = false,
-                    showDraftSaved = false,
                     onTitleChange = {},
                     onDescriptionChange = {},
                     onStartDateClick = {},
