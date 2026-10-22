@@ -37,7 +37,8 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.S
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 
 /**
  * 照 App 的接法，把測試用的 Repository 組成 use case
@@ -55,8 +56,8 @@ class TestUseCases(
     private val extractHashtags = ExtractHashtagsUseCase(HashtagRepositoryImpl())
     private val photos = PhotoRepositoryImpl(imageStorage, itineraries, items)
 
-    /** 路線存在記憶體，測試可以讀回剛生成的路線 */
-    val routes: RouteRepository = RouteRepositoryImpl(InMemoryStorageService(), itineraries)
+    /** 路線依行程現算；清舊版路線用的鍵值儲存換成記憶體 */
+    private val routes: RouteRepository = RouteRepositoryImpl(InMemoryStorageService(), itineraries)
 
     val getCurrentTrip = GetCurrentTripUseCase(itineraries)
     val getAllItineraries = GetAllItinerariesUseCase(itineraries)
@@ -65,7 +66,7 @@ class TestUseCases(
     val updateItinerary = UpdateItineraryUseCase(itineraries)
     val searchItineraries = SearchItinerariesUseCase(itineraries)
     val deleteItinerary = DeleteItineraryUseCase(itineraries, items, imageStorage)
-    val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items))
+    val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items), routes)
 
     val getItemsByItinerary = GetItemsByItineraryUseCase(items)
     val getItem = GetItineraryItemUseCase(items)
@@ -80,7 +81,8 @@ class TestUseCases(
     val setCoverPhoto = SetCoverPhotoUseCase(photos)
     val generateThumbnail = GenerateThumbnailUseCase(photos)
 
-    val createRoute = CreateRouteFromItineraryUseCase(routes)
+    val getRouteForItinerary = GetRouteForItineraryUseCase(routes)
+    val exportRoute = ExportRouteUseCase(routes)
 
     val saveDraft = SaveDraftUseCase(drafts)
     val loadDraft = LoadDraftUseCase(drafts)

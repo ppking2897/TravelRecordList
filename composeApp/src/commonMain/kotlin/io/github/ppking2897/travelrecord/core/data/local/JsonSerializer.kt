@@ -84,13 +84,6 @@ object JsonSerializer {
     }
 
     /**
-     * 從 JSON 字串反序列化 RouteResponse
-     */
-    fun deserializeRoute(jsonString: String): RouteResponse {
-        return json.decodeFromString(RouteResponse.serializer(), jsonString)
-    }
-
-    /**
      * 將 DraftResponse 序列化為 JSON 字串
      */
     fun serializeDraft(draft: DraftResponse): String {

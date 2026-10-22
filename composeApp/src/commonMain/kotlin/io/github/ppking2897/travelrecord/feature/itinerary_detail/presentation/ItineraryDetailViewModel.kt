@@ -15,7 +15,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.G
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.SetCoverPhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.datetime.LocalDate
@@ -33,7 +33,7 @@ class ItineraryDetailViewModel(
     private val getItineraryUseCase: GetItineraryUseCase,
     private val getItemsByItineraryUseCase: GetItemsByItineraryUseCase,
     private val deleteItineraryUseCase: DeleteItineraryUseCase,
-    private val createRouteUseCase: CreateRouteFromItineraryUseCase,
+    private val getRouteForItineraryUseCase: GetRouteForItineraryUseCase,
     private val updateItemUseCase: UpdateItineraryItemUseCase,
     private val deleteItemUseCase: DeleteItineraryItemUseCase,
     private val groupItemsByDateUseCase: GroupItemsByDateUseCase,
@@ -198,9 +198,10 @@ class ItineraryDetailViewModel(
 
     private suspend fun generateRoute() {
         state.value.itinerary?.let { itinerary ->
-            createRouteUseCase(itinerary.id)
-                .onSuccess { route ->
-                    sendEvent(ItineraryDetailEvent.NavigateToRoute(route.id))
+            // 先排一次確認排得出來，排不出來就留在詳情頁提示；路線頁打開時會依行程再排一次
+            getRouteForItineraryUseCase(itinerary.id)
+                .onSuccess {
+                    sendEvent(ItineraryDetailEvent.NavigateToRoute(itinerary.id))
                 }
                 .onFailure { exception ->
                     sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "生成路線失敗"))

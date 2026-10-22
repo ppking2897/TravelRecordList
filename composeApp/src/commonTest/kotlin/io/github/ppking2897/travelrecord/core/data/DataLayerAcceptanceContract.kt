@@ -17,7 +17,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.B
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.BatchUpdateItemsUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ExtractHashtagsUseCase
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.CreateRouteFromItineraryUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.TestRepositories
 import io.github.ppking2897.travelrecord.test.instantAt
@@ -47,7 +47,7 @@ abstract class DataLayerAcceptanceContract {
         val routes = RouteRepositoryImpl(InMemoryStorageService(), repos.itineraries)
 
         val initializeSampleData = InitializeSampleDataUseCase(repos.itineraries, repos.items)
-        val createRoute = CreateRouteFromItineraryUseCase(routes)
+        val getRoute = GetRouteForItineraryUseCase(routes)
         val addPhoto = AddPhotoUseCase(photos)
         val deleteItinerary = DeleteItineraryUseCase(repos.itineraries, repos.items, FakeImageStorageService())
         val search = SearchItinerariesUseCase(repos.itineraries)
@@ -76,7 +76,7 @@ abstract class DataLayerAcceptanceContract {
         val app = App()
         app.initializeSampleData().getOrThrow()
 
-        val route = app.createRoute(sampleItineraryId)
+        val route = app.getRoute(sampleItineraryId)
 
         route.isSuccess shouldBe true
         route.getOrThrow().locations.size shouldBe 8

@@ -311,14 +311,13 @@ class ItineraryDetailViewModelTest {
 
     @Test
     fun `生成路線成功`() = runTest(dispatcher) {
-        val useCases = useCasesOf(item("fushimi", "伏見稻荷", oct14), item("kinkaku", "金閣寺", oct15))
-        val viewModel = loaded(useCases)
+        val viewModel = loaded(useCasesOf(item("fushimi", "伏見稻荷", oct14), item("kinkaku", "金閣寺", oct15)))
         val events = collectEvents(viewModel)
 
         act(viewModel, ItineraryDetailIntent.GenerateRoute)
 
-        val routeId = events.filterIsInstance<ItineraryDetailEvent.NavigateToRoute>().single().routeId
-        useCases.routes.getRoute(routeId).getOrThrow()?.createdFrom shouldBe "kyoto"
+        events.filterIsInstance<ItineraryDetailEvent.NavigateToRoute>() shouldBe
+            listOf(ItineraryDetailEvent.NavigateToRoute("kyoto"))
     }
 
     @Test
@@ -492,7 +491,7 @@ class ItineraryDetailViewModelTest {
         getItineraryUseCase = useCases.getItinerary,
         getItemsByItineraryUseCase = useCases.getItemsByItinerary,
         deleteItineraryUseCase = useCases.deleteItinerary,
-        createRouteUseCase = useCases.createRoute,
+        getRouteForItineraryUseCase = useCases.getRouteForItinerary,
         updateItemUseCase = useCases.updateItem,
         deleteItemUseCase = useCases.deleteItem,
         groupItemsByDateUseCase = GroupItemsByDateUseCase(),

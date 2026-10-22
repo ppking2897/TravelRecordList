@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class RouteResponse(
-    val id: String,
     val title: String,
     val locations: List<RouteLocationResponse>,
     val createdFrom: String

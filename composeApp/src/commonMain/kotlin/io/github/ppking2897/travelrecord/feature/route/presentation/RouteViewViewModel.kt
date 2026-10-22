@@ -2,7 +2,7 @@ package io.github.ppking2897.travelrecord.feature.route.presentation
 
 import androidx.lifecycle.viewModelScope
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteUseCase
+import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import kotlinx.coroutines.launch
 
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
  * 負責處理路線檢視相關的業務邏輯
  */
 class RouteViewViewModel(
-    private val getRouteUseCase: GetRouteUseCase,
+    private val getRouteForItineraryUseCase: GetRouteForItineraryUseCase,
     private val exportRouteUseCase: ExportRouteUseCase
 ) : BaseViewModel<RouteViewIntent, RouteViewState, RouteViewEvent>(
     initialState = RouteViewState()
@@ -21,34 +21,25 @@ class RouteViewViewModel(
     override fun processIntent(intent: RouteViewIntent) {
         viewModelScope.launch {
             when (intent) {
-                is RouteViewIntent.LoadRoute -> loadRoute(intent.routeId)
-                is RouteViewIntent.ExportRoute -> exportRoute(intent.routeId)
+                is RouteViewIntent.LoadRoute -> loadRoute(intent.itineraryId)
+                is RouteViewIntent.ExportRoute -> exportRoute(intent.itineraryId)
             }
         }
     }
 
     /**
-     * 載入路線資料
+     * 依行程目前的項目載入路線
      */
-    private suspend fun loadRoute(routeId: String) {
+    private suspend fun loadRoute(itineraryId: String) {
         updateState { copy(isLoading = true, error = null) }
 
-        getRouteUseCase(routeId)
+        getRouteForItineraryUseCase(itineraryId)
             .onSuccess { route ->
-                if (route != null) {
-                    updateState {
-                        copy(
-                            route = route,
-                            isLoading = false
-                        )
-                    }
-                } else {
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            error = "找不到路線"
-                        )
-                    }
+                updateState {
+                    copy(
+                        route = route,
+                        isLoading = false
+                    )
                 }
             }
             .onFailure { exception ->
@@ -65,10 +56,10 @@ class RouteViewViewModel(
     /**
      * 匯出路線為 JSON
      */
-    private suspend fun exportRoute(routeId: String) {
+    private suspend fun exportRoute(itineraryId: String) {
         updateState { copy(isExporting = true) }
 
-        exportRouteUseCase(routeId)
+        exportRouteUseCase(itineraryId)
             .onSuccess { json ->
                 updateState { copy(isExporting = false) }
                 sendEvent(RouteViewEvent.ExportSuccess(json))

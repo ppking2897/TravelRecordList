@@ -1,7 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.route.data.repository
 
 import io.github.ppking2897.travelrecord.feature.route.data.mapper.toDto
-import io.github.ppking2897.travelrecord.feature.route.data.mapper.toDomain
 import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
 import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
@@ -12,7 +11,8 @@ import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRe
 
 /**
  * RouteRepository 實作
- * 使用 StorageService 儲存資料
+ *
+ * 路線從行程現算；[StorageService] 只用來清掉舊版存下的路線。
  */
 class RouteRepositoryImpl(
     private val storageService: StorageService,
@@ -20,68 +20,14 @@ class RouteRepositoryImpl(
 ) : RouteRepository {
 
     companion object {
-        private const val ROUTE_KEY_PREFIX = "route:"
-        private const val ROUTE_INDEX_KEY = "route:index"
+        /** 舊版存路線用的鍵開頭，索引 route:index 也在內 */
+        private const val STORED_ROUTE_KEY_PREFIX = "route:"
     }
 
-    override suspend fun createRoute(route: Route): Result<Route> {
-        return try {
-            val uniqueLocations = route.locations.map { it.location.name }.distinct()
-            if (uniqueLocations.size < 2) {
-                return Result.failure(
-                    Exception("Route must contain at least two unique locations")
-                )
-            }
-
-            val key = "$ROUTE_KEY_PREFIX${route.id}"
-            val dto = route.toDto()
-            val jsonData = JsonSerializer.serializeRoute(dto)
-            storageService.save(key, jsonData).getOrThrow()
-
-            updateIndex { ids -> ids + route.id }
-
-            Result.success(route)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getRoute(id: String): Result<Route?> {
-        return try {
-            val key = "$ROUTE_KEY_PREFIX$id"
-            val jsonData = storageService.load(key).getOrNull()
-
-            if (jsonData == null) {
-                Result.success(null)
-            } else {
-                val dto = JsonSerializer.deserializeRoute(jsonData)
-                Result.success(dto.toDomain())
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun exportRoute(id: String): Result<String> {
-        return try {
-            val route = getRoute(id).getOrNull()
-                ?: return Result.failure(Exception("Route not found: $id"))
-
-            val dto = route.toDto()
-            val jsonData = JsonSerializer.serializeRoute(dto)
-            Result.success(jsonData)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun createRouteFromItinerary(
-        itineraryId: String,
-        routeId: String
-    ): Result<Route> {
+    override suspend fun getRouteForItinerary(itineraryId: String): Result<Route> {
         return try {
             val itinerary = itineraryRepository.getItinerary(itineraryId).getOrNull()
-                ?: return Result.failure(Exception("Itinerary not found: $itineraryId"))
+                ?: return Result.failure(Exception("找不到路線"))
 
             val uniqueLocations = itinerary.items
                 .map { it.location.name }
@@ -115,40 +61,31 @@ class RouteRepositoryImpl(
                 }
             }
 
-            val route = Route(
-                id = routeId,
-                title = itinerary.title,
-                locations = routeLocations,
-                createdFrom = itineraryId
+            Result.success(
+                Route(
+                    title = itinerary.title,
+                    locations = routeLocations,
+                    createdFrom = itineraryId
+                )
             )
-
-            createRoute(route)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    private suspend fun getRouteIds(): List<String> {
-        return try {
-            val jsonData = storageService.load(ROUTE_INDEX_KEY).getOrNull()
-            if (jsonData == null) {
-                emptyList()
-            } else {
-                JsonSerializer.deserializeStringList(jsonData)
-            }
-        } catch (e: Exception) {
-            emptyList()
+    override suspend fun exportRoute(itineraryId: String): Result<String> =
+        getRouteForItinerary(itineraryId).map { route ->
+            JsonSerializer.serializeRoute(route.toDto())
         }
-    }
 
-    private suspend fun updateIndex(transform: (List<String>) -> List<String>) {
-        try {
-            val currentIds = getRouteIds()
-            val newIds = transform(currentIds).distinct()
-            val jsonData = JsonSerializer.serializeStringList(newIds)
-            storageService.save(ROUTE_INDEX_KEY, jsonData)
+    override suspend fun deleteStoredRoutes(): Result<Unit> {
+        return try {
+            storageService.getAllKeys().getOrThrow()
+                .filter { it.startsWith(STORED_ROUTE_KEY_PREFIX) }
+                .forEach { key -> storageService.delete(key).getOrThrow() }
+            Result.success(Unit)
         } catch (e: Exception) {
-            // 索引更新失敗不應影響主要邏輯
+            Result.failure(e)
         }
     }
 }

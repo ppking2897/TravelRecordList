@@ -253,7 +253,7 @@ private fun PlanNavHost(
                         },
                         onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) },
                         onEditItineraryClick = { backStack.add(AppRoute.EditItinerary(key.itineraryId)) },
-                        onRouteClick = { routeId -> backStack.add(AppRoute.RouteView(routeId)) },
+                        onRouteClick = { itineraryId -> backStack.add(AppRoute.RouteView(itineraryId)) },
                         onMapClick = { backStack.add(AppRoute.ItineraryMap(key.itineraryId)) }
                     )
                 }
@@ -294,7 +294,7 @@ private fun PlanNavHost(
 
                 is AppRoute.RouteView -> NavEntry(key) {
                     RouteViewScreen(
-                        routeId = key.routeId,
+                        itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
                         onExportSuccess = onShareRoute
                     )

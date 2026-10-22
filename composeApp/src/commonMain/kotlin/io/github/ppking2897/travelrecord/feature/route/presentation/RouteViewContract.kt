@@ -20,8 +20,8 @@ data class RouteViewState(
  * RouteView Intent
  */
 sealed class RouteViewIntent {
-    data class LoadRoute(val routeId: String) : RouteViewIntent()
-    data class ExportRoute(val routeId: String) : RouteViewIntent()
+    data class LoadRoute(val itineraryId: String) : RouteViewIntent()
+    data class ExportRoute(val itineraryId: String) : RouteViewIntent()
 }
 
 /**

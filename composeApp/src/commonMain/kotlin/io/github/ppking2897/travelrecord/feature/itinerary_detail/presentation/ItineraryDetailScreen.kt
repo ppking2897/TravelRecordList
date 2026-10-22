@@ -111,7 +111,7 @@ fun ItineraryDetailScreen(
             when (event) {
                 is ItineraryDetailEvent.NavigateBack -> onNavigateBack()
                 is ItineraryDetailEvent.NavigateToQuickAddItem -> onQuickAddItemClick(event.defaultDate)
-                is ItineraryDetailEvent.NavigateToRoute -> onRouteClick(event.routeId)
+                is ItineraryDetailEvent.NavigateToRoute -> onRouteClick(event.itineraryId)
                 is ItineraryDetailEvent.ShowError -> {
                     snackbarHostState.showSnackbar(event.message)
                 }

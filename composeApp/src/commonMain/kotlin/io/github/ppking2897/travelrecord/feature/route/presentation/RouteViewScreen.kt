@@ -39,7 +39,7 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun RouteViewScreen(
-    routeId: String,
+    itineraryId: String,
     onNavigateBack: () -> Unit,
     onExportSuccess: (String) -> Unit,
     viewModel: RouteViewViewModel = koinViewModel()
@@ -62,8 +62,8 @@ fun RouteViewScreen(
     }
     
     // 載入路線
-    LaunchedEffect(routeId) {
-        viewModel.processIntent(RouteViewIntent.LoadRoute(routeId))
+    LaunchedEffect(itineraryId) {
+        viewModel.processIntent(RouteViewIntent.LoadRoute(itineraryId))
     }
     
     RouteViewScreenContent(
@@ -73,7 +73,7 @@ fun RouteViewScreen(
         error = state.error,
         onNavigateBack = onNavigateBack,
         onExportClick = {
-            viewModel.processIntent(RouteViewIntent.ExportRoute(routeId))
+            viewModel.processIntent(RouteViewIntent.ExportRoute(itineraryId))
         },
         onOpenMapClick = { location ->
             val query = if (location.latitude != null && location.longitude != null) {
@@ -252,7 +252,6 @@ private fun RouteViewScreenPreview() {
         Surface {
             RouteViewScreenContent(
                 route = Route(
-                    id = "1",
                     title = "東京一日遊",
                     locations = listOf(
                         RouteLocation(

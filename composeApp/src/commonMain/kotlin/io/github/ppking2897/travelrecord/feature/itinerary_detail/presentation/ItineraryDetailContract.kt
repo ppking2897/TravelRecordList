@@ -69,7 +69,7 @@ sealed class ItineraryDetailEvent {
     object NavigateToEditItinerary : ItineraryDetailEvent()
     data class ShowDeleteItemConfirm(val item: ItineraryItem) : ItineraryDetailEvent()
     data class ShowDeleteItineraryConfirm(val itinerary: Itinerary) : ItineraryDetailEvent()
-    data class NavigateToRoute(val routeId: String) : ItineraryDetailEvent()
+    data class NavigateToRoute(val itineraryId: String) : ItineraryDetailEvent()
     data class ShowError(val message: String) : ItineraryDetailEvent()
     data class ShowPhotoViewer(val photoId: String) : ItineraryDetailEvent()
     data class ShowImagePicker(val itemId: String) : ItineraryDetailEvent()
