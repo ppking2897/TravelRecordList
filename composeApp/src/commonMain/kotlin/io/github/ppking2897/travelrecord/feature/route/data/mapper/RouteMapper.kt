@@ -14,14 +14,12 @@ object RouteLocationMapper {
     fun toDomain(dto: RouteLocationResponse): RouteLocation = RouteLocation(
         location = dto.location.toDomain(),
         order = dto.order,
-        recommendedDuration = dto.recommendedDuration,
         notes = dto.notes
     )
 
     fun toDto(entity: RouteLocation): RouteLocationResponse = RouteLocationResponse(
         location = entity.location.toDto(),
         order = entity.order,
-        recommendedDuration = entity.recommendedDuration,
         notes = entity.notes
     )
 }

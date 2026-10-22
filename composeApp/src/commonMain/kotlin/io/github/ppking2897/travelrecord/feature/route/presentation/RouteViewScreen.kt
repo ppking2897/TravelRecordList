@@ -117,26 +117,6 @@ private fun RouteInfoCard(route: Route) {
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-            
-            // 總建議時間（如果有）
-            val totalDuration = route.locations.mapNotNull { it.recommendedDuration }
-                .fold(kotlin.time.Duration.ZERO) { acc, duration -> acc + duration }
-            if (totalDuration.inWholeMinutes > 0) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.DateRange,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "建議總時間：${totalDuration.inWholeHours} 小時 ${totalDuration.inWholeMinutes % 60} 分鐘",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
         }
     }
 }
@@ -251,26 +231,6 @@ private fun RouteLocationCard(
                     )
                 }
                 
-                // 建議停留時間
-                routeLocation.recommendedDuration?.let { duration ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.DateRange,
-                            contentDescription = null,
-                            modifier = Modifier.size(IconSize.xs),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "建議停留：${duration.inWholeHours} 小時 ${duration.inWholeMinutes % 60} 分鐘",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-                
                 // 備註
                 if (routeLocation.notes.isNotBlank()) {
                     Text(
@@ -303,7 +263,6 @@ private fun RouteViewScreenPreview() {
                                 address = "東京都台東區淺草2-3-1"
                             ),
                             order = 0,
-                            recommendedDuration = kotlin.time.Duration.parse("2h"),
                             notes = "參觀雷門和五重塔"
                         ),
                         RouteLocation(
@@ -314,7 +273,6 @@ private fun RouteViewScreenPreview() {
                                 address = "東京都墨田區押上1-1-2"
                             ),
                             order = 1,
-                            recommendedDuration = kotlin.time.Duration.parse("3h"),
                             notes = "登塔觀景"
                         )
                     ),

@@ -108,7 +108,6 @@ class RouteRepositoryImpl(
                         RouteLocation(
                             location = item.location,
                             order = order++,
-                            recommendedDuration = null,
                             notes = ""
                         )
                     )
