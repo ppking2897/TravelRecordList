@@ -16,7 +16,8 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDo
  *   舊版的批次刪除與批次標記只更新單獨那份，內嵌副本可能是已刪除或過期的資料。
  * - 找不到所屬行程的項目、無法解析的單筆資料略過；讀取舊資料失敗則整個中止，不寫入任何資料。
  * - 依舊索引的順序寫入，時間相同的行程與項目維持原本的先後。
- * - 路線與草稿仍留在鍵值儲存，不搬；舊資料搬完後保留，不刪除。
+ * - 草稿仍留在鍵值儲存，不搬；舊版存下的路線也不搬，由啟動流程（`EnsureLocalDataReadyUseCase`）清掉。
+ * - 舊資料搬完後保留，不刪除。
  */
 class LegacyJsonImporter(
     private val storage: StorageService,
