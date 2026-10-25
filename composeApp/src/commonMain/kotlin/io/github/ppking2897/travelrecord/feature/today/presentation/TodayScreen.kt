@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.today.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -197,6 +199,7 @@ private fun TodayScreenContent(
             if (state.currentTrip != null) {
                 ExtendedFloatingActionButton(
                     onClick = onQuickRecord,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("快速紀錄") }
                 )
@@ -310,7 +313,9 @@ private fun TodayTripHeader(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(CardStyle.contentPadding),
@@ -352,7 +357,9 @@ private fun TodayItemCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(CardStyle.contentPadding),
@@ -415,7 +422,9 @@ private fun EmptyTodayItemsState(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(CardStyle.contentPadding),

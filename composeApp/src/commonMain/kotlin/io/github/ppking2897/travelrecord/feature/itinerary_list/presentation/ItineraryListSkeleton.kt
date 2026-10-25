@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +45,9 @@ fun ItineraryListSkeleton(
 private fun ItineraryCardSkeleton() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation)
+        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier

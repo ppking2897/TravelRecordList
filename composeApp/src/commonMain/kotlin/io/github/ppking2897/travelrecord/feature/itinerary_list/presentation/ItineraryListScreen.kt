@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_list.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -184,6 +186,7 @@ private fun ItineraryPlanningDashboard(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddClick,
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text("建立行程") }
             )
@@ -329,7 +332,9 @@ private fun PlanningHeader(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        ),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(Spacing.lg),
@@ -414,7 +419,9 @@ private fun ItineraryDashboardCard(
             } else {
                 MaterialTheme.colorScheme.surface
             }
-        )
+        ),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier

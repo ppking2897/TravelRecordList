@@ -8,7 +8,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -44,6 +43,7 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.CompletedStateC
 import io.github.ppking2897.travelrecord.core.presentation.theme.ComponentSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
 import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.LocationTagColors
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
 
@@ -76,13 +76,11 @@ fun ItemCard(
 ) {
     val expanded = isExpanded
     var showMoreMenu by remember { mutableStateOf(false) }
-    val isLightTheme = !isSystemInDarkTheme()
 
     // 動畫顏色 - 使用 CompletedStateColors
     val cardBackgroundColor by animateColorAsState(
         targetValue = if (item.isCompleted) {
-            if (isLightTheme) CompletedStateColors.lightBackground
-            else CompletedStateColors.darkBackground
+            CompletedStateColors.background
         } else {
             MaterialTheme.colorScheme.surface
         },
@@ -90,11 +88,9 @@ fun ItemCard(
     )
 
     val cardBorderColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else if (item.isCompleted) {
-        if (isLightTheme) CompletedStateColors.lightBorder else CompletedStateColors.darkBorder
+        MaterialTheme.colorScheme.tertiaryContainer
     } else {
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+        MaterialTheme.colorScheme.outline
     }
 
     Row(
@@ -146,10 +142,8 @@ fun ItemCard(
                 defaultElevation = if (item.isCompleted) CardStyle.listCardElevation / 2
                     else CardStyle.listCardElevation
             ),
-            shape = RoundedCornerShape(CornerRadius.md),
-            border = if (isSelected) BorderStroke(2.dp, cardBorderColor)
-                else if (item.isCompleted) BorderStroke(TimelineDimensions.lineWidth / 2, cardBorderColor)
-                else null
+            shape = RoundedCornerShape(CardStyle.cornerRadius),
+            border = BorderStroke(CardStyle.borderWidth, cardBorderColor)
         ) {
             Column(
                 modifier = Modifier
@@ -333,18 +327,16 @@ private fun TimelineSection(
     modifier: Modifier = Modifier
 ) {
     val primaryTime = arrivalTime ?: departureTime
-    val isLightTheme = !isSystemInDarkTheme()
 
     // 使用 CompletedStateColors 區分完成狀態
     val timelineColor = if (isCompleted) {
-        if (isLightTheme) CompletedStateColors.lightIcon else CompletedStateColors.darkIcon
+        CompletedStateColors.indicator
     } else {
         MaterialTheme.colorScheme.primary
     }
 
     val timeTextColor = if (isCompleted) {
-        if (isLightTheme) CompletedStateColors.lightText.copy(alpha = 0.6f)
-        else CompletedStateColors.darkText.copy(alpha = 0.6f)
+        CompletedStateColors.text.copy(alpha = 0.6f)
     } else {
         MaterialTheme.colorScheme.primary
     }
@@ -376,8 +368,7 @@ private fun TimelineSection(
                     Icons.Default.Check,
                     contentDescription = null,
                     modifier = Modifier.size(TimelineDimensions.nodeSize - Spacing.xs),
-                    tint = if (isLightTheme) CompletedStateColors.lightBackground
-                    else CompletedStateColors.darkBackground
+                    tint = CompletedStateColors.onIndicator
                 )
             }
         }
@@ -404,7 +395,7 @@ private fun LocationChip(
 ) {
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.secondaryContainer,
+        color = LocationTagColors.container,
         shape = RoundedCornerShape(CornerRadius.xs)
     ) {
         Row(
@@ -416,12 +407,12 @@ private fun LocationChip(
                 Icons.Default.Place,
                 contentDescription = null,
                 modifier = Modifier.size(IconSize.xs),
-                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                tint = LocationTagColors.content
             )
             Text(
                 text = location,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                color = LocationTagColors.content,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -435,11 +426,8 @@ private fun LocationChip(
  */
 @Composable
 private fun CompletedBadge(modifier: Modifier = Modifier) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val backgroundColor = if (isLightTheme) CompletedStateColors.lightBackground
-        else CompletedStateColors.darkBackground
-    val contentColor = if (isLightTheme) CompletedStateColors.lightContent
-        else CompletedStateColors.darkContent
+    val backgroundColor = CompletedStateColors.indicator
+    val contentColor = CompletedStateColors.onIndicator
 
     Surface(
         modifier = modifier,

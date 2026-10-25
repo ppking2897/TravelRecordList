@@ -2,9 +2,9 @@
 <resources>
     <!--
         App 畫面畫出來之前，系統先用這個底色墊著。要跟 Compose 主題的背景同色，啟動時才不會閃一下別的顏色：
-        淺色模式對 Color.kt 的 Gray99，深色模式（values-night）對 Gray10。改了那兩個顏色要一起改這裡。
+        對 Color.kt 的 Cream，改了要一起改這裡。App 只有淺色配色，所以沒有 values-night 版本。
     -->
     <style name="Theme.TravelRecord" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">#FFFFFBFE</item>
+        <item name="android:windowBackground">#FFFAF6EC</item>
     </style>
 </resources>

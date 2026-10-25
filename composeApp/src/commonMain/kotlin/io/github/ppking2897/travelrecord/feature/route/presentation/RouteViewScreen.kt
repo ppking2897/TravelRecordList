@@ -1,8 +1,10 @@
 package io.github.ppking2897.travelrecord.feature.route.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -25,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.core.presentation.components.LoadingContent
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
@@ -90,7 +93,9 @@ fun RouteViewScreen(
 @Composable
 private fun RouteInfoCard(route: Route) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier.padding(Spacing.lg),
@@ -129,7 +134,9 @@ private fun RouteLocationCard(
     onOpenMapClick: (Location) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier

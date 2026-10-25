@@ -161,8 +161,8 @@ object ComponentSize {
 // ============================================================================
 
 object CardStyle {
-    /** 列表卡片 - 低陰影 */
-    val listCardElevation: Dp = Elevation.sm
+    /** 列表卡片 - 手帳風改用外框區分，不加陰影 */
+    val listCardElevation: Dp = Elevation.none
 
     /** 詳情卡片 - 標準陰影 */
     val detailCardElevation: Dp = Elevation.md
@@ -176,8 +176,11 @@ object CardStyle {
     /** 緊湊卡片內部間距 */
     val compactContentPadding: Dp = Spacing.md
 
-    /** 卡片圓角 */
-    val cornerRadius: Dp = CornerRadius.md
+    /** 內容卡片圓角（照片類的卡片不套用） */
+    val cornerRadius: Dp = 18.dp
+
+    /** 內容卡片外框粗細，顏色用 colorScheme.outline */
+    val borderWidth: Dp = 2.dp
 }
 
 // ============================================================================

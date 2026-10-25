@@ -2,7 +2,6 @@ package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -38,12 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun DefaultCoverPlaceholder(
     modifier: Modifier = Modifier
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val backgroundGradient = if (isLightTheme) {
-        AppGradients.warmBackgroundGradient
-    } else {
-        AppGradients.darkBackgroundGradient
-    }
+    val backgroundGradient = AppGradients.warmBackgroundGradient
     val iconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
 
     Box(

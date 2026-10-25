@@ -2,6 +2,7 @@ package io.github.ppking2897.travelrecord.core.presentation.theme
 
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 
 /**
  * 探險橙色主題 - 旅遊記錄 App 配色
@@ -13,19 +14,12 @@ import androidx.compose.ui.graphics.Color
 val Orange40 = Color(0xFFE65100) // Dark theme primary
 val Orange80 = Color(0xFFFFB74D) // Light theme primary
 val Orange90 = Color(0xFFFFE0B2) // Light theme primary container
-val Orange10 = Color(0xFF3E2723) // Dark theme on primary
 
 // Secondary - 暖棕色（大地色系）
 val Brown40 = Color(0xFF5D4037)
-val Brown80 = Color(0xFFBCAAA4)
-val Brown90 = Color(0xFFEFEBE9)
-val Brown10 = Color(0xFF1B1210)
 
 // Tertiary - 深藍色（對比色，用於強調）
 val Blue40 = Color(0xFF1565C0)
-val Blue80 = Color(0xFF90CAF9)
-val Blue90 = Color(0xFFBBDEFB)
-val Blue10 = Color(0xFF0D1B2A)
 
 // Success - 完成狀態綠色
 val Green40 = Color(0xFF2E7D32) // Dark theme success
@@ -35,43 +29,27 @@ val Green10 = Color(0xFF1B5E20) // Dark theme on success
 
 // Error
 val Red40 = Color(0xFFB71C1C)
-val Red80 = Color(0xFFEF9A9A)
 val Red90 = Color(0xFFFFEBEE)
 
 // Neutral - 中性色
-// Gray10、Gray99 也是 Android 的啟動底色（androidApp 的 res/values*/themes.xml），改這兩個要一起改那裡
-val Gray10 = Color(0xFF1A1A1A)
 val Gray20 = Color(0xFF2D2D2D)
-val Gray80 = Color(0xFFC9C9C9)
 val Gray90 = Color(0xFFE8E8E8)
-val Gray95 = Color(0xFFF5F5F5)
-val Gray99 = Color(0xFFFFFBFE)
+
+// 手帳風：米白底、墨色字與框線，色塊只當底色用，上面一律放墨色字
+// Cream 也是 Android 的啟動底色（androidApp 的 res/values/themes.xml），改了要一起改那裡
+val Cream = Color(0xFFFAF6EC)  // 頁面底色
+val Ink = Color(0xFF2B2A28)    // 主要文字、圖示、卡片框線
+val InkMuted = Color(0xFF6B665E) // 次要文字
+val Sand = Color(0xFFF1E7D6)   // 標籤、次要色塊
+val Butter = Color(0xFFF8D57E) // 摘要卡
+val Coral = Color(0xFFF07060)  // 強調色塊（新增按鈕、選中狀態、進行中）
+val Mint = Color(0xFFCDEBC0)   // 已完成的卡片底色
+val Leaf = Color(0xFF7CC38A)   // 已完成的圓點與標記
+val Sky = Color(0xFFBFDDF2)    // 地點標籤
 
 // Surface variants
 val OrangeSurface = Color(0xFFFFF8E1) // 淡橙色背景
 val OrangeSurfaceDark = Color(0xFF2D2418) // 深色模式背景
-
-// ============================================================================
-// Surface 層次系統 (Surface Levels)
-// ============================================================================
-
-/**
- * Light Theme Surface 層次
- * 用於創建視覺深度和層次感
- */
-val SurfaceLevel0 = Color(0xFFFFFBFE) // 最底層，純白背景
-val SurfaceLevel1 = Color(0xFFFFF8F5) // 第一層，輕微橙色調
-val SurfaceLevel2 = Color(0xFFFFF5EE) // 第二層，更明顯的橙色調
-val SurfaceLevel3 = Color(0xFFFFF0E5) // 第三層，最高層次
-
-/**
- * Dark Theme Surface 層次
- * 深色模式下的層次感
- */
-val SurfaceDarkLevel0 = Color(0xFF1A1A1A) // 最底層，深色背景
-val SurfaceDarkLevel1 = Color(0xFF242420) // 第一層，輕微暖色調
-val SurfaceDarkLevel2 = Color(0xFF2D2824) // 第二層，更明顯的暖色調
-val SurfaceDarkLevel3 = Color(0xFF363028) // 第三層，最高層次
 
 // ============================================================================
 // 漸層色系統 (Gradients)
@@ -115,17 +93,9 @@ object AppGradients {
             ),
         )
 
-    /** 暖色背景漸層 - Light Theme */
+    /** 頁面背景（手帳風用單色米白，不做漸層） */
     val warmBackgroundGradient: Brush
-        get() = Brush.verticalGradient(
-            colors = listOf(SurfaceLevel0, SurfaceLevel1, SurfaceLevel2),
-        )
-
-    /** 暖色背景漸層 - Dark Theme */
-    val darkBackgroundGradient: Brush
-        get() = Brush.verticalGradient(
-            colors = listOf(SurfaceDarkLevel0, SurfaceDarkLevel1, SurfaceDarkLevel2),
-        )
+        get() = SolidColor(Cream)
 }
 
 // ============================================================================
@@ -137,17 +107,26 @@ object AppGradients {
  * 用於區分已完成/未完成的行程項目
  */
 object CompletedStateColors {
-    // Light Theme
-    val lightBackground = Green90
-    val lightContent = Green40
-    val lightBorder = Green80
-    val lightIcon = Green40
-    val lightText = Green10
+    /** 已完成的卡片底色 */
+    val background = Mint
+    /** 時間軸圓點、日期軸節點、「已完成」標記的底色 */
+    val indicator = Leaf
+    /** 放在 indicator 上的勾勾與文字 */
+    val onIndicator = Ink
+    /** 綠色文字（日期軸上已完成那天的地點與進度） */
+    val content = Green40
+    /** 已完成項目的時間文字 */
+    val text = Green10
+}
 
-    // Dark Theme
-    val darkBackground = Green10.copy(alpha = 0.3f)
-    val darkContent = Green80
-    val darkBorder = Green40
-    val darkIcon = Green80
-    val darkText = Green90
+// ============================================================================
+// 地點標籤色彩 (Location Tag Colors)
+// ============================================================================
+
+/**
+ * 地點標籤專用色彩，跟一般標籤（Sand）區分
+ */
+object LocationTagColors {
+    val container = Sky
+    val content = Ink
 }

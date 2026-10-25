@@ -1,7 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_map.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -98,12 +97,7 @@ private fun ItineraryMapScreenContent(
     onEditItem: (String) -> Unit,
     onFilterByDate: (LocalDate?) -> Unit
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val backgroundGradient = if (isLightTheme) {
-        AppGradients.warmBackgroundGradient
-    } else {
-        AppGradients.darkBackgroundGradient
-    }
+    val backgroundGradient = AppGradients.warmBackgroundGradient
 
     var showDateFilterMenu by remember { mutableStateOf(false) }
 

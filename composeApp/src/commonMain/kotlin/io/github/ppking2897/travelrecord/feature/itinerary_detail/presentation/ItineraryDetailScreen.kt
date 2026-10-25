@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -254,7 +253,6 @@ private fun ItineraryDetailScreenContent(
     onMapClick: () -> Unit = {}
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
-    val isLightTheme = !isSystemInDarkTheme()
     val lazyListState = rememberLazyListState()
 
     // 選日期後 LazyColumn 自動捲動到對應區段
@@ -285,12 +283,7 @@ private fun ItineraryDetailScreenContent(
         }
     }
 
-    // 使用 SurfaceLevel 漸層背景
-    val backgroundGradient = if (isLightTheme) {
-        AppGradients.warmBackgroundGradient
-    } else {
-        AppGradients.darkBackgroundGradient
-    }
+    val backgroundGradient = AppGradients.warmBackgroundGradient
 
     Scaffold(
         topBar = {
@@ -388,7 +381,10 @@ private fun ItineraryDetailScreenContent(
                 enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
             ) {
-                FloatingActionButton(onClick = onAddItemClick) {
+                FloatingActionButton(
+                    onClick = onAddItemClick,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "新增項目")
                 }
             }

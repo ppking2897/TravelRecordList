@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- 深色模式的啟動底色，對 Color.kt 的 Gray10；說明見 values/themes.xml -->
-    <style name="Theme.TravelRecord" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:windowBackground">#FF1A1A1A</item>
-    </style>
-</resources>

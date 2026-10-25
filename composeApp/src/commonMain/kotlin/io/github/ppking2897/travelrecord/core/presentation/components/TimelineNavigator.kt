@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
+import io.github.ppking2897.travelrecord.core.presentation.theme.CompletedStateColors
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
@@ -170,8 +171,9 @@ private fun AllTabItem(
         animationSpec = tween(durationMillis = 200)
     )
 
+    // 選中的節點用強調色塊，跟未選中的墨色節點區分
     val nodeColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.tertiaryContainer
     } else {
         MaterialTheme.colorScheme.outline
     }
@@ -300,13 +302,13 @@ private fun TimelineNodeItem(
         animationSpec = tween(durationMillis = 200)
     )
 
-    // 完成狀態顏色（綠色）
-    val successColor = MaterialTheme.colorScheme.tertiary
+    // 完成狀態顏色（綠色）：節點用亮綠，文字用深綠才讀得清楚
+    val successColor = CompletedStateColors.content
 
     // 根據選中和完成狀態決定節點顏色
     val nodeColor = when {
-        node.isAllCompleted -> successColor
-        isSelected -> MaterialTheme.colorScheme.primary
+        node.isAllCompleted -> CompletedStateColors.indicator
+        isSelected -> MaterialTheme.colorScheme.tertiaryContainer
         else -> MaterialTheme.colorScheme.outline
     }
 
@@ -402,7 +404,7 @@ private fun TimelineNodeItem(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "已完成",
                                 modifier = Modifier.size(nodeSize * 0.6f),
-                                tint = MaterialTheme.colorScheme.onTertiary
+                                tint = CompletedStateColors.onIndicator
                             )
                         }
                     }

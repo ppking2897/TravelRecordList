@@ -404,7 +404,7 @@ fun LocationTag(
 ) {
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = LocationTagColors.container,
         shape = RoundedCornerShape(CornerRadius.xs)
     ) {
         Row(
@@ -420,14 +420,14 @@ fun LocationTag(
                     imageVector = it,
                     contentDescription = null,
                     modifier = Modifier.size(IconSize.xs),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = LocationTagColors.content
                 )
             }
 
             Text(
                 text = location,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = LocationTagColors.content
             )
         }
     }

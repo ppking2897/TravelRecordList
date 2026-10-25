@@ -1,7 +1,9 @@
 package io.github.ppking2897.travelrecord.core.presentation.components
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -13,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 
 /**
@@ -43,7 +46,9 @@ fun MapInfoCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = RoundedCornerShape(CardStyle.cornerRadius),
+                border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
             ) {
                 Column(
                     modifier = Modifier
