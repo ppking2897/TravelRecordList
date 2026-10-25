@@ -37,7 +37,8 @@ private val LightColorScheme = lightColorScheme(
     // Background & Surface
     background = Cream,
     onBackground = Ink,
-    surface = Color.White,
+    // 標題列、日期軸等直接放在頁面上的元件；白色卡片用 surfaceContainerLowest
+    surface = Cream,
     onSurface = Ink,
     surfaceVariant = Sand,
     onSurfaceVariant = InkMuted,

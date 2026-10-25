@@ -417,7 +417,7 @@ private fun ItineraryDashboardCard(
             containerColor = if (emphasized) {
                 MaterialTheme.colorScheme.secondaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surfaceContainerLowest
             }
         ),
         shape = RoundedCornerShape(CardStyle.cornerRadius),

@@ -5,8 +5,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -107,6 +110,9 @@ fun TravelApp() {
 
     CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
         Scaffold(
+            // 狀態列交給各頁的標題列處理，標題列的底色才會延伸到狀態列後面
+            contentWindowInsets = ScaffoldDefaults.contentWindowInsets
+                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 val currentTab = selectedTab
@@ -119,7 +125,7 @@ fun TravelApp() {
                 }
             }
         ) { paddingValues ->
-            // 外框已讓出狀態列與底部分頁列的空間，標記為已處理，各頁的標題列與內容就不會再讓一次
+            // 外框已讓出底部分頁列的空間，標記為已處理，各頁的內容就不會再讓一次
             val contentModifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues)
             when (selectedTab) {
                 null -> Unit

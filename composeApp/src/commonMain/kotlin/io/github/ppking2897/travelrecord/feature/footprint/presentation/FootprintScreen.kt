@@ -235,7 +235,7 @@ private fun TripFootprintCard(
         onClick = onOpenTrip,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         shape = RoundedCornerShape(CardStyle.cornerRadius),
         border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)

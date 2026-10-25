@@ -82,7 +82,7 @@ fun ItemCard(
         targetValue = if (item.isCompleted) {
             CompletedStateColors.background
         } else {
-            MaterialTheme.colorScheme.surface
+            MaterialTheme.colorScheme.surfaceContainerLowest
         },
         label = "cardBackground"
     )
