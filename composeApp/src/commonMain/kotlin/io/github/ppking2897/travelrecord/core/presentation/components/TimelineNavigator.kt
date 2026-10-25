@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
 import io.github.ppking2897.travelrecord.core.presentation.theme.CompletedStateColors
@@ -118,41 +119,53 @@ fun TimelineNavigator(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
     ) {
-        LazyRow(
-            state = listState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = TimelineDimensions.horizontalPadding,
-                    vertical = TimelineDimensions.verticalPadding
-                ),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-            // Top 對齊：選中的節點會因為顯示「地點/今天/進度」變高，若用
-            // CenterVertically 中央對齊，圓點會隨 Column 高度浮動導致連接線
-            // 斷層；Top 對齊讓圓點在「Day N 標籤」下方的位置固定，保持一直線。
-            verticalAlignment = Alignment.Top
-        ) {
-            // 「全部」tab
-            item {
-                AllTabItem(
-                    isSelected = selectedDate == null,
-                    onClick = { onDateSelected(null) }
-                )
-            }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            // 每格寬度：平分整排比固定寬度寬就撐滿；天數多、排不下時維持固定寬度，可以左右滑
+            val tabCount = nodes.size + 1 // 總覽 + 每一天
+            val availableWidth = maxWidth - TimelineDimensions.horizontalPadding * 2
+            val itemWidth = maxOf(
+                TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize,
+                (availableWidth - Spacing.xs * (tabCount - 1)) / tabCount
+            )
 
-            itemsIndexed(nodes) { index, node ->
-                val isSelected = selectedDate == node.date
-                val isFirst = index == 0
-                val isLast = index == nodes.lastIndex
+            LazyRow(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = TimelineDimensions.horizontalPadding,
+                        vertical = TimelineDimensions.verticalPadding
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                // Top 對齊：選中的節點會因為顯示「地點/今天/進度」變高，若用
+                // CenterVertically 中央對齊，圓點會隨 Column 高度浮動導致連接線
+                // 斷層；Top 對齊讓圓點在「Day N 標籤」下方的位置固定，保持一直線。
+                verticalAlignment = Alignment.Top
+            ) {
+                // 「全部」tab
+                item {
+                    AllTabItem(
+                        width = itemWidth,
+                        isSelected = selectedDate == null,
+                        onClick = { onDateSelected(null) }
+                    )
+                }
 
-                TimelineNodeItem(
-                    node = node,
-                    isSelected = isSelected,
-                    showLeadingLine = true,
-                    showTrailingLine = !isLast,
-                    isToday = node.date == today,
-                    onClick = { onDateSelected(node.date) }
-                )
+                itemsIndexed(nodes) { index, node ->
+                    val isSelected = selectedDate == node.date
+                    val isFirst = index == 0
+                    val isLast = index == nodes.lastIndex
+
+                    TimelineNodeItem(
+                        node = node,
+                        width = itemWidth,
+                        isSelected = isSelected,
+                        showLeadingLine = true,
+                        showTrailingLine = !isLast,
+                        isToday = node.date == today,
+                        onClick = { onDateSelected(node.date) }
+                    )
+                }
             }
         }
     }
@@ -163,6 +176,7 @@ fun TimelineNavigator(
  */
 @Composable
 private fun AllTabItem(
+    width: Dp,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -186,7 +200,7 @@ private fun AllTabItem(
 
     Column(
         modifier = Modifier
-            .width(TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize)
+            .width(width)
             .clickable(onClick = onClick)
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -291,6 +305,7 @@ private fun QuickAddButton(
 @Composable
 private fun TimelineNodeItem(
     node: TimelineNode,
+    width: Dp,
     isSelected: Boolean,
     showLeadingLine: Boolean,
     showTrailingLine: Boolean,
@@ -321,7 +336,7 @@ private fun TimelineNodeItem(
 
     Column(
         modifier = Modifier
-            .width(TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize)
+            .width(width)
             .clickable(onClick = onClick)
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
