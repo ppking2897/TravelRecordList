@@ -76,6 +76,7 @@ fun TravelRecordTheme(
     ) {
         MaterialTheme(
             colorScheme = LightColorScheme,
+            typography = AppTypography,
             content = content
         )
     }

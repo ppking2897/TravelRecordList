@@ -181,6 +181,9 @@ object CardStyle {
 
     /** 內容卡片外框粗細，顏色用 colorScheme.outline */
     val borderWidth: Dp = 2.dp
+
+    /** 膠囊標籤（地點、已完成）的外框粗細 */
+    val tagBorderWidth: Dp = 1.5.dp
 }
 
 // ============================================================================
@@ -233,6 +236,12 @@ object TimelineDimensions {
 
     /** 標籤與節點的間距 */
     val labelSpacing: Dp = 4.dp
+
+    /** 日期軸節點那一排的高度：選中那天的行李箱比圓點高，固定高度切換時才不會跳動 */
+    val nodeTrackHeight: Dp = 32.dp
+
+    /** 行程卡片左側時間軸的圓點大小 */
+    val itemNodeSize: Dp = 20.dp
 }
 
 // ============================================================================

@@ -1,5 +1,7 @@
 package io.github.ppking2897.travelrecord.feature.today.presentation
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +35,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -199,7 +202,11 @@ private fun TodayScreenContent(
             if (state.currentTrip != null) {
                 ExtendedFloatingActionButton(
                     onClick = onQuickRecord,
+                    // 手帳風：膠囊形、墨色框、不加陰影
+                    modifier = Modifier.border(CardStyle.borderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                    shape = CircleShape,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("快速紀錄") }
                 )

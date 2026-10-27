@@ -3,8 +3,10 @@ package io.github.ppking2897.travelrecord.core.presentation.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
@@ -405,13 +407,11 @@ fun LocationTag(
     Surface(
         modifier = modifier,
         color = LocationTagColors.container,
-        shape = RoundedCornerShape(CornerRadius.xs)
+        shape = CircleShape,
+        border = BorderStroke(CardStyle.tagBorderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
-            modifier = Modifier.padding(
-                horizontal = Spacing.sm,
-                vertical = Spacing.xs
-            ),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {

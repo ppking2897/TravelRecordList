@@ -52,6 +52,16 @@ fun LocalDate.toShortString(): String {
 }
 
 /**
+ * 格式化日期為簡短格式加星期
+ *
+ * @return 格式化的日期字串，例如："01/15（一）"
+ */
+fun LocalDate.toShortStringWithWeekday(): String {
+    val weekday = listOf("一", "二", "三", "四", "五", "六", "日")[dayOfWeek.ordinal]
+    return "${toShortString()}（$weekday）"
+}
+
+/**
  * 檢查日期是否在範圍內
  * 
  * @param range 日期範圍

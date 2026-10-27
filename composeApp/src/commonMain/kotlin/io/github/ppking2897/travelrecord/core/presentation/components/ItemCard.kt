@@ -6,6 +6,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
@@ -43,6 +51,7 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.CompletedStateC
 import io.github.ppking2897.travelrecord.core.presentation.theme.ComponentSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.CornerRadius
 import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
+import io.github.ppking2897.travelrecord.core.presentation.theme.ListStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.LocationTagColors
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
@@ -93,8 +102,25 @@ fun ItemCard(
         MaterialTheme.colorScheme.outline
     }
 
+    // 時間軸圓點底部中心的位置，由左側時間軸回報，虛線從這裡往下畫
+    val connectorColor = MaterialTheme.colorScheme.outline
+    var connectorStart by remember { mutableStateOf(Offset.Unspecified) }
+
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            // 時間軸虛線畫在整列後面：左側時間軸只有時間和圓點那麼高，只有整列知道卡片多高。
+            // 線畫到卡片底下再延伸過列表的項目間距，接到下一個項目的時間上方
+            .drawBehind {
+                if (isLastItem || isSelectionMode || !connectorStart.isSpecified) return@drawBehind
+                drawLine(
+                    color = connectorColor,
+                    start = Offset(connectorStart.x, connectorStart.y + Spacing.xs.toPx()),
+                    end = Offset(connectorStart.x, size.height + ListStyle.contentPadding.toPx()),
+                    strokeWidth = TimelineDimensions.lineWidth.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
+                )
+            },
         verticalAlignment = Alignment.Top
     ) {
         // ========== 選擇模式時顯示 Checkbox ==========
@@ -116,7 +142,7 @@ fun ItemCard(
                 arrivalTime = item.arrivalTime,
                 departureTime = item.departureTime,
                 isCompleted = item.isCompleted,
-                isLastItem = isLastItem
+                onNodePlaced = { connectorStart = it }
             )
 
             Spacer(modifier = Modifier.width(Spacing.md))
@@ -323,22 +349,22 @@ private fun TimelineSection(
     arrivalTime: kotlinx.datetime.LocalTime?,
     departureTime: kotlinx.datetime.LocalTime?,
     isCompleted: Boolean,
-    isLastItem: Boolean,
+    onNodePlaced: (Offset) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val primaryTime = arrivalTime ?: departureTime
 
-    // 使用 CompletedStateColors 區分完成狀態
-    val timelineColor = if (isCompleted) {
+    // 已完成：綠底圓點、時間改次要文字色；未完成：白底圓點、墨色時間
+    val nodeColor = if (isCompleted) {
         CompletedStateColors.indicator
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.surfaceContainerLowest
     }
 
     val timeTextColor = if (isCompleted) {
-        CompletedStateColors.text.copy(alpha = 0.6f)
+        MaterialTheme.colorScheme.onSurfaceVariant
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.onSurface
     }
 
     Column(
@@ -356,31 +382,28 @@ private fun TimelineSection(
             Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
         }
 
-        // 時間軸圓點 - 使用 TimelineDimensions.nodeSize
+        // 時間軸圓點：墨色外框。連接的虛線由 ItemCard 畫在整列後面
         Box(
             modifier = Modifier
-                .size(TimelineDimensions.nodeSize)
-                .background(timelineColor, CircleShape),
+                .size(TimelineDimensions.itemNodeSize)
+                // 時間軸在整列的左上角，相對時間軸的座標就是相對整列的座標
+                .onPlaced { coordinates ->
+                    val bounds = coordinates.boundsInParent()
+                    onNodePlaced(Offset(bounds.center.x, bounds.bottom))
+                }
+                .clip(CircleShape)
+                .background(nodeColor)
+                .border(TimelineDimensions.lineWidth, MaterialTheme.colorScheme.outline, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             if (isCompleted) {
                 Icon(
                     Icons.Default.Check,
                     contentDescription = null,
-                    modifier = Modifier.size(TimelineDimensions.nodeSize - Spacing.xs),
+                    modifier = Modifier.size(12.dp),
                     tint = CompletedStateColors.onIndicator
                 )
             }
-        }
-
-        // 時間軸連接線 - 使用 TimelineDimensions.lineWidth
-        if (!isLastItem) {
-            Box(
-                modifier = Modifier
-                    .width(TimelineDimensions.lineWidth)
-                    .weight(1f)
-                    .background(timelineColor.copy(alpha = 0.3f))
-            )
         }
     }
 }
@@ -396,10 +419,11 @@ private fun LocationChip(
     Surface(
         modifier = modifier,
         color = LocationTagColors.container,
-        shape = RoundedCornerShape(CornerRadius.xs)
+        shape = CircleShape,
+        border = BorderStroke(CardStyle.tagBorderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {
@@ -432,15 +456,16 @@ private fun CompletedBadge(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         color = backgroundColor,
-        shape = RoundedCornerShape(CornerRadius.xs)
+        shape = CircleShape,
+        border = BorderStroke(CardStyle.tagBorderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {
             Icon(
-                Icons.Default.CheckCircle,
+                Icons.Default.Check,
                 contentDescription = null,
                 modifier = Modifier.size(IconSize.xs),
                 tint = contentColor
@@ -448,6 +473,7 @@ private fun CompletedBadge(modifier: Modifier = Modifier) {
             Text(
                 text = "已完成",
                 style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
                 color = contentColor
             )
         }

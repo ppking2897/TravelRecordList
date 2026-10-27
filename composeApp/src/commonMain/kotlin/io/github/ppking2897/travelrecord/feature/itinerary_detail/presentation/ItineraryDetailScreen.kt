@@ -1,5 +1,11 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_detail.presentation
 
+import io.github.ppking2897.travelrecord.util.toShortStringWithWeekday
+import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -259,9 +265,10 @@ private fun ItineraryDetailScreenContent(
     LaunchedEffect(selectedDate, groupedItems) {
         if (selectedDate == null || groupedItems.isEmpty()) return@LaunchedEffect
         var targetIndex = if (error != null) 1 else 0
+        // 選了某一天時列表不放日期標題，每個區段只有項目
         for (group in groupedItems) {
             if (group.date == selectedDate) break
-            targetIndex += 1 + group.items.size
+            targetIndex += group.items.size
         }
         lazyListState.animateScrollToItem(targetIndex)
     }
@@ -383,7 +390,11 @@ private fun ItineraryDetailScreenContent(
             ) {
                 FloatingActionButton(
                     onClick = onAddItemClick,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    // 手帳風：正圓、墨色框、不加陰影
+                    modifier = Modifier.border(CardStyle.borderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "新增項目")
                 }
@@ -433,6 +444,7 @@ private fun ItineraryDetailScreenContent(
                 selectedDate?.let { date ->
                     DayPlanningSummary(
                         date = date,
+                        dayNumber = dateRange?.let { dayIndexFor(it, date) + 1 },
                         items = groupedItems.firstOrNull { it.date == date }?.items.orEmpty(),
                         onAddFirstItem = {
                             val range = dateRange
@@ -484,21 +496,23 @@ private fun ItineraryDetailScreenContent(
                         }
                     } else {
                         groupedItems.forEach { group ->
-                            item {
-                                Text(
-                                    text = group.date.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(top = Spacing.sm)
-                                )
+                            // 選了某一天時，上方的摘要卡已經寫了日期，不再重複
+                            if (selectedDate == null) {
+                                item {
+                                    Text(
+                                        text = group.date.toString(),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(top = Spacing.sm)
+                                    )
+                                }
                             }
 
                             itemsIndexed(
                                 items = group.items,
                                 key = { _, item -> item.id }
                             ) { _, item ->
-                                val isLastInGroup = item == group.items.last()
-                                val isLastGroup = group == groupedItems.last()
-                                val isLastItem = isLastInGroup && isLastGroup
+                                // 時間軸虛線以一天為單位：每天最後一個項目不再往下畫
+                                val isLastItem = item == group.items.last()
 
                                 Box(modifier = Modifier.animateItem()) {
                                     ItemCard(
@@ -529,15 +543,21 @@ private fun ItineraryDetailScreenContent(
 @Composable
 private fun DayPlanningSummary(
     date: LocalDate,
+    dayNumber: Int?,
     items: List<ItineraryItem>,
     onAddFirstItem: () -> Unit
 ) {
     val completedCount = items.count { it.isCompleted }
     val photoCount = items.sumOf { it.photos.size }
 
+    // 手帳風：有框的圓角卡片，小字「Day N」、大字日期
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primaryContainer
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ListStyle.contentPadding, end = ListStyle.contentPadding, top = Spacing.xs),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
@@ -545,9 +565,16 @@ private fun DayPlanningSummary(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                dayNumber?.let {
+                    Text(
+                        text = "Day $it",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
                 Text(
-                    text = date.toString(),
-                    style = MaterialTheme.typography.titleSmall,
+                    text = date.toShortStringWithWeekday(),
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(

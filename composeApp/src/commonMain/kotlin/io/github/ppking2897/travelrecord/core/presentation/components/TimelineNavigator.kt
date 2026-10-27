@@ -1,8 +1,7 @@
 package io.github.ppking2897.travelrecord.core.presentation.components
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,6 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +39,7 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TimelineDimensions
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
 import io.github.ppking2897.travelrecord.util.toDateList
+import io.github.ppking2897.travelrecord.util.toShortString
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -116,16 +120,16 @@ fun TimelineNavigator(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp
+        color = MaterialTheme.colorScheme.surface
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // 每格寬度：平分整排比固定寬度寬就撐滿；天數多、排不下時維持固定寬度，可以左右滑
+            // 每格寬度：平分整排比固定寬度寬就撐滿；天數多、排不下時維持固定寬度，可以左右滑。
+            // 格與格之間不留空隙，每格的連接線才會接成一條
             val tabCount = nodes.size + 1 // 總覽 + 每一天
             val availableWidth = maxWidth - TimelineDimensions.horizontalPadding * 2
             val itemWidth = maxOf(
                 TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize,
-                (availableWidth - Spacing.xs * (tabCount - 1)) / tabCount
+                availableWidth / tabCount
             )
 
             LazyRow(
@@ -136,10 +140,7 @@ fun TimelineNavigator(
                         horizontal = TimelineDimensions.horizontalPadding,
                         vertical = TimelineDimensions.verticalPadding
                     ),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-                // Top 對齊：選中的節點會因為顯示「地點/今天/進度」變高，若用
-                // CenterVertically 中央對齊，圓點會隨 Column 高度浮動導致連接線
-                // 斷層；Top 對齊讓圓點在「Day N 標籤」下方的位置固定，保持一直線。
+                // Top 對齊：每格各行固定佔位、高度一致，節點那一排才會在同一條水平線上
                 verticalAlignment = Alignment.Top
             ) {
                 // 「全部」tab
@@ -147,13 +148,13 @@ fun TimelineNavigator(
                     AllTabItem(
                         width = itemWidth,
                         isSelected = selectedDate == null,
+                        showTrailingLine = nodes.isNotEmpty(),
                         onClick = { onDateSelected(null) }
                     )
                 }
 
                 itemsIndexed(nodes) { index, node ->
                     val isSelected = selectedDate == node.date
-                    val isFirst = index == 0
                     val isLast = index == nodes.lastIndex
 
                     TimelineNodeItem(
@@ -173,31 +174,16 @@ fun TimelineNavigator(
 
 /**
  * 「全部」tab 項目
+ *
+ * 跟每一天的節點同樣的行數與高度：「Day N」那一行留空，「總覽」放在日期那一行。
  */
 @Composable
 private fun AllTabItem(
     width: Dp,
     isSelected: Boolean,
+    showTrailingLine: Boolean,
     onClick: () -> Unit
 ) {
-    val nodeSize by animateDpAsState(
-        targetValue = if (isSelected) TimelineDimensions.nodeSelectedSize else TimelineDimensions.nodeSize,
-        animationSpec = tween(durationMillis = 200)
-    )
-
-    // 選中的節點用強調色塊，跟未選中的墨色節點區分
-    val nodeColor = if (isSelected) {
-        MaterialTheme.colorScheme.tertiaryContainer
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
-
-    val textColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-
     Column(
         modifier = Modifier
             .width(width)
@@ -205,47 +191,21 @@ private fun AllTabItem(
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // 對應「Day N」那一行：留空但佔高度
         Text(
-            text = "總覽",
-            // 固定 style 避免字型 line height 微差造成 Column 高度跳動；
-            // 選中改用 Bold 區分。
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = textColor,
-            textAlign = TextAlign.Center
+            text = " ",
+            style = MaterialTheme.typography.labelMedium
         )
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 同 TimelineNodeItem 一致的固定 container size，確保圓點水平線對齊
-            Box(
-                modifier = Modifier.size(TimelineDimensions.nodeSelectedSize + 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(nodeSize)
-                        .clip(CircleShape)
-                        .background(nodeColor)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(TimelineDimensions.lineWidth)
-                    .background(MaterialTheme.colorScheme.outlineVariant)
-            )
+        NodeTrack(showLeadingLine = false, showTrailingLine = showTrailingLine) {
+            if (isSelected) SuitcaseNode() else HollowNode()
         }
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
+
+        DateLabel(text = "總覽", isSelected = isSelected)
 
         // 與 TimelineNodeItem 對齊的隱形 placeholder：對應下段三行（地點/今天/進度），
         // 全部 alpha=0 但佔空間，確保 AllTab 和 Day 節點 Column 高度永遠一致。
@@ -262,7 +222,7 @@ private fun AllTabItem(
             modifier = Modifier.alpha(0f)
         )
         Text(
-            text = "(0/0)",
+            text = "0/0",
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.alpha(0f)
         )
@@ -312,27 +272,13 @@ private fun TimelineNodeItem(
     isToday: Boolean = false,
     onClick: () -> Unit
 ) {
-    val nodeSize by animateDpAsState(
-        targetValue = if (isSelected) TimelineDimensions.nodeSelectedSize else TimelineDimensions.nodeSize,
-        animationSpec = tween(durationMillis = 200)
-    )
-
-    // 完成狀態顏色（綠色）：節點用亮綠，文字用深綠才讀得清楚
-    val successColor = CompletedStateColors.content
-
-    // 根據選中和完成狀態決定節點顏色
-    val nodeColor = when {
-        node.isAllCompleted -> CompletedStateColors.indicator
-        isSelected -> MaterialTheme.colorScheme.tertiaryContainer
-        else -> MaterialTheme.colorScheme.outline
-    }
-
-    // 根據選中和完成狀態決定文字顏色
-    val textColor = when {
-        node.isAllCompleted -> successColor
-        isSelected -> MaterialTheme.colorScheme.primary
+    // 地點與進度的文字：選中用墨色粗體，全部完成用深綠，其餘用次要文字色
+    val detailColor = when {
+        isSelected -> MaterialTheme.colorScheme.onSurface
+        node.isAllCompleted -> CompletedStateColors.content
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
+    val detailWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
 
     Column(
         modifier = Modifier
@@ -341,111 +287,46 @@ private fun TimelineNodeItem(
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Day 標籤（固定 style + Bold 區分選中，避免 labelSmall↔labelMedium 切換
-        // 在不同字型 fallback 下 line height 微差造成節點跳動）
+        // Day 標籤（固定 style，選中只改粗細與顏色，避免 line height 微差造成節點跳動）
         Text(
             text = "Day ${node.dayNumber}",
             style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = textColor,
+            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
+            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
-        // 節點和連接線
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // 前導連接線
-            if (showLeadingLine) {
+        NodeTrack(showLeadingLine = showLeadingLine, showTrailingLine = showTrailingLine) {
+            // 今天的 halo 外圈（不撐大節點那一排的高度）
+            if (isToday && !isSelected) {
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(TimelineDimensions.lineWidth)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
+                        .size(TimelineDimensions.itemNodeSize + 6.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
             }
-
-            // 節點容器：固定 max size（nodeSelectedSize + 4dp 給 today halo 用），
-            // 不管 isToday / isSelected 組合都維持同高，連接線才能對齊。
-            Box(
-                modifier = Modifier.size(TimelineDimensions.nodeSelectedSize + 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // 今天的 halo 外圈（固定占位，不撐大容器）
-                if (isToday) {
-                    Box(
-                        modifier = Modifier
-                            .size(nodeSize + 4.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                    )
-                }
-                // 節點圓點本體
-                if (node.totalCount == 0) {
-                    // 待規劃：空心 + 虛線邊框（不改變 Box size，不影響對齊）
-                    val outlineColor = nodeColor
-                    Box(
-                        modifier = Modifier
-                            .size(nodeSize)
-                            .drawBehind {
-                                drawCircle(
-                                    color = outlineColor,
-                                    style = Stroke(
-                                        width = 1.5.dp.toPx(),
-                                        pathEffect = PathEffect.dashPathEffect(
-                                            floatArrayOf(3.dp.toPx(), 2.5.dp.toPx())
-                                        )
-                                    )
-                                )
-                            }
-                    )
-                } else {
-                    // 實心圓（已安排，未完成 / 已完成 / 選中 各用不同 nodeColor）
-                    Box(
-                        modifier = Modifier
-                            .size(nodeSize)
-                            .clip(CircleShape)
-                            .background(nodeColor),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (node.isAllCompleted) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "已完成",
-                                modifier = Modifier.size(nodeSize * 0.6f),
-                                tint = CompletedStateColors.onIndicator
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 後續連接線
-            if (showTrailingLine) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(TimelineDimensions.lineWidth)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
+            when {
+                isSelected -> SuitcaseNode()
+                node.isAllCompleted -> CompletedNode()
+                // 待規劃：空心 + 虛線邊框
+                node.totalCount == 0 -> HollowNode(dashed = true)
+                else -> HollowNode()
             }
         }
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
+        DateLabel(text = node.date.toShortString(), isSelected = isSelected)
+
         // 地點名稱
         Text(
             text = node.primaryLocationName ?: "",
             style = MaterialTheme.typography.bodySmall,
-            color = textColor,
+            fontWeight = detailWeight,
+            color = detailColor,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -464,13 +345,170 @@ private fun TimelineNodeItem(
         // 進度指示 (如 2/3)：0/0 時用 alpha 0 隱藏文字但保留高度，
         // 讓所有節點的垂直尺寸一致（不會因沒項目而變矮）
         Text(
-            text = "(${node.completedCount}/${node.totalCount})",
+            text = "${node.completedCount}/${node.totalCount}",
             style = MaterialTheme.typography.labelSmall,
-            color = if (node.isAllCompleted) successColor else textColor.copy(alpha = 0.7f),
+            fontWeight = detailWeight,
+            color = detailColor,
             textAlign = TextAlign.Center,
             modifier = if (node.totalCount == 0) Modifier.alpha(0f) else Modifier
         )
     }
+}
+
+/**
+ * 節點那一排：連接線畫在節點後面、穿過每一格的中心，相鄰的格子接起來就是一條線
+ */
+@Composable
+private fun NodeTrack(
+    showLeadingLine: Boolean,
+    showTrailingLine: Boolean,
+    content: @Composable () -> Unit
+) {
+    val lineColor = MaterialTheme.colorScheme.outline
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(TimelineDimensions.nodeTrackHeight)
+            .drawBehind {
+                val y = size.height / 2
+                val strokeWidth = TimelineDimensions.lineWidth.toPx()
+                if (showLeadingLine) {
+                    drawLine(lineColor, Offset(0f, y), Offset(size.width / 2, y), strokeWidth)
+                }
+                if (showTrailingLine) {
+                    drawLine(lineColor, Offset(size.width / 2, y), Offset(size.width, y), strokeWidth)
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+/**
+ * 空心圓點：米白底蓋住後面的連接線，墨色外框；虛線外框代表這天還沒安排
+ */
+@Composable
+private fun HollowNode(dashed: Boolean = false) {
+    val fillColor = MaterialTheme.colorScheme.surface
+    val outlineColor = MaterialTheme.colorScheme.outline
+    Box(
+        modifier = Modifier
+            .size(TimelineDimensions.nodeSize)
+            .drawBehind {
+                val strokeWidth = TimelineDimensions.lineWidth.toPx()
+                drawCircle(color = fillColor)
+                drawCircle(
+                    color = outlineColor,
+                    radius = (size.minDimension - strokeWidth) / 2,
+                    style = Stroke(
+                        width = strokeWidth,
+                        pathEffect = if (dashed) {
+                            PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.5.dp.toPx()))
+                        } else {
+                            null
+                        }
+                    )
+                )
+            }
+    )
+}
+
+/**
+ * 全部完成那天：綠底、墨框、打勾，跟行程卡片時間軸上已完成的圓點一樣
+ */
+@Composable
+private fun CompletedNode() {
+    Box(
+        modifier = Modifier
+            .size(TimelineDimensions.itemNodeSize)
+            .clip(CircleShape)
+            .background(CompletedStateColors.indicator)
+            .border(TimelineDimensions.lineWidth, MaterialTheme.colorScheme.outline, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = "已完成",
+            modifier = Modifier.size(12.dp),
+            tint = CompletedStateColors.onIndicator
+        )
+    }
+}
+
+/**
+ * 選中的那一格：珊瑚紅的行李箱，墨色外框、提把與兩個扣環
+ */
+@Composable
+private fun SuitcaseNode() {
+    val bodyColor = MaterialTheme.colorScheme.tertiaryContainer
+    val outlineColor = MaterialTheme.colorScheme.outline
+    val latchColor = MaterialTheme.colorScheme.surface
+    Box(
+        modifier = Modifier
+            .size(width = 30.dp, height = 24.dp)
+            .drawBehind {
+                val strokeWidth = TimelineDimensions.lineWidth.toPx()
+                val bodyRadius = 7.dp.toPx()
+
+                // 提把：畫在箱身上方、超出這個元件的範圍，下半段會被箱身蓋住
+                val handleWidth = 10.dp.toPx()
+                drawRoundRect(
+                    color = outlineColor,
+                    topLeft = Offset((size.width - handleWidth) / 2, -6.dp.toPx()),
+                    size = Size(handleWidth, 10.dp.toPx()),
+                    cornerRadius = CornerRadius(4.dp.toPx()),
+                    style = Stroke(strokeWidth)
+                )
+
+                // 箱身
+                drawRoundRect(color = bodyColor, cornerRadius = CornerRadius(bodyRadius))
+                drawRoundRect(
+                    color = outlineColor,
+                    topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                    size = Size(size.width - strokeWidth, size.height - strokeWidth),
+                    cornerRadius = CornerRadius(bodyRadius - strokeWidth / 2),
+                    style = Stroke(strokeWidth)
+                )
+
+                // 兩個扣環
+                val latchSize = 6.dp.toPx()
+                val latchGap = 4.dp.toPx()
+                val latchTop = (size.height - latchSize) / 2
+                val firstLatchX = (size.width - latchSize * 2 - latchGap) / 2
+                listOf(firstLatchX, firstLatchX + latchSize + latchGap).forEach { x ->
+                    val topLeft = Offset(x, latchTop)
+                    val latch = Size(latchSize, latchSize)
+                    val radius = CornerRadius(2.dp.toPx())
+                    drawRoundRect(color = latchColor, topLeft = topLeft, size = latch, cornerRadius = radius)
+                    drawRoundRect(
+                        color = outlineColor,
+                        topLeft = topLeft,
+                        size = latch,
+                        cornerRadius = radius,
+                        style = Stroke(1.5.dp.toPx())
+                    )
+                }
+            }
+    )
+}
+
+/**
+ * 日期（或「總覽」）：選中那天外面一圈珊瑚紅膠囊。
+ * 內距不分選中與否都加，切換時寬高才不會變。
+ */
+@Composable
+private fun DateLabel(text: String, isSelected: Boolean) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(if (isSelected) MaterialTheme.colorScheme.tertiaryContainer else Color.Transparent)
+            .padding(horizontal = Spacing.sm, vertical = 1.dp)
+    )
 }
 
 // Preview
