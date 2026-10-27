@@ -27,6 +27,7 @@ import io.github.ppking2897.travelrecord.core.presentation.components.ItineraryM
 import io.github.ppking2897.travelrecord.core.presentation.components.LoadingContent
 import io.github.ppking2897.travelrecord.core.presentation.components.MapInfoCard
 import io.github.ppking2897.travelrecord.core.presentation.theme.AppGradients
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -164,7 +165,7 @@ private fun ItineraryMapScreenContent(
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                text = date.toString(),
+                                                text = DateTimeFormatter.formatDate(date),
                                                 color = if (selectedDate == date) {
                                                     MaterialTheme.colorScheme.primary
                                                 } else {

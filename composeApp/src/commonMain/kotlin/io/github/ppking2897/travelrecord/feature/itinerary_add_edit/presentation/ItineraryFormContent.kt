@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.core.presentation.components.CoverPhotoSection
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import kotlinx.datetime.LocalDate
 
 /**
@@ -82,7 +83,7 @@ fun ItineraryFormContent(
         )
 
         OutlinedTextField(
-            value = startDate?.toString() ?: "",
+            value = startDate?.let { DateTimeFormatter.formatDate(it) } ?: "",
             onValueChange = {},
             label = { Text("開始日期") },
             modifier = Modifier.fillMaxWidth(),
@@ -95,7 +96,7 @@ fun ItineraryFormContent(
         )
 
         OutlinedTextField(
-            value = endDate?.toString() ?: "",
+            value = endDate?.let { DateTimeFormatter.formatDate(it) } ?: "",
             onValueChange = {},
             label = { Text("結束日期") },
             modifier = Modifier.fillMaxWidth(),

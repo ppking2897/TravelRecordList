@@ -166,7 +166,7 @@ fun ItemFormContent(
             }
         } else {
             OutlinedTextField(
-                value = selectedDate?.toString() ?: "",
+                value = selectedDate?.let { DateTimeFormatter.formatDate(it) } ?: "",
                 onValueChange = {},
                 label = { Text("日期 *") },
                 modifier = Modifier.fillMaxWidth(),

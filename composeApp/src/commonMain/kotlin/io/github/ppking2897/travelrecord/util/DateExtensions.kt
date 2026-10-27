@@ -25,21 +25,11 @@ fun ClosedRange<LocalDate>.toDateList(): List<LocalDate> {
 
 /**
  * 格式化日期為使用者友善的格式
- * 
- * @return 格式化的日期字串，例如："2024-01-15 (週一)"
+ *
+ * @return 格式化的日期字串，例如："2024/01/15（一）"
  */
 fun LocalDate.toFriendlyString(): String {
-    val dayOfWeek = when (this.dayOfWeek.ordinal + 1) {
-        1 -> "週一"
-        2 -> "週二"
-        3 -> "週三"
-        4 -> "週四"
-        5 -> "週五"
-        6 -> "週六"
-        7 -> "週日"
-        else -> ""
-    }
-    return "$this ($dayOfWeek)"
+    return "$year/${toShortStringWithWeekday()}"
 }
 
 /**

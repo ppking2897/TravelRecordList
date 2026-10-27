@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -133,7 +133,6 @@ fun TravelApp() {
                 AppTab.Plan -> PlanNavHost(
                     backStack = planBackStack,
                     modifier = contentModifier,
-                    onSwitchToFootprints = { selectedTab = AppTab.Footprints },
                     onShareRoute = { json -> shareLauncher.share(json, "分享行程路線") }
                 )
 
@@ -145,12 +144,14 @@ fun TravelApp() {
 
                 AppTab.Footprints -> FootprintScreen(
                     modifier = contentModifier,
-                    onOpenTrip = openTripDetail
+                    onOpenTrip = openTripDetail,
+                    onGoToPlan = { selectedTab = AppTab.Plan }
                 )
 
                 AppTab.Memories -> MemoryScreen(
                     modifier = contentModifier,
-                    onOpenTrip = openTripDetail
+                    onOpenTrip = openTripDetail,
+                    onGoToPlan = { selectedTab = AppTab.Plan }
                 )
             }
         }
@@ -171,7 +172,7 @@ private fun TravelBottomNavigation(
                     Icon(
                         imageVector = when (tab) {
                             AppTab.Plan -> Icons.Default.DateRange
-                            AppTab.Today -> Icons.Default.Add
+                            AppTab.Today -> Icons.Default.Today
                             AppTab.Footprints -> Icons.Default.Map
                             AppTab.Memories -> Icons.Default.Star
                         },
@@ -189,7 +190,6 @@ private fun TravelBottomNavigation(
 private fun PlanNavHost(
     backStack: MutableList<AppRoute>,
     modifier: Modifier = Modifier,
-    onSwitchToFootprints: () -> Unit,
     onShareRoute: (String) -> Unit
 ) {
     NavDisplay(
@@ -224,8 +224,7 @@ private fun PlanNavHost(
                         viewModel = viewModel,
                         onItineraryClick = { id -> backStack.add(AppRoute.ItineraryDetail(id)) },
                         onEditClick = { id -> backStack.add(AppRoute.EditItinerary(id)) },
-                        onAddClick = { backStack.add(AppRoute.AddItinerary) },
-                        onHistoryClick = onSwitchToFootprints
+                        onAddClick = { backStack.add(AppRoute.AddItinerary) }
                     )
                 }
 

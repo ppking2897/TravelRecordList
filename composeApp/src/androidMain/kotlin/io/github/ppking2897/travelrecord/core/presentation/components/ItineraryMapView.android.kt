@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.core.presentation.theme.DateColorPalette
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 
 /**
@@ -96,7 +97,7 @@ actual fun ItineraryMapView(
                 item(key = "header_$date") {
                     DayGroupHeader(
                         dayIndex = dayIndex + 1,
-                        date = date.toString(),
+                        date = DateTimeFormatter.formatDate(date),
                         color = dayColor,
                         count = dateMarkers.size
                     )
@@ -154,7 +155,7 @@ private fun DayGroupHeader(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Day $dayIndex · $date",
+                text = "第 $dayIndex 天 · $date",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )

@@ -8,9 +8,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,13 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -48,7 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 /**
  * 時間軸導覽節點資料
  *
- * @property dayNumber 第幾天 (Day 1, Day 2, ...)
+ * @property dayNumber 第幾天（第 1 天、第 2 天…）
  * @property date 日期
  * @property primaryLocationName 該日主要地點名稱
  * @property completedCount 已完成項目數量
@@ -124,12 +127,15 @@ fun TimelineNavigator(
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             // 每格寬度：平分整排比固定寬度寬就撐滿；天數多、排不下時維持固定寬度，可以左右滑。
+            // 最長的地點名稱放不下時，所有格子一起加寬到放得下（有上限），格子仍一樣寬。
             // 格與格之間不留空隙，每格的連接線才會接成一條
             val tabCount = nodes.size + 1 // 總覽 + 每一天
             val availableWidth = maxWidth - TimelineDimensions.horizontalPadding * 2
+            val nameWidth = rememberLongestNameWidth(nodes)
             val itemWidth = maxOf(
                 TimelineDimensions.nodeSpacing + TimelineDimensions.nodeSize,
-                availableWidth / tabCount
+                availableWidth / tabCount,
+                minOf(nameWidth, TimelineDimensions.maxItemWidth)
             )
 
             LazyRow(
@@ -173,9 +179,26 @@ fun TimelineNavigator(
 }
 
 /**
+ * 最長的地點名稱連同左右內距需要的寬度。用粗體量，選中那天的名稱是粗體，也要放得下。
+ */
+@Composable
+private fun rememberLongestNameWidth(nodes: List<TimelineNode>): Dp {
+    val textMeasurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+    val density = LocalDensity.current
+    return remember(nodes, style, density) {
+        val widestPx = nodes
+            .mapNotNull { it.primaryLocationName }
+            .maxOfOrNull { textMeasurer.measure(it, style, maxLines = 1).size.width }
+            ?: 0
+        with(density) { widestPx.toDp() } + Spacing.xs * 2
+    }
+}
+
+/**
  * 「全部」tab 項目
  *
- * 跟每一天的節點同樣的行數與高度：「Day N」那一行留空，「總覽」放在日期那一行。
+ * 跟每一天的節點同樣的行數與高度：「第 N 天」那一行放看不見的同樣文字，「總覽」放在日期那一行。
  */
 @Composable
 private fun AllTabItem(
@@ -191,16 +214,18 @@ private fun AllTabItem(
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 對應「Day N」那一行：留空但佔高度
+        // 對應「第 N 天」那一行：用同樣的中文字、alpha 0 佔高度。
+        // 放空白的話是英文字型，比中文那一行矮，節點那一排會跟每一天錯開，連接線看起來像斷掉
         Text(
-            text = " ",
-            style = MaterialTheme.typography.labelMedium
+            text = "第 1 天",
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.alpha(0f)
         )
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
 
         NodeTrack(showLeadingLine = false, showTrailingLine = showTrailingLine) {
-            if (isSelected) SuitcaseNode() else HollowNode()
+            if (isSelected) SelectedNode() else HollowNode()
         }
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
@@ -287,9 +312,9 @@ private fun TimelineNodeItem(
             .padding(vertical = Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Day 標籤（固定 style，選中只改粗細與顏色，避免 line height 微差造成節點跳動）
+        // 「第 N 天」標籤（固定 style，選中只改粗細與顏色，避免 line height 微差造成節點跳動）
         Text(
-            text = "Day ${node.dayNumber}",
+            text = "第 ${node.dayNumber} 天",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
             color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -309,7 +334,7 @@ private fun TimelineNodeItem(
                 )
             }
             when {
-                isSelected -> SuitcaseNode()
+                isSelected -> SelectedNode()
                 node.isAllCompleted -> CompletedNode()
                 // 待規劃：空心 + 虛線邊框
                 node.totalCount == 0 -> HollowNode(dashed = true)
@@ -437,60 +462,28 @@ private fun CompletedNode() {
 }
 
 /**
- * 選中的那一格：珊瑚紅的行李箱，墨色外框、提把與兩個扣環
+ * 選中的那一格：珊瑚紅圓角底、墨色外框，中間一架朝右飛的飛機
  */
 @Composable
-private fun SuitcaseNode() {
-    val bodyColor = MaterialTheme.colorScheme.tertiaryContainer
-    val outlineColor = MaterialTheme.colorScheme.outline
-    val latchColor = MaterialTheme.colorScheme.surface
+private fun SelectedNode() {
+    val shape = RoundedCornerShape(7.dp)
     Box(
         modifier = Modifier
             .size(width = 30.dp, height = 24.dp)
-            .drawBehind {
-                val strokeWidth = TimelineDimensions.lineWidth.toPx()
-                val bodyRadius = 7.dp.toPx()
-
-                // 提把：畫在箱身上方、超出這個元件的範圍，下半段會被箱身蓋住
-                val handleWidth = 10.dp.toPx()
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft = Offset((size.width - handleWidth) / 2, -6.dp.toPx()),
-                    size = Size(handleWidth, 10.dp.toPx()),
-                    cornerRadius = CornerRadius(4.dp.toPx()),
-                    style = Stroke(strokeWidth)
-                )
-
-                // 箱身
-                drawRoundRect(color = bodyColor, cornerRadius = CornerRadius(bodyRadius))
-                drawRoundRect(
-                    color = outlineColor,
-                    topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
-                    size = Size(size.width - strokeWidth, size.height - strokeWidth),
-                    cornerRadius = CornerRadius(bodyRadius - strokeWidth / 2),
-                    style = Stroke(strokeWidth)
-                )
-
-                // 兩個扣環
-                val latchSize = 6.dp.toPx()
-                val latchGap = 4.dp.toPx()
-                val latchTop = (size.height - latchSize) / 2
-                val firstLatchX = (size.width - latchSize * 2 - latchGap) / 2
-                listOf(firstLatchX, firstLatchX + latchSize + latchGap).forEach { x ->
-                    val topLeft = Offset(x, latchTop)
-                    val latch = Size(latchSize, latchSize)
-                    val radius = CornerRadius(2.dp.toPx())
-                    drawRoundRect(color = latchColor, topLeft = topLeft, size = latch, cornerRadius = radius)
-                    drawRoundRect(
-                        color = outlineColor,
-                        topLeft = topLeft,
-                        size = latch,
-                        cornerRadius = radius,
-                        style = Stroke(1.5.dp.toPx())
-                    )
-                }
-            }
-    )
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .border(TimelineDimensions.lineWidth, MaterialTheme.colorScheme.outline, shape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Flight,
+            contentDescription = null,
+            modifier = Modifier
+                .size(16.dp)
+                .rotate(90f),
+            tint = MaterialTheme.colorScheme.outline
+        )
+    }
 }
 
 /**

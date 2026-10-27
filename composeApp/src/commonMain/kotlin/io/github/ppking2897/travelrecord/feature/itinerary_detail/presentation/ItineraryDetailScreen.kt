@@ -40,6 +40,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerar
 import io.github.ppking2897.travelrecord.core.presentation.theme.AppGradients
 import io.github.ppking2897.travelrecord.core.presentation.theme.ListStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
@@ -500,7 +501,7 @@ private fun ItineraryDetailScreenContent(
                             if (selectedDate == null) {
                                 item {
                                     Text(
-                                        text = group.date.toString(),
+                                        text = DateTimeFormatter.formatDate(group.date),
                                         style = MaterialTheme.typography.titleMedium,
                                         modifier = Modifier.padding(top = Spacing.sm)
                                     )
@@ -550,7 +551,7 @@ private fun DayPlanningSummary(
     val completedCount = items.count { it.isCompleted }
     val photoCount = items.sumOf { it.photos.size }
 
-    // 手帳風：有框的圓角卡片，小字「Day N」、大字日期
+    // 手帳風：有框的圓角卡片，小字「第 N 天」、大字日期
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -567,7 +568,7 @@ private fun DayPlanningSummary(
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 dayNumber?.let {
                     Text(
-                        text = "Day $it",
+                        text = "第 $it 天",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )

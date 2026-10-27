@@ -28,13 +28,11 @@ enum class DashboardEmptyState {
  * 行程列表畫面要呈現的內容：各區塊、摘要卡數字與空畫面種類
  *
  * @property allTrips 搜尋與篩選後的全部行程，維持讀取順序
- * @property recentTrips 「最近編輯」區塊；只有一筆行程時為空，不顯示
  * @property emptyState 沒有行程可列時的空畫面種類；有行程時為 null
  */
 data class ItineraryDashboard(
     val currentTrips: List<Itinerary>,
     val upcomingTrips: List<Itinerary>,
-    val recentTrips: List<Itinerary>,
     val allTrips: List<Itinerary>,
     val currentCount: Int,
     val upcomingCount: Int,
@@ -91,16 +89,10 @@ fun buildItineraryDashboard(
     val planningTrips = filtered
         .filter { phaseOf(it, today) == TravelPhase.Planning }
         .sortedBy { it.startDate?.toString() ?: "9999-12-31" }
-    val recentTrips = if (filtered.size > 1) {
-        filtered.sortedByDescending { it.modifiedAt }.take(SECTION_LIMIT)
-    } else {
-        emptyList()
-    }
 
     return ItineraryDashboard(
         currentTrips = currentTrips,
         upcomingTrips = planningTrips.take(SECTION_LIMIT),
-        recentTrips = recentTrips,
         allTrips = filtered,
         currentCount = currentTrips.size,
         upcomingCount = planningTrips.size,

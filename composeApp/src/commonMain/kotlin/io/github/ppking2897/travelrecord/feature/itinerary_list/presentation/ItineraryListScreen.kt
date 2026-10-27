@@ -82,7 +82,6 @@ fun ItineraryListScreen(
     onItineraryClick: (String) -> Unit,
     onEditClick: (String) -> Unit,
     onAddClick: () -> Unit,
-    onHistoryClick: () -> Unit,
     viewModel: ItineraryListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -124,7 +123,6 @@ fun ItineraryListScreen(
             showDeleteDialog = true
         },
         onAddClick = onAddClick,
-        onHistoryClick = onHistoryClick,
         onRefresh = { viewModel.processIntent(ItineraryListIntent.Refresh) }
     )
 
@@ -158,7 +156,6 @@ private fun ItineraryPlanningDashboard(
     onEditClick: (String) -> Unit,
     onDeleteClick: (Itinerary) -> Unit,
     onAddClick: () -> Unit,
-    onHistoryClick: () -> Unit,
     onRefresh: () -> Unit
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -174,16 +171,7 @@ private fun ItineraryPlanningDashboard(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("行程規劃") },
-                actions = {
-                    IconButton(onClick = onHistoryClick) {
-                        Icon(
-                            Icons.Default.Place,
-                            contentDescription = "查看足跡",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                title = { Text("行程規劃") }
             )
         },
         floatingActionButton = {
@@ -286,25 +274,11 @@ private fun ItineraryPlanningDashboard(
                     }
 
                     if (dashboard.upcomingTrips.isNotEmpty()) {
-                        item { SectionHeader("即將出發", "出發前先把每日地點安排好") }
+                        item { SectionHeader("規劃中", "出發前先把每日地點安排好") }
                         items(dashboard.upcomingTrips, key = { "upcoming_${it.id}" }) { itinerary ->
                             ItineraryDashboardCard(
                                 itinerary = itinerary,
                                 phase = phaseUseCase(itinerary, today),
-                                onClick = { onItineraryClick(itinerary.id) },
-                                onEdit = { onEditClick(itinerary.id) },
-                                onDelete = { onDeleteClick(itinerary) }
-                            )
-                        }
-                    }
-
-                    if (dashboard.recentTrips.isNotEmpty()) {
-                        item { SectionHeader("最近編輯", "快速回到剛調整過的行程") }
-                        items(dashboard.recentTrips, key = { "recent_${it.id}" }) { itinerary ->
-                            ItineraryDashboardCard(
-                                itinerary = itinerary,
-                                phase = phaseUseCase(itinerary, today),
-                                compact = true,
                                 onClick = { onItineraryClick(itinerary.id) },
                                 onEdit = { onEditClick(itinerary.id) },
                                 onDelete = { onDeleteClick(itinerary) }
@@ -357,7 +331,7 @@ private fun PlanningHeader(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 DashboardStat("$currentCount", "旅行中")
-                DashboardStat("$upcomingCount", "即將出發")
+                DashboardStat("$upcomingCount", "規劃中")
                 DashboardStat("$completedCount", "已結束")
             }
         }
@@ -681,7 +655,6 @@ private fun ItineraryPlanningDashboardPreview() {
                 onEditClick = {},
                 onDeleteClick = {},
                 onAddClick = {},
-                onHistoryClick = {},
                 onRefresh = {}
             )
         }

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -63,6 +64,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun MemoryScreen(
     modifier: Modifier = Modifier,
     onOpenTrip: (String) -> Unit,
+    onGoToPlan: () -> Unit,
     viewModel: MemoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -85,7 +87,8 @@ fun MemoryScreen(
         modifier = modifier,
         onRefresh = { viewModel.processIntent(MemoryIntent.Refresh) },
         onToggleExpanded = { viewModel.processIntent(MemoryIntent.ToggleExpanded(it)) },
-        onOpenTrip = onOpenTrip
+        onOpenTrip = onOpenTrip,
+        onGoToPlan = onGoToPlan
     )
 }
 
@@ -96,7 +99,8 @@ private fun MemoryScreenContent(
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onToggleExpanded: (String) -> Unit,
-    onOpenTrip: (String) -> Unit
+    onOpenTrip: (String) -> Unit,
+    onGoToPlan: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -114,6 +118,7 @@ private fun MemoryScreenContent(
         when {
             state.isLoading -> LoadingCenter(paddingValues)
             state.memories.isEmpty() -> EmptyMemoriesState(
+                onGoToPlan = onGoToPlan,
                 modifier = Modifier.padding(paddingValues)
             )
             else -> LazyColumn(
@@ -302,7 +307,10 @@ private fun DailyHighlightRow(highlight: DailyHighlight) {
 }
 
 @Composable
-private fun EmptyMemoriesState(modifier: Modifier = Modifier) {
+private fun EmptyMemoriesState(
+    onGoToPlan: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -326,6 +334,9 @@ private fun EmptyMemoriesState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Button(onClick = onGoToPlan) {
+                Text("去看行程")
+            }
         }
     }
 }
@@ -398,7 +409,8 @@ private fun MemoryScreen_WithData_Preview() {
                 state = MemoryState(memories = previewMemories()),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }
@@ -417,7 +429,8 @@ private fun MemoryScreen_Expanded_Preview() {
                 ),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }
@@ -433,7 +446,8 @@ private fun MemoryScreen_Empty_Preview() {
                 state = MemoryState(),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }

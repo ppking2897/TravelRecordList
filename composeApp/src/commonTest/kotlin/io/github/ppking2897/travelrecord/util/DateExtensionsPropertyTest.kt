@@ -1,5 +1,6 @@
 package io.github.ppking2897.travelrecord.util
 
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.test.localDate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
@@ -76,9 +77,10 @@ class DateExtensionsPropertyTest : StringSpec({
         checkAll(100, Arb.localDate()) { date ->
             val formatted = date.toFriendlyString()
             
-            // 驗證格式包含日期和星期
-            formatted shouldContain date.toString()
-            formatted shouldContain "週"
+            // 驗證格式包含 yyyy/MM/dd 的日期和全形括號的星期
+            formatted shouldContain DateTimeFormatter.formatDate(date)
+            formatted shouldContain "（"
+            formatted shouldContain "）"
         }
     }
     

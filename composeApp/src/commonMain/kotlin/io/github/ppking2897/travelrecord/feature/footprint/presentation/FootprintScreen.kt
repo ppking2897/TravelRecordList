@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -61,6 +62,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun FootprintScreen(
     modifier: Modifier = Modifier,
     onOpenTrip: (String) -> Unit,
+    onGoToPlan: () -> Unit,
     viewModel: FootprintViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -83,7 +85,8 @@ fun FootprintScreen(
         modifier = modifier,
         onRefresh = { viewModel.processIntent(FootprintIntent.Refresh) },
         onToggleExpanded = { viewModel.processIntent(FootprintIntent.ToggleExpanded(it)) },
-        onOpenTrip = onOpenTrip
+        onOpenTrip = onOpenTrip,
+        onGoToPlan = onGoToPlan
     )
 }
 
@@ -94,7 +97,8 @@ private fun FootprintScreenContent(
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onToggleExpanded: (String) -> Unit,
-    onOpenTrip: (String) -> Unit
+    onOpenTrip: (String) -> Unit,
+    onGoToPlan: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -120,6 +124,7 @@ private fun FootprintScreenContent(
             }
 
             state.groups.isEmpty() -> EmptyFootprintState(
+                onGoToPlan = onGoToPlan,
                 modifier = Modifier.padding(paddingValues)
             )
 
@@ -338,7 +343,10 @@ private fun VisitedPlaceRow(place: VisitedPlace) {
 }
 
 @Composable
-private fun EmptyFootprintState(modifier: Modifier = Modifier) {
+private fun EmptyFootprintState(
+    onGoToPlan: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -363,6 +371,9 @@ private fun EmptyFootprintState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Button(onClick = onGoToPlan) {
+                Text("去看行程")
+            }
         }
     }
 }
@@ -416,7 +427,8 @@ private fun FootprintScreen_Collapsed_Preview() {
                 state = FootprintState(groups = previewGroups()),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }
@@ -435,7 +447,8 @@ private fun FootprintScreen_Expanded_Preview() {
                 ),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }
@@ -451,7 +464,8 @@ private fun FootprintScreen_Empty_Preview() {
                 state = FootprintState(),
                 onRefresh = {},
                 onToggleExpanded = {},
-                onOpenTrip = {}
+                onOpenTrip = {},
+                onGoToPlan = {}
             )
         }
     }

@@ -6,7 +6,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerar
 import io.github.ppking2897.travelrecord.test.testItem
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.github.ppking2897.travelrecord.test.testPhoto
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import kotlinx.datetime.LocalDate
@@ -44,7 +43,7 @@ class ItineraryDashboardTest {
     }
 
     @Test
-    fun `即將出發依開始日排序、最多 3 筆`() {
+    fun `規劃中依開始日排序、最多 3 筆`() {
         val trips = listOf(
             trip("nov20", "11/20 出發", LocalDate(2026, 11, 20), null),
             trip("nov01", "11/01 出發", LocalDate(2026, 11, 1), null),
@@ -56,13 +55,6 @@ class ItineraryDashboardTest {
         val dashboard = buildItineraryDashboard(trips, "", ItineraryFilter.All, today)
 
         dashboard.upcomingTrips.map { it.id } shouldBe listOf("nov01", "nov10", "nov20")
-    }
-
-    @Test
-    fun `只有一筆行程時不顯示最近編輯`() {
-        val dashboard = buildItineraryDashboard(listOf(kyoto), "", ItineraryFilter.All, today)
-
-        dashboard.recentTrips.shouldBeEmpty()
     }
 
     @Test

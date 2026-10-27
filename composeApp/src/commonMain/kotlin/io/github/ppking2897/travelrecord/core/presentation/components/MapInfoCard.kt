@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 
 /**
@@ -138,7 +139,7 @@ fun MapInfoCard(
 
                     // 日期
                     Text(
-                        text = currentMarker.date.toString(),
+                        text = DateTimeFormatter.formatDate(currentMarker.date),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )

@@ -484,7 +484,7 @@ private fun NoCurrentTripState(
             onClick = onGoToPlan,
             modifier = Modifier.padding(top = Spacing.lg)
         ) {
-            Text("回行程規劃")
+            Text("去看行程")
         }
     }
 }

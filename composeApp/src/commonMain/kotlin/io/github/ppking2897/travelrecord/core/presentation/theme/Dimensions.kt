@@ -225,6 +225,9 @@ object TimelineDimensions {
     /** 節點間距 */
     val nodeSpacing: Dp = 48.dp
 
+    /** 每格依地點名稱加寬時的上限，約 7 個中文字；名稱更長才顯示「…」 */
+    val maxItemWidth: Dp = 96.dp
+
     /** 水平內距 */
     val horizontalPadding: Dp = 16.dp
 
@@ -237,7 +240,7 @@ object TimelineDimensions {
     /** 標籤與節點的間距 */
     val labelSpacing: Dp = 4.dp
 
-    /** 日期軸節點那一排的高度：選中那天的行李箱比圓點高，固定高度切換時才不會跳動 */
+    /** 日期軸節點那一排的高度：選中那天的飛機框比圓點高，固定高度切換時才不會跳動 */
     val nodeTrackHeight: Dp = 32.dp
 
     /** 行程卡片左側時間軸的圓點大小 */
