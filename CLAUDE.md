@@ -67,8 +67,10 @@
 
 ## 規劃文件
 
-- **Phase 進度與 UX 待辦**：`.claude/docs/uiux-fix-plan.md`（「執行狀態」段）——挑下一個任務前先讀。
-- 其他 `.claude/docs/*.md`（product-analysis、ui-review、ux-improvements）是一次性分析報告，不是 feature-doc 格式。
+- **產品規格（現況）**：`.claude/docs/product-spec.md`——App 目前實際的行為、已知問題與待確認事項；改了行為要同步更新。功能文件裡說的「產品規格書」就是這份。
+- **改善計畫**：`.claude/docs/improvement-plan.md`——地基任務、UI 改善與後續功能的進度，挑下一個任務前先讀。
+- 這兩份 2026-10-27 從 Claude Docs 搬進來，之後以專案內的版本為準。repo 是公開的，文件裡不寫求職、自傳這類個人用語。
+- 其他 `.claude/docs/*.md`（uiux-fix-plan、product-analysis、ui-review、ux-improvements）是 4 月與 10/14 的一次性報告，留作紀錄、不再更新，不是 feature-doc 格式。
 
 ## 等待標記
 
