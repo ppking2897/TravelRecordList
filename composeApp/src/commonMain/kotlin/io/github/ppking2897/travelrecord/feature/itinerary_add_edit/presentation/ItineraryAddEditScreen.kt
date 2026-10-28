@@ -82,13 +82,7 @@ fun ItineraryAddEditScreen(
     var showEndDatePicker by remember { mutableStateOf(false) }
     var showDiscardDialog by remember { mutableStateOf(false) }
 
-    val hasChanges = !state.isEditMode && (
-        state.title.isNotEmpty() ||
-        state.description.isNotEmpty() ||
-        state.startDate != null ||
-        state.endDate != null ||
-        state.coverPhotoPath != null
-    )
+    val hasChanges = state.hasUnsavedChanges
 
     val onBack: () -> Unit = {
         if (hasChanges) {

@@ -120,7 +120,20 @@ fun PhotoGridItem(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        DeleteConfirmDialog(
+            title = "刪除照片",
+            message = "確定要刪除這張照片嗎？此操作無法復原。",
+            onConfirm = {
+                showDeleteConfirm = false
+                onDelete()
+            },
+            onDismiss = { showDeleteConfirm = false }
+        )
+    }
+
     Card(
         onClick = onClick,
         modifier = modifier
@@ -210,7 +223,7 @@ fun PhotoGridItem(
                         text = { Text("刪除") },
                         onClick = {
                             showMenu = false
-                            onDelete()
+                            showDeleteConfirm = true
                         },
                         leadingIcon = {
                             Icon(

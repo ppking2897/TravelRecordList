@@ -33,7 +33,24 @@ data class EditItemState(
     val isLoading: Boolean = false,
     val hasDateRange: Boolean = false,
     val photos: List<String> = emptyList()
-)
+) {
+    /** 離開時要不要跳「捨棄變更？」：跟讀進來的 [item] 比，任一欄不同就算 */
+    val hasUnsavedChanges: Boolean
+        get() {
+            val original = item ?: return false
+            return activity != original.activity ||
+                locationName != original.location.name ||
+                // 讀進來時沒有地址會填成空字串，比的時候也要一樣
+                locationAddress != (original.location.address ?: "") ||
+                locationLatitude != original.location.latitude ||
+                locationLongitude != original.location.longitude ||
+                notes != original.notes ||
+                selectedDate != original.date ||
+                arrivalTime != original.arrivalTime ||
+                departureTime != original.departureTime ||
+                photos != original.photos.map { it.filePath }
+        }
+}
 
 /**
  * EditItem Intent

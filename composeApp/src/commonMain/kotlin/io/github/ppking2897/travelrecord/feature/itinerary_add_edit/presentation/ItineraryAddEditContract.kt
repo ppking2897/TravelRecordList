@@ -23,7 +23,29 @@ data class ItineraryAddEditState(
     val isLoading: Boolean = false,
     val isEditMode: Boolean = false,
     val showDraftSaved: Boolean = false
-)
+) {
+    /**
+     * 離開時要不要跳「捨棄變更？」
+     *
+     * 新增時任一欄有填就算；編輯時跟讀進來的 [itinerary] 比，改回原樣不算。
+     */
+    val hasUnsavedChanges: Boolean
+        get() {
+            if (!isEditMode) {
+                return title.isNotEmpty() ||
+                    description.isNotEmpty() ||
+                    startDate != null ||
+                    endDate != null ||
+                    coverPhotoPath != null
+            }
+            val original = itinerary ?: return false
+            return title != original.title ||
+                description != original.description ||
+                startDate != original.startDate ||
+                endDate != original.endDate ||
+                coverPhotoPath != original.coverPhotoPath
+        }
+}
 
 /**
  * ItineraryAddEdit Intent

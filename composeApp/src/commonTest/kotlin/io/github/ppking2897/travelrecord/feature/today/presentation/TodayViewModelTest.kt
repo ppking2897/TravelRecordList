@@ -7,11 +7,14 @@ import io.github.ppking2897.travelrecord.core.domain.service.LocationSuggestion
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import io.github.ppking2897.travelrecord.test.BlockingAddItemRepository
+import io.github.ppking2897.travelrecord.test.FailingAddItemRepository
 import io.github.ppking2897.travelrecord.test.FailingSaveImageStorageService
 import io.github.ppking2897.travelrecord.test.FailingUpdateItemRepository
 import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryRepository
+import io.github.ppking2897.travelrecord.test.SwitchableReadItineraryRepository
 import io.github.ppking2897.travelrecord.test.TestUseCases
 import io.github.ppking2897.travelrecord.test.testItem
 import io.github.ppking2897.travelrecord.test.testItinerary
@@ -22,6 +25,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -435,6 +439,115 @@ class TodayViewModelTest {
         viewModel.state.value.item("清水寺").photos.shouldBeEmpty()
     }
 
+    // ── 規格調整第 3 組：讀取失敗可以重試、快速紀錄存檔成功才關閉（.claude/docs/SpecAdjustments.md）──
+
+    @Test
+    fun `按重試後重新讀取`() = runTest(dispatcher) {
+        val items = InMemoryItineraryItemRepository(item("fushimi", "伏見稻荷"))
+        val trips = SwitchableReadItineraryRepository(InMemoryItineraryRepository(items, kyoto))
+        val viewModel = viewModelWith(TestUseCases(trips, items))
+        trips.failReads = true
+        act(viewModel, TodayIntent.LoadToday)
+        viewModel.state.value.error shouldNotBe null
+
+        trips.failReads = false
+        act(viewModel, TodayIntent.Refresh)
+
+        viewModel.state.value.error shouldBe null
+        viewModel.state.value.itemNames shouldContain "伏見稻荷"
+    }
+
+    @Test
+    fun `存檔成功才關閉面板`() = runTest(dispatcher) {
+        val items = InMemoryItineraryItemRepository()
+        val viewModel = viewModelWith(useCasesOf(items, kyoto))
+        act(viewModel, TodayIntent.LoadToday)
+        val events = collectEvents(viewModel)
+
+        act(
+            viewModel,
+            TodayIntent.UpdateQuickActivity("喝抹茶"),
+            TodayIntent.UpdateQuickLocation("中村藤吉"),
+            TodayIntent.SaveQuickRecord,
+        )
+
+        events shouldContain TodayEvent.QuickRecordSaved
+        viewModel.state.value.quickRecord shouldBe QuickRecordState()
+        events shouldContain TodayEvent.ShowMessage("已加入今日紀錄")
+        viewModel.state.value.todayItems.map { it.activity } shouldContain "喝抹茶"
+    }
+
+    @Test
+    fun `存檔中不能再按`() = runTest(dispatcher) {
+        val items = BlockingAddItemRepository(InMemoryItineraryItemRepository())
+        val viewModel = viewModelWith(useCasesOf(items, kyoto))
+        act(viewModel, TodayIntent.LoadToday)
+        val events = collectEvents(viewModel)
+
+        act(
+            viewModel,
+            TodayIntent.UpdateQuickActivity("喝抹茶"),
+            TodayIntent.UpdateQuickLocation("中村藤吉"),
+            TodayIntent.SaveQuickRecord,
+        )
+
+        viewModel.state.value.isSavingQuickRecord shouldBe true
+        events shouldNotContain TodayEvent.QuickRecordSaved
+
+        act(viewModel, TodayIntent.SaveQuickRecord)
+        items.release()
+        advanceUntilIdle()
+
+        items.getItemsByItinerary("kyoto").getOrThrow() shouldHaveSize 1
+    }
+
+    @Test
+    fun `存檔失敗時留在面板`() = runTest(dispatcher) {
+        val items = FailingAddItemRepository(InMemoryItineraryItemRepository(), message = "磁碟已滿")
+        val viewModel = viewModelWith(useCasesOf(items, kyoto))
+        act(viewModel, TodayIntent.LoadToday)
+        val events = collectEvents(viewModel)
+
+        act(
+            viewModel,
+            TodayIntent.UpdateQuickActivity("喝抹茶"),
+            TodayIntent.UpdateQuickLocation("中村藤吉"),
+            TodayIntent.UpdateQuickNotes("排隊 20 分鐘"),
+            TodayIntent.AddQuickPhoto(byteArrayOf(1)),
+            TodayIntent.SaveQuickRecord,
+        )
+
+        events shouldNotContain TodayEvent.QuickRecordSaved
+        val quickRecord = viewModel.state.value.quickRecord
+        quickRecord.saveError shouldBe "儲存失敗：磁碟已滿"
+        quickRecord.activity shouldBe "喝抹茶"
+        quickRecord.locationName shouldBe "中村藤吉"
+        quickRecord.notes shouldBe "排隊 20 分鐘"
+        quickRecord.photoPaths shouldHaveSize 1
+        viewModel.state.value.isSavingQuickRecord shouldBe false
+        // 頁面的錯誤只代表讀取失敗；寫進去的話，項目區會被畫成讀取失敗
+        viewModel.state.value.error shouldBe null
+
+        val states = collectStates(viewModel)
+        act(viewModel, TodayIntent.SaveQuickRecord)
+
+        states.map { it.quickRecord.saveError } shouldContain null
+    }
+
+    @Test
+    fun `沒填活動時不關閉面板`() = runTest(dispatcher) {
+        val items = InMemoryItineraryItemRepository()
+        val viewModel = viewModelWith(useCasesOf(items, kyoto))
+        act(viewModel, TodayIntent.LoadToday)
+        val events = collectEvents(viewModel)
+
+        act(viewModel, TodayIntent.UpdateQuickLocation("中村藤吉"), TodayIntent.SaveQuickRecord)
+
+        events shouldNotContain TodayEvent.QuickRecordSaved
+        viewModel.state.value.quickRecord.activityError shouldBe "請輸入活動"
+        items.getItemsByItinerary("kyoto").getOrThrow().shouldBeEmpty()
+    }
+
     // ── 測試工具 ──
 
     private val nakamuraTokichi = LocationSuggestion(
@@ -481,6 +594,14 @@ class TodayViewModelTest {
             viewModel.event.collect { if (it is TodayEvent.ShowMessage) messages += it.message }
         }
         return messages
+    }
+
+    private fun TestScope.collectEvents(viewModel: TodayViewModel): List<TodayEvent> {
+        val events = mutableListOf<TodayEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.event.collect { events += it }
+        }
+        return events
     }
 
     private fun TestScope.collectStates(viewModel: TodayViewModel): List<TodayState> {

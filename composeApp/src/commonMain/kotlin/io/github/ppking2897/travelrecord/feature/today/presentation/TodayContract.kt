@@ -38,7 +38,9 @@ data class QuickRecordState(
     val arrivalTime: LocalTime? = null,
     val photoPaths: List<String> = emptyList(),
     val activityError: String? = null,
-    val locationError: String? = null
+    val locationError: String? = null,
+    /** 存檔失敗的訊息，顯示在面板裡；下一次按儲存時清掉 */
+    val saveError: String? = null
 )
 
 sealed class TodayIntent {
@@ -74,4 +76,7 @@ sealed class TodayIntent {
 
 sealed class TodayEvent {
     data class ShowMessage(val message: String) : TodayEvent()
+
+    /** 快速紀錄存檔成功，畫面收到才關閉面板 */
+    data object QuickRecordSaved : TodayEvent()
 }

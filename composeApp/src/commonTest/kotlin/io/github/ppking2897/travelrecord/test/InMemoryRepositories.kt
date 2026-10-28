@@ -9,6 +9,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.Iti
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
@@ -167,4 +168,29 @@ class FailingDeleteItemRepository(
 ) : ItineraryItemRepository by base {
     override suspend fun deleteItem(id: String): Result<Unit> =
         Result.failure(IllegalStateException("刪除失敗"))
+}
+
+/** 新增項目一律失敗，原因是 [message]，其餘行為同 [base] */
+class FailingAddItemRepository(
+    private val base: ItineraryItemRepository,
+    private val message: String = "磁碟已滿",
+) : ItineraryItemRepository by base {
+    override suspend fun addItem(item: ItineraryItem): Result<ItineraryItem> =
+        Result.failure(IllegalStateException(message))
+}
+
+/** 新增項目會停住，呼叫 [release] 後才寫入，用來觀察「存檔中」；其餘行為同 [base] */
+class BlockingAddItemRepository(
+    private val base: ItineraryItemRepository
+) : ItineraryItemRepository by base {
+    private val gate = CompletableDeferred<Unit>()
+
+    fun release() {
+        gate.complete(Unit)
+    }
+
+    override suspend fun addItem(item: ItineraryItem): Result<ItineraryItem> {
+        gate.await()
+        return base.addItem(item)
+    }
 }

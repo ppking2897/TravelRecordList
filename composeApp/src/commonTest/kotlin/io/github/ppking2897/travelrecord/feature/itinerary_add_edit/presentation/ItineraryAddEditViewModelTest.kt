@@ -13,6 +13,7 @@ import io.github.ppking2897.travelrecord.test.RecordingImageStorageService
 import io.github.ppking2897.travelrecord.test.TestUseCases
 import io.github.ppking2897.travelrecord.test.inMemoryDraftRepository
 import io.github.ppking2897.travelrecord.test.testItinerary
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
@@ -303,6 +304,70 @@ class ItineraryAddEditViewModelTest {
 
         events.last() shouldBe ItineraryAddEditEvent.NavigateBack
         useCases.loadDraft(DraftType.ITINERARY).getOrThrow()?.get("title") shouldBe "京都大阪 5 日遊"
+    }
+
+    // ── 規格調整第 3 組：有修改才提醒捨棄（.claude/docs/SpecAdjustments.md）──
+
+    @Test
+    fun `編輯行程沒改就離開`() = runTest(dispatcher) {
+        val viewModel = viewModelWith(useCasesOf())
+
+        act(viewModel, ItineraryAddEditIntent.LoadItinerary("kyoto"))
+
+        viewModel.state.value.hasUnsavedChanges shouldBe false
+    }
+
+    @Test
+    fun `改回原樣不算修改`() = runTest(dispatcher) {
+        val viewModel = viewModelWith(useCasesOf())
+
+        act(
+            viewModel,
+            ItineraryAddEditIntent.LoadItinerary("kyoto"),
+            ItineraryAddEditIntent.UpdateTitle("京都 5 日遊"),
+            ItineraryAddEditIntent.UpdateTitle("京都大阪 5 日遊"),
+        )
+
+        viewModel.state.value.hasUnsavedChanges shouldBe false
+    }
+
+    @Test
+    fun `行程的每一欄都算`() = runTest(dispatcher) {
+        val edits = listOf(
+            "標題" to ItineraryAddEditIntent.UpdateTitle("京都 5 日遊"),
+            "描述" to ItineraryAddEditIntent.UpdateDescription("秋天賞楓"),
+            "開始日期" to ItineraryAddEditIntent.UpdateStartDate(LocalDate(2026, 10, 2)),
+            "結束日期" to ItineraryAddEditIntent.UpdateEndDate(LocalDate(2026, 10, 6)),
+            "換封面" to ItineraryAddEditIntent.SetCoverPhoto(photoBytes),
+            "移除封面" to ItineraryAddEditIntent.RemoveCoverPhoto,
+        )
+
+        edits.forEach { (field, edit) ->
+            val viewModel = viewModelWith(useCasesOf())
+            act(viewModel, ItineraryAddEditIntent.LoadItinerary("kyoto"), edit)
+            withClue(field) { viewModel.state.value.hasUnsavedChanges shouldBe true }
+        }
+    }
+
+    @Test
+    fun `新增時照舊`() = runTest(dispatcher) {
+        val blank = viewModelWith(useCasesOf())
+        act(blank, ItineraryAddEditIntent.LoadDraft)
+        blank.state.value.hasUnsavedChanges shouldBe false
+
+        val edits = listOf(
+            "標題" to ItineraryAddEditIntent.UpdateTitle("京都大阪 5 日遊"),
+            "描述" to ItineraryAddEditIntent.UpdateDescription("秋天賞楓"),
+            "開始日期" to ItineraryAddEditIntent.UpdateStartDate(LocalDate(2026, 11, 20)),
+            "結束日期" to ItineraryAddEditIntent.UpdateEndDate(LocalDate(2026, 11, 24)),
+            "封面" to ItineraryAddEditIntent.SetCoverPhoto(photoBytes),
+        )
+
+        edits.forEach { (field, edit) ->
+            val viewModel = viewModelWith(useCasesOf())
+            act(viewModel, ItineraryAddEditIntent.LoadDraft, edit)
+            withClue(field) { viewModel.state.value.hasUnsavedChanges shouldBe true }
+        }
     }
 
     // ── 測試工具 ──

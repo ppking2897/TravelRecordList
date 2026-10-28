@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -61,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import io.github.ppking2897.travelrecord.core.domain.service.LocationSearchService
 import io.github.ppking2897.travelrecord.core.presentation.components.LocationSearchField
@@ -129,7 +131,9 @@ fun TodayScreen(
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
             when (event) {
-                is TodayEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+                // 提示要顯示幾秒才結束，另開 coroutine，後面的事件（例如關面板）才不用等它
+                is TodayEvent.ShowMessage -> launch { snackbarHostState.showSnackbar(event.message) }
+                TodayEvent.QuickRecordSaved -> showQuickRecordSheet = false
             }
         }
     }
@@ -225,6 +229,15 @@ private fun TodayScreenContent(
                 }
             }
 
+            // 讀不到行程時不能顯示成「沒有旅行中的行程」，要讓使用者知道可以重試
+            state.error != null && state.currentTrip == null -> {
+                LoadErrorState(
+                    message = state.error,
+                    onRetry = onRefresh,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+
             state.currentTrip == null -> {
                 NoCurrentTripState(
                     today = state.today,
@@ -279,15 +292,11 @@ private fun TodayScreenContent(
                     }
 
                     if (state.error != null) {
+                        // 讀不到項目時不能顯示成「今天還沒有行程」
                         item {
-                            Text(
-                                text = state.error,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                            TodayItemsErrorState(message = state.error, onRetry = onRefresh)
                         }
-                    }
-
-                    if (state.todayItems.isEmpty()) {
+                    } else if (state.todayItems.isEmpty()) {
                         item {
                             EmptyTodayItemsState(onQuickRecord = onQuickRecord)
                         }
@@ -453,6 +462,70 @@ private fun EmptyTodayItemsState(
 }
 
 @Composable
+private fun TodayItemsErrorState(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
+    ) {
+        Column(
+            modifier = Modifier.padding(CardStyle.contentPadding),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+            Text(
+                text = "讀取失敗：$message",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Button(onClick = onRetry) {
+                Icon(Icons.Default.Refresh, contentDescription = null)
+                Text("重試")
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadErrorState(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(Spacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(40.dp)
+        )
+        Text(
+            text = "讀取失敗：$message",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(top = Spacing.md)
+        )
+        Button(
+            onClick = onRetry,
+            modifier = Modifier.padding(top = Spacing.lg)
+        ) {
+            Icon(Icons.Default.Refresh, contentDescription = null)
+            Text("重試")
+        }
+    }
+}
+
+@Composable
 private fun NoCurrentTripState(
     today: LocalDate?,
     onGoToPlan: () -> Unit,
@@ -564,13 +637,16 @@ private fun QuickRecordSheet(
                 Icon(Icons.Default.Image, contentDescription = null)
                 Text("加入照片 ${state.quickRecord.photoPaths.size}")
             }
+            state.quickRecord.saveError?.let { errorText ->
+                Text(
+                    text = errorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            // 面板等存檔成功的通知才關，這裡只送出儲存
             Button(
-                onClick = {
-                    onSave()
-                    if (state.quickRecord.activity.isNotBlank() && state.quickRecord.locationName.isNotBlank()) {
-                        onDismiss()
-                    }
-                },
+                onClick = onSave,
                 enabled = !state.isSavingQuickRecord,
                 modifier = Modifier.fillMaxWidth()
             ) {

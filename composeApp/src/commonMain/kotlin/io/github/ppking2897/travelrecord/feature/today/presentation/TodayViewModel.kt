@@ -183,6 +183,12 @@ class TodayViewModel(
     }
 
     private suspend fun saveQuickRecord() {
+        // 按鈕停用要等畫面重畫才生效，連點兩下仍可能送出兩次，這裡再擋一次
+        if (state.value.isSavingQuickRecord) return
+
+        // 上一次存檔失敗的訊息，這次按下儲存就先清掉
+        updateState { copy(quickRecord = quickRecord.copy(saveError = null)) }
+
         val snapshot = state.value
         val trip = snapshot.currentTrip ?: run {
             sendEvent(TodayEvent.ShowMessage("目前沒有旅行中的行程"))
@@ -205,7 +211,7 @@ class TodayViewModel(
             return
         }
 
-        updateState { copy(isSavingQuickRecord = true, error = null) }
+        updateState { copy(isSavingQuickRecord = true) }
 
         addItineraryItemUseCase(
             itineraryId = trip.id,
@@ -229,12 +235,20 @@ class TodayViewModel(
                         quickRecord = QuickRecordState()
                     )
                 }
+                sendEvent(TodayEvent.QuickRecordSaved)
                 loadToday()
                 sendEvent(TodayEvent.ShowMessage("已加入今日紀錄"))
             }
             .onFailure { exception ->
-                updateState { copy(isSavingQuickRecord = false, error = exception.message) }
-                sendEvent(TodayEvent.ShowMessage(exception.message ?: "新增紀錄失敗"))
+                // 錯誤留在面板裡，不寫進頁面的 error（那是讀取失敗用的），也不跳底部提示（會被面板擋住）
+                updateState {
+                    copy(
+                        isSavingQuickRecord = false,
+                        quickRecord = this.quickRecord.copy(
+                            saveError = "儲存失敗：${exception.message ?: "新增紀錄失敗"}"
+                        )
+                    )
+                }
             }
     }
 
