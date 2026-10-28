@@ -7,6 +7,7 @@ import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.GetCurrentTripUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.AddPhotoUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.GenerateThumbnailUseCase
@@ -83,7 +84,7 @@ class TodayViewModel(
                                 currentTrip = currentTrip,
                                 todayItems = items
                                     .filter { it.date == today }
-                                    .sortedWith(compareBy({ it.primaryTime() }, { it.createdAt })),
+                                    .sortedWith(itemDayOrder),
                                 today = today
                             )
                         }

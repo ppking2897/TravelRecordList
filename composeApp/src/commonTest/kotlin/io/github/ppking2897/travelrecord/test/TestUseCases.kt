@@ -10,7 +10,9 @@ import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRe
 import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.DeleteDraftUseCase
 import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.LoadDraftUseCase
 import io.github.ppking2897.travelrecord.feature.draft.domain.usecase.SaveDraftUseCase
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.SampleDataRecordRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.SampleDataRecordRepository
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.CreateItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.EnsureLocalDataReadyUseCase
@@ -66,7 +68,11 @@ class TestUseCases(
     val updateItinerary = UpdateItineraryUseCase(itineraries)
     val searchItineraries = SearchItinerariesUseCase(itineraries)
     val deleteItinerary = DeleteItineraryUseCase(itineraries, items, imageStorage)
-    val ensureLocalDataReady = EnsureLocalDataReadyUseCase(legacyDataImporter, InitializeSampleDataUseCase(itineraries, items), routes)
+    val ensureLocalDataReady = EnsureLocalDataReadyUseCase(
+        legacyDataImporter,
+        InitializeSampleDataUseCase(itineraries, items, inMemorySampleDataRecord()),
+        routes,
+    )
 
     val getItemsByItinerary = GetItemsByItineraryUseCase(items)
     val getItem = GetItineraryItemUseCase(items)
@@ -91,6 +97,9 @@ class TestUseCases(
 
 /** App 用的草稿 Repository，底層換成記憶體儲存 */
 fun inMemoryDraftRepository(): DraftRepository = DraftRepositoryImpl(InMemoryStorageService())
+
+/** App 用的「範例已放過」紀錄，底層換成記憶體儲存 */
+fun inMemorySampleDataRecord(): SampleDataRecordRepository = SampleDataRecordRepositoryImpl(InMemoryStorageService())
 
 /** 舊資料搬移一律回傳指定的結果 */
 class FakeLegacyDataImporter(private val result: Result<Unit>) : LegacyDataImporter {

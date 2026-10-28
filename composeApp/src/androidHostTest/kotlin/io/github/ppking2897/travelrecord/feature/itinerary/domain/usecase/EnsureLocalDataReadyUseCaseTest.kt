@@ -6,6 +6,7 @@ import io.github.ppking2897.travelrecord.core.data.local.db.inMemoryAppDatabase
 import io.github.ppking2897.travelrecord.core.data.local.db.repositories
 import io.github.ppking2897.travelrecord.core.domain.service.LegacyDataImporter
 import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.SampleDataRecordRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
 import io.github.ppking2897.travelrecord.test.testItinerary
@@ -26,10 +27,13 @@ class EnsureLocalDataReadyUseCaseTest {
     /** 跟 App 一樣，路線與舊資料用同一個鍵值儲存 */
     private val routes = RouteRepositoryImpl(legacyStorage, room.itineraries)
 
+    /** 「範例已放過」另外存，才不會混進上面檢查鍵值儲存內容的斷言 */
+    private val sampleDataRecord = SampleDataRecordRepositoryImpl(InMemoryStorageService())
+
     private fun ensureWith(
         importer: LegacyDataImporter = LegacyJsonImporter(legacyStorage, database),
         routeRepository: RouteRepository = routes,
-    ) = EnsureLocalDataReadyUseCase(importer, InitializeSampleDataUseCase(room.itineraries, room.items), routeRepository)
+    ) = EnsureLocalDataReadyUseCase(importer, InitializeSampleDataUseCase(room.itineraries, room.items, sampleDataRecord), routeRepository)
 
     private val ensure = ensureWith()
 

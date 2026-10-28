@@ -3,7 +3,7 @@ package io.github.ppking2897.travelrecord.feature.route.data.repository
 import io.github.ppking2897.travelrecord.feature.route.data.mapper.toDto
 import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
 import io.github.ppking2897.travelrecord.core.data.local.StorageService
-import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
 import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
@@ -39,10 +39,7 @@ class RouteRepositoryImpl(
                 )
             }
 
-            val sortedItems = itinerary.items.sortedWith(
-                compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.primaryTime() }
-            )
+            val sortedItems = itinerary.items.sortedWith(itemDayOrder)
 
             val routeLocations = mutableListOf<RouteLocation>()
             val seenLocations = mutableSetOf<String>()

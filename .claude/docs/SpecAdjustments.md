@@ -114,15 +114,60 @@ App 的用語 SHALL 統一如下：
 
 ### Requirement: 沒排時間的項目排在當天最後 <!-- ADDED 2026-10-27 -->
 
-行程詳情、今日、地圖、路線 SHALL 用同一套排序：同一天裡，有時間的項目依時間排（有抵達時間用抵達，否則用出發），沒排時間的排在當天最後。（產品規格書待確認 #6）
+行程詳情、今日、地圖、路線、回憶故事 SHALL 用同一套排序：同一天裡，有時間的項目依時間排（有抵達時間用抵達，否則用出發），沒排時間的排在當天最後；時間相同、或都沒排時間的，先建立的在前。（產品規格書待確認 #6）
 
-#### Scenario: TODO：沒排時間的項目排在當天最後（第 2 組動工時補）
+#### Scenario: 同一天的排序規則
+- GIVEN 10/14 依建立先後有：「祇園晚餐」沒排時間、「清水寺」抵達 14:30、「錦市場」抵達 14:30、「伏見稻荷」只填出發 09:00、「八坂神社」沒排時間
+- WHEN 排出 10/14 的順序
+- THEN 依序是伏見稻荷、清水寺、錦市場、祇園晚餐、八坂神社
+
+#### Scenario: 今日頁沒排時間的排最後
+- GIVEN 今天是 10/15，進行中的行程今天有跟上一條一樣的五個項目
+- WHEN 使用者打開今日分頁
+- THEN 清單依序是伏見稻荷、清水寺、錦市場、祇園晚餐、八坂神社
+- AND 祇園晚餐、八坂神社的時間欄寫「未排時間」
+
+#### Scenario: 地圖頁沒排時間的排在當天最後
+- GIVEN 行程 10/14–10/15，項目都有座標：10/14 有沒排時間的「祇園」、09:00 的「伏見稻荷」，10/15 有 10:00 的「金閣寺」
+- WHEN 使用者打開地圖頁
+- THEN 地點依序是伏見稻荷（10/14 第 1 站）、祇園（10/14 第 2 站）、金閣寺（10/15 第 1 站）
+
+#### Scenario: 路線沒排時間的排在當天最後
+- GIVEN 同上一條的行程
+- WHEN 使用者生成路線
+- THEN 路線依序是伏見稻荷 → 祇園 → 金閣寺
+
+#### Scenario: 回憶故事的第一站與最後一站
+- GIVEN 已結束的行程 10/14–10/15，全部已打卡：10/14 有沒排時間的「錦市場」、09:00 的「伏見稻荷」，10/15 有 10:00 的「金閣寺」、沒排時間的「關西機場」
+- WHEN 產生這趟行程的回憶故事
+- THEN 敘述開頭是「10 月 14 日，旅程從伏見稻荷展開。」
+- AND 敘述裡寫「最後一站關西機場成了旅程的句點」
 
 ### Requirement: 範例行程只在第一次安裝時放一次 <!-- ADDED 2026-10-27 -->
 
 範例行程 SHALL 只在第一次安裝時放一次；使用者把行程全部刪掉後重開 App，範例 SHALL 不會再出現。從舊版升級、本來就有行程的人，SHALL 視為已經放過。（待確認 #7）
 
-#### Scenario: TODO：範例行程只在第一次安裝時放一次（第 2 組動工時補）
+#### Scenario: 第一次安裝放入範例行程
+- GIVEN 全新安裝，手機上沒有任何行程
+- WHEN 使用者第一次打開 App
+- THEN 行程列表有「京都大阪 5 日遊」與「東京 3 日遊」兩趟範例
+
+#### Scenario: 範例刪光後重開不會回來
+- GIVEN 範例已經放過，使用者把行程全部刪掉
+- WHEN 使用者重開 App
+- THEN 行程列表是空的，顯示「還沒有行程」
+
+#### Scenario: 從舊版升級、本來就有行程
+- GIVEN 舊版使用者手機上有 2 趟行程，沒有「範例已放過」的紀錄
+- WHEN 升級後第一次打開 App
+- THEN 不加範例，行程維持原本的 2 趟
+- AND 之後把行程全部刪掉再重開，範例也不會出現
+
+#### Scenario: 從舊版升級、行程已經刪光
+- GIVEN 舊版使用者已經把行程全部刪掉，沒有「範例已放過」的紀錄
+- WHEN 升級後第一次打開 App
+- THEN 放入兩趟範例（這時跟全新安裝分不出來）
+- AND 之後把行程全部刪掉再重開，範例不會再出現
 
 **第 3 組：存檔與防呆**
 
@@ -224,6 +269,40 @@ App 的用語 SHALL 統一如下：
 - Today.md：待辦的「換今日分頁圖示」改成已完成；情境「從沒有行程的狀態回到行程規劃」的按鈕名稱改成「去看行程」（MODIFIED）。
 - product-spec.md：首頁、行程詳情、回憶等章節改寫成新行為，待確認 #1、#12、#13、#15、#16 標成已完成。
 
+### 第 2 組
+
+**排序**
+- 在 domain 放一個共用的比較規則（`ItineraryItem` 旁）：日期 → 有時間的在前 → 時間（`primaryTime()`）。時間相同時不另外比，靠穩定排序維持資料層讀出的順序（先建立的在前）。
+- 改用這個規則的地方：
+  - 行程詳情的 `GroupItemsByDateUseCase`：拿掉「沒時間當成 23:59:59」的寫法，免得 23:59:59 的項目跟沒排時間的分不出先後。時間軸每天顯示的地點取當天第一個項目，跟著一起對。
+  - 今日的 `TodayViewModel`：原本是沒時間的排最前，時間相同再比建立時間。
+  - 地圖的 `GetMapMarkersUseCase`：原本沒時間的排最前，當天第幾站跟著變。
+  - 路線的 `RouteRepositoryImpl`：原本沒時間的排最前。
+  - 回憶故事的 `LocalRuleBasedMemoryStoryGenerator`：第一站、最後一站跟著變。
+- 資料層讀出的順序也改成同一規則：`ItineraryItemDao` 的 `ORDER BY` 在時間前加 `COALESCE(arrivalTime, departureTime) IS NULL`。只改查詢，不動資料表，不用升資料庫版本。同一份合約綁著的另外兩個測試用實作也跟著改：記憶體版（`InMemoryRepositories`）與舊版 JSON 版（`legacy/LegacyJsonItineraryItemRepository`），兩者都直接用 `itemDayOrder`。
+
+**範例資料**
+- `InitializeSampleDataUseCase` 改成看「範例已放過」的紀錄，不再看「有沒有行程」：
+  - 有紀錄：不放。
+  - 沒紀錄、已經有行程（舊版升級）：補寫紀錄，不放。
+  - 沒紀錄、沒有行程：放範例，成功後寫紀錄。
+- 紀錄存在鍵值儲存，跟搬移標記 `migration:room:v1` 同一處。domain 加一個小介面讀寫這筆紀錄，data 層用 `StorageService` 實作，use case 不直接碰儲存。
+- 寫紀錄失敗也不會重複放：下次啟動時已經有行程，會走「補寫紀錄」那條。
+
+**因規格改變而要改的既有測試**
+
+| 測試 | 改法 |
+|---|---|
+| `ItineraryItemRepositoryContract#項目依日期再依抵達或離開時間排序，沒有時間的排前面，相同時保留新增順序` | 預期改成沒有時間的排在當天最後，測試名稱改成「…沒有時間的排在當天最後…」 |
+| `TodayViewModelTest#沒排時間的項目排在最前面` | 換成 `沒排時間的項目排在最後面`，對應 Today.md 的情境改成 MODIFIED |
+
+**同一筆 commit 要更新的既有文件**
+- Today.md：Requirement「只列出進行中行程裡日期是今天的項目，並依時間排序」與情境「沒排時間的項目排在最前面」改成排在最後（MODIFIED）。
+- ItineraryDetail.md：待辦「沒排時間的項目在這頁排最後、在今日頁排最前」拿掉。
+- ItineraryList.md：Requirement「啟動時先準備本機資料，再載入行程」裡「一筆行程都沒有時放入範例行程」改成只放一次（MODIFIED）。
+- product-spec.md：今日、地圖、路線的排序描述與範例行程的說明改成新行為，待確認 #6、#7 標成已完成。
+- improvement-plan.md：規格調整第 2 組的兩項打勾。
+
 ---
 
 ## 涵蓋範圍
@@ -247,7 +326,15 @@ App 的用語 SHALL 統一如下：
   - `androidMain/.../ItineraryMapView.android.kt`
   - `util/DateExtensions.kt`
   - `App.kt`
-- 第 2～6 組：動工時補。
+- 第 2 組識別字：`itemDayOrder`、`GroupItemsByDateUseCase`、`GetMapMarkersUseCase`、`RouteRepositoryImpl`、`InitializeSampleDataUseCase`、`SampleDataRecordRepository`、`SampleDataRecordRepositoryImpl`、`EnsureLocalDataReadyUseCase`、`ItineraryItemDao`
+- 第 2 組路徑：
+  - `feature/itinerary_item/domain/**`、`feature/itinerary_item/data/local/ItineraryItemDao.kt`
+  - `feature/today/presentation/TodayViewModel.kt`
+  - `feature/route/domain/usecase/GetMapMarkersUseCase.kt`、`feature/route/data/repository/RouteRepositoryImpl.kt`
+  - `feature/memory/data/service/LocalRuleBasedMemoryStoryGenerator.kt`
+  - `feature/itinerary/domain/usecase/InitializeSampleDataUseCase.kt`
+  - `feature/itinerary/domain/repository/SampleDataRecordRepository.kt`、`feature/itinerary/data/repository/SampleDataRecordRepositoryImpl.kt`、`feature/itinerary/di/ItineraryModule.kt`
+- 第 3～6 組：動工時補。
 
 ---
 
@@ -257,7 +344,7 @@ App 的用語 SHALL 統一如下：
 
 ### Slice 1 — 第 1 組：用語與小畫面
 - **對應 Requirement**：介面用語統一、「今日」分頁換成代表今天的圖示、首頁拿掉最近編輯區塊與足跡按鈕、沒有資料時有「去看行程」按鈕、時間軸的地點名稱完整顯示
-- **commit**：未 commit（程式已改完，測試 243 條全過）
+- **commit**：`2234536`
 - **整體狀態**：✅ 邏輯情境由單元測試驗證，UI 情境 2026-10-27 實機走查通過
 - **高風險組**：是（「去看行程」會切換分頁）
 
@@ -280,8 +367,23 @@ App 的用語 SHALL 統一如下：
 
 ### Slice 2 — 第 2 組：排序與範例資料
 - **對應 Requirement**：沒排時間的項目排在當天最後、範例行程只在第一次安裝時放一次
-- **commit**：未開始
-- **整體狀態**：⏸️ blocked: Scenario 未定義
+- **commit**：未 commit
+- **整體狀態**：🟡 九條邏輯情境都有單元測試、先紅後綠並做過突變；今日頁那條的突變只驗到共用規則這一層（見表）。尚未在手機上看過
+- **高風險組**：否（沒有改到換頁或返回）
+
+| Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
+|----------|------|------|--------|---------|
+| 同一天的排序規則 | 邏輯 | ✅ | 2026-10-28 | unit test: ItemDayOrderTest#同一天的排序規則 、 ItemDayOrderTest#行程詳情的分組照同一套排序 、 ItineraryDetailViewModelTest#組內依時間排序，沒排時間的排最後；先紅後綠（行程詳情原本就把沒時間的排最後，那條一開始就綠）；突變：共用規則拿掉「有時間的在前」→ 三條都紅；時間相同改成依 id 倒序 → 前兩條紅 |
+| 今日頁沒排時間的排最後 | 邏輯 | 🟡 | 2026-10-28 | unit test: TodayViewModelTest#沒排時間的項目排在最後面；先紅後綠；突變：共用規則拿掉「有時間的在前」→ 紅。只拿掉今日頁自己那行排序不會紅，因為資料層讀出時已照同一規則排好；「未排時間」字樣屬畫面，未測 |
+| 地圖頁沒排時間的排在當天最後 | 邏輯 | ✅ | 2026-10-28 | unit test: GetMapMarkersUseCaseTest#地圖頁沒排時間的排在當天最後；測試直接餵沒排序的項目，不靠資料層；先紅後綠；突變：共用規則拿掉「有時間的在前」→ 紅 |
+| 路線沒排時間的排在當天最後 | 邏輯 | ✅ | 2026-10-28 | unit test: RouteRepositoryImplTest#路線沒排時間的排在當天最後；測試直接餵沒排序的項目；先紅後綠；突變同上 → 紅 |
+| 回憶故事的第一站與最後一站 | 邏輯 | ✅ | 2026-10-28 | unit test: LocalRuleBasedMemoryStoryGeneratorTest#回憶故事的第一站與最後一站；先紅後綠；突變同上 → 紅 |
+| 第一次安裝放入範例行程 | 邏輯 | ✅ | 2026-10-28 | unit test: InitializeSampleDataUseCaseTest#第一次安裝放入範例行程；原本就會放，一開始就綠；突變：不放範例 → 紅 |
+| 範例刪光後重開不會回來 | 邏輯 | ✅ | 2026-10-28 | unit test: InitializeSampleDataUseCaseTest#範例刪光後重開不會回來；先紅後綠；突變：放完範例不記紀錄 → 紅 |
+| 從舊版升級、本來就有行程 | 邏輯 | ✅ | 2026-10-28 | unit test: InitializeSampleDataUseCaseTest#從舊版升級、本來就有行程；先紅後綠；突變：已有行程時不記紀錄 → 紅 |
+| 從舊版升級、行程已經刪光 | 邏輯 | ✅ | 2026-10-28 | unit test: InitializeSampleDataUseCaseTest#從舊版升級、行程已經刪光；先紅後綠；突變：放完範例不記紀錄、不放範例 → 都紅 |
+
+資料層讀出的順序（技術設計「排序」最後一點）由 `ItineraryItemRepositoryContract#項目依日期再依抵達或離開時間排序，沒有時間的排在當天最後，相同時保留新增順序` 驗證，資料庫版、記憶體版、舊版 JSON 版三種都跑；先紅後綠；突變：資料庫查詢拿掉 `IS NULL` 那段 → 資料庫版紅，共用規則拿掉「有時間的在前」→ 記憶體版、舊版 JSON 版紅；「相同時保留新增順序」也改壞過：資料庫查詢改成 `rowid DESC`、共用規則加上依 id 倒序 → 三種都紅。
 
 ### Slice 3 — 第 3 組：存檔與防呆
 - **對應 Requirement**：今日頁讀取失敗時可以重試、快速紀錄存檔成功才關閉、編輯沒存就離開會提醒、刪照片一律先確認
@@ -319,3 +421,4 @@ App 的用語 SHALL 統一如下：
 - **2026-10-27** ADDED: Requirement「介面用語統一」「「今日」分頁換成代表今天的圖示」「首頁拿掉最近編輯區塊與足跡按鈕」「沒有資料時有「去看行程」按鈕」（第 1 組，含情境）
 - **2026-10-27** ADDED: Requirement「沒排時間的項目排在當天最後」「範例行程只在第一次安裝時放一次」「今日頁讀取失敗時可以重試」「快速紀錄存檔成功才關閉」「編輯沒存就離開會提醒」「刪照片一律先確認」「行程一定要有日期」「路線分天，分享可讀的文字」「點標籤篩選同標籤的項目」「卡片可以左右滑」（第 2～6 組，情境動工時補）
 - **2026-10-27** 技術設計：時間軸選中那格的行李箱換成飛機（實機檢查後決定，示意圖仍是行李箱）
+- **2026-10-28** ADDED: 第 2 組的 9 條情境與技術設計；Requirement「沒排時間的項目排在當天最後」補上回憶故事與「時間相同時先建立的在前」。實作完成，單元測試先紅後綠並做過突變

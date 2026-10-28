@@ -4,6 +4,7 @@ package io.github.ppking2897.travelrecord.core.data
 
 import io.github.ppking2897.travelrecord.core.data.local.InMemoryStorageService
 import io.github.ppking2897.travelrecord.core.domain.sample.SampleDataProvider
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.SampleDataRecordRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.SearchItinerariesUseCase
@@ -46,7 +47,11 @@ abstract class DataLayerAcceptanceContract {
         val photos = PhotoRepositoryImpl(FakeImageStorageService(), repos.itineraries, repos.items)
         val routes = RouteRepositoryImpl(InMemoryStorageService(), repos.itineraries)
 
-        val initializeSampleData = InitializeSampleDataUseCase(repos.itineraries, repos.items)
+        val initializeSampleData = InitializeSampleDataUseCase(
+            repos.itineraries,
+            repos.items,
+            SampleDataRecordRepositoryImpl(InMemoryStorageService()),
+        )
         val getRoute = GetRouteForItineraryUseCase(routes)
         val addPhoto = AddPhotoUseCase(photos)
         val deleteItinerary = DeleteItineraryUseCase(repos.itineraries, repos.items, FakeImageStorageService())

@@ -6,6 +6,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.data.mapper.toDo
 import io.github.ppking2897.travelrecord.core.data.local.JsonSerializer
 import io.github.ppking2897.travelrecord.core.data.local.StorageService
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 
 /**
@@ -89,10 +90,7 @@ class LegacyJsonItineraryItemRepository(
 
             val filtered = allItems.filter { it.itineraryId == itineraryId }
 
-            val sorted = filtered.sortedWith(
-                compareBy<ItineraryItem> { it.date }
-                    .thenBy { it.primaryTime() }
-            )
+            val sorted = filtered.sortedWith(itemDayOrder)
 
             Result.success(sorted)
         } catch (e: Exception) {

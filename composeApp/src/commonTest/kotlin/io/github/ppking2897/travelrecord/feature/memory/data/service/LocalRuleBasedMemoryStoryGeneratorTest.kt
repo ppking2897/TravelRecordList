@@ -6,6 +6,8 @@ import io.github.ppking2897.travelrecord.test.testItem
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.github.ppking2897.travelrecord.test.testPhoto
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldStartWith
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -41,8 +43,28 @@ class LocalRuleBasedMemoryStoryGeneratorTest {
             "最後一站嵐山成了旅程的句點——相簿裡留下 2 張照片，剩下的就放在心裡。"
     }
 
+    @Test
+    fun `回憶故事的第一站與最後一站`() = runTest {
+        val itinerary = testItinerary("kyoto").copy(
+            startDate = LocalDate(2026, 10, 14),
+            endDate = LocalDate(2026, 10, 15)
+        )
+        // 依建立先後排列，還沒排序
+        val items = listOf(
+            visited("nishiki", LocalDate(2026, 10, 14), null, "錦市場"),
+            visited("fushimi", LocalDate(2026, 10, 14), LocalTime(9, 0), "伏見稻荷"),
+            visited("kinkaku", LocalDate(2026, 10, 15), LocalTime(10, 0), "金閣寺"),
+            visited("kix", LocalDate(2026, 10, 15), null, "關西機場"),
+        )
+
+        val narrative = generator.generate(itinerary, items).narrative
+
+        narrative shouldStartWith "10 月 14 日，旅程從伏見稻荷展開。"
+        narrative shouldContain "最後一站關西機場成了旅程的句點"
+    }
+
     /** 已打卡的項目，照片數依參數 */
-    private fun visited(id: String, date: LocalDate, arrival: LocalTime, place: String, photos: Int = 0) =
+    private fun visited(id: String, date: LocalDate, arrival: LocalTime?, place: String, photos: Int = 0) =
         testItem(id, "kyoto", date = date, arrivalTime = arrival, locationName = place).copy(
             isCompleted = true,
             photos = (0 until photos).map { testPhoto("$id-photo-$it", id, order = it) }

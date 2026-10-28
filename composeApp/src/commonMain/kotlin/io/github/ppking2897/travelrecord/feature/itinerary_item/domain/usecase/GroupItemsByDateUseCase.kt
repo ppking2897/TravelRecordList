@@ -1,8 +1,8 @@
 package io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase
 
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
 
 /**
  * 項目按日期分組的資料類別
@@ -30,12 +30,7 @@ class GroupItemsByDateUseCase {
             .map { (date, groupItems) ->
                 ItemsByDate(
                     date = date,
-                    items = groupItems.sortedWith(
-                        compareBy<ItineraryItem> {
-                            // 沒有時間的項目排在最後
-                            it.primaryTime() ?: LocalTime(23, 59, 59)
-                        }
-                    )
+                    items = groupItems.sortedWith(itemDayOrder)
                 )
             }
             .sortedBy { it.date }

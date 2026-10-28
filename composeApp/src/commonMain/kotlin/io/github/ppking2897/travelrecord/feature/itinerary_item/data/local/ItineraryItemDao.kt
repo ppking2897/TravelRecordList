@@ -6,7 +6,9 @@ import androidx.room.Query
 import androidx.room.Update
 
 /**
- * 項目一律依日期、再依抵達或離開時間排序；沒有時間的排在當天最前面，相同時保留新增順序
+ * 項目一律依日期、再依抵達或離開時間排序；沒有時間的排在當天最後，相同時保留新增順序
+ *
+ * 跟 domain 的 `itemDayOrder` 是同一套規則，畫面再排一次結果不變。
  */
 @Dao
 interface ItineraryItemDao {
@@ -25,11 +27,14 @@ interface ItineraryItemDao {
     suspend fun get(id: String): ItineraryItemEntity?
 
     @Query(
-        "SELECT * FROM itinerary_items WHERE itineraryId = :itineraryId " +
-            "ORDER BY date, COALESCE(arrivalTime, departureTime), rowid"
+        "SELECT * FROM itinerary_items WHERE itineraryId = :itineraryId ORDER BY $DAY_ORDER"
     )
     suspend fun getByItinerary(itineraryId: String): List<ItineraryItemEntity>
 
-    @Query("SELECT * FROM itinerary_items ORDER BY date, COALESCE(arrivalTime, departureTime), rowid")
+    @Query("SELECT * FROM itinerary_items ORDER BY $DAY_ORDER")
     suspend fun getAll(): List<ItineraryItemEntity>
 }
+
+/** `IS NULL` 在 SQLite 是 0／1，有時間的（0）排前面 */
+private const val DAY_ORDER =
+    "date, COALESCE(arrivalTime, departureTime) IS NULL, COALESCE(arrivalTime, departureTime), rowid"

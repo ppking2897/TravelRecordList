@@ -66,6 +66,19 @@ class RouteRepositoryImplTest {
     }
 
     @Test
+    fun `路線沒排時間的排在當天最後`() = runTest {
+        val trip = unsortedTrip(
+            item("gion", "祇園", oct14),
+            item("fushimi", "伏見稻荷", oct14, LocalTime(9, 0)),
+            item("kinkaku", "金閣寺", oct15, LocalTime(10, 0)),
+        )
+
+        val route = RouteRepositoryImpl(storage, trip).getRouteForItinerary("kyoto").getOrThrow()
+
+        route.locations.map { it.location.name } shouldBe listOf("伏見稻荷", "祇園", "金閣寺")
+    }
+
+    @Test
     fun `生成路線不會存檔`() = runTest {
         add(item("fushimi", "伏見稻荷", oct14), item("kinkaku", "金閣寺", oct15))
 

@@ -142,7 +142,7 @@ abstract class ItineraryItemRepositoryContract {
     }
 
     @Test
-    fun `項目依日期再依抵達或離開時間排序，沒有時間的排前面，相同時保留新增順序`() = runTest {
+    fun `項目依日期再依抵達或離開時間排序，沒有時間的排在當天最後，相同時保留新增順序`() = runTest {
         val repos = newRepositories().withItinerary("it-1")
         val day1 = LocalDate(2026, 10, 1)
         val day2 = LocalDate(2026, 10, 2)
@@ -156,10 +156,10 @@ abstract class ItineraryItemRepositoryContract {
         ).forEach { repos.items.addItem(it).getOrThrow() }
 
         repos.items.getItemsByItinerary("it-1").getOrThrow().map { it.id } shouldBe listOf(
-            "d1-no-time-first",
-            "d1-no-time-second",
             "d1-09:00",
             "d1-depart-15:00",
+            "d1-no-time-first",
+            "d1-no-time-second",
             "d2-10:00-first",
             "d2-10:00-second",
         )

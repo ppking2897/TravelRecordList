@@ -1,6 +1,7 @@
 package io.github.ppking2897.travelrecord.feature.route.domain.usecase
 
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.route.domain.model.MapMarker
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 
@@ -30,10 +31,8 @@ class GetMapMarkersUseCase(
             item.location.latitude != null && item.location.longitude != null
         }
 
-        // 按日期和時間排序
-        val sortedItems = itemsWithCoordinates.sortedWith(
-            compareBy({ it.date }, { it.primaryTime() })
-        )
+        // 按日期和時間排序，沒排時間的排在當天最後
+        val sortedItems = itemsWithCoordinates.sortedWith(itemDayOrder)
 
         // 計算每個項目在當日的順序
         val dateGroups = sortedItems.groupBy { it.date }

@@ -7,6 +7,7 @@ import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRe
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -70,7 +71,7 @@ class InMemoryItineraryRepository(
 }
 
 /**
- * 存在記憶體的項目 Repository，排序規則與資料庫版相同：日期、抵達或離開時間（沒有時間的排前面）、新增順序
+ * 存在記憶體的項目 Repository，排序規則與資料庫版相同：日期、抵達或離開時間（沒有時間的排在當天最後）、新增順序
  */
 class InMemoryItineraryItemRepository(vararg initial: ItineraryItem) : ItineraryItemRepository {
     private val lock = Mutex()
@@ -100,7 +101,7 @@ class InMemoryItineraryItemRepository(vararg initial: ItineraryItem) : Itinerary
     override suspend fun getItemsByItinerary(itineraryId: String): Result<List<ItineraryItem>> = lock.withLock {
         Result.success(
             items.filter { it.itineraryId == itineraryId }
-                .sortedWith(compareBy({ it.date }, { it.arrivalTime ?: it.departureTime }))
+                .sortedWith(itemDayOrder)
         )
     }
 }

@@ -7,6 +7,7 @@ import io.github.ppking2897.travelrecord.core.data.local.db.repositories
 import io.github.ppking2897.travelrecord.core.domain.sample.SampleDataProvider
 import io.github.ppking2897.travelrecord.feature.itinerary.data.mapper.toDto
 import io.github.ppking2897.travelrecord.core.data.local.legacy.LegacyJsonItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.SampleDataRecordRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.InitializeSampleDataUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.repository.HashtagRepositoryImpl
@@ -43,7 +44,9 @@ class LegacyJsonImporterTest {
         val items = LegacyJsonItineraryItemRepository(storage)
         val addItem = AddItineraryItemUseCase(items, itineraries, ExtractHashtagsUseCase(HashtagRepositoryImpl()))
 
-        suspend fun seedSamples() = InitializeSampleDataUseCase(itineraries, items)().getOrThrow()
+        /** 舊版沒有「範例已放過」的紀錄，給一個用完就丟的，不寫進舊資料的儲存 */
+        suspend fun seedSamples() =
+            InitializeSampleDataUseCase(itineraries, items, SampleDataRecordRepositoryImpl(InMemoryStorageService()))().getOrThrow()
 
         suspend fun createTrip(id: String, createdAtMs: Long, vararg locationNames: String): List<ItineraryItem> {
             itineraries.createItinerary(testItinerary(id = id, createdAtMs = createdAtMs)).getOrThrow()

@@ -3,6 +3,7 @@ package io.github.ppking2897.travelrecord.feature.memory.data.service
 
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.memory.domain.model.DailyHighlight
 import io.github.ppking2897.travelrecord.feature.memory.domain.model.MemoryStory
 import io.github.ppking2897.travelrecord.feature.memory.domain.service.MemoryStoryGenerator
@@ -20,7 +21,7 @@ class LocalRuleBasedMemoryStoryGenerator : MemoryStoryGenerator {
         itinerary: Itinerary,
         items: List<ItineraryItem>
     ): MemoryStory {
-        val sortedItems = items.sortedWith(compareBy({ it.date }, { it.primaryTime() }))
+        val sortedItems = items.sortedWith(itemDayOrder)
         val dateGroups = sortedItems.groupBy { it.date }
 
         val placeCount = sortedItems.size

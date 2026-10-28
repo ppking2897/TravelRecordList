@@ -1,7 +1,9 @@
 package io.github.ppking2897.travelrecord.feature.itinerary.di
 
 import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.ItineraryRepositoryImpl
+import io.github.ppking2897.travelrecord.feature.itinerary.data.repository.SampleDataRecordRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.SampleDataRecordRepository
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.CreateItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.DeleteItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.usecase.EnsureLocalDataReadyUseCase
@@ -18,6 +20,7 @@ import org.koin.dsl.module
 val itineraryModule = module {
     // Repositories
     single<ItineraryRepository> { ItineraryRepositoryImpl(get()) }
+    single<SampleDataRecordRepository> { SampleDataRecordRepositoryImpl(get()) }
 
     // Use Cases
     factory { GetItineraryUseCase(get()) }
@@ -27,6 +30,6 @@ val itineraryModule = module {
     factory { UpdateItineraryUseCase(get()) }
     factory { DeleteItineraryUseCase(get(), get(), get()) }
     factory { SearchItinerariesUseCase(get()) }
-    factory { InitializeSampleDataUseCase(get(), get()) }
+    factory { InitializeSampleDataUseCase(get(), get(), get()) }
     factory { EnsureLocalDataReadyUseCase(get(), get(), get()) }
 }

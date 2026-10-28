@@ -144,15 +144,18 @@ class TodayViewModelTest {
     }
 
     @Test
-    fun `沒排時間的項目排在最前面`() = runTest(dispatcher) {
+    fun `沒排時間的項目排在最後面`() = runTest(dispatcher) {
         val viewModel = kyotoViewModelWith(
-            item("kiyomizu", "清水寺", arrival = LocalTime(14, 30)),
             item("gion", "祇園晚餐"),
+            item("kiyomizu", "清水寺", arrival = LocalTime(14, 30)),
+            item("nishiki", "錦市場", arrival = LocalTime(14, 30)),
+            item("fushimi", "伏見稻荷", departure = LocalTime(9, 0)),
+            item("yasaka", "八坂神社"),
         )
 
         act(viewModel, TodayIntent.LoadToday)
 
-        viewModel.state.value.itemNames shouldBe listOf("祇園晚餐", "清水寺")
+        viewModel.state.value.itemNames shouldBe listOf("伏見稻荷", "清水寺", "錦市場", "祇園晚餐", "八坂神社")
     }
 
     @Test
