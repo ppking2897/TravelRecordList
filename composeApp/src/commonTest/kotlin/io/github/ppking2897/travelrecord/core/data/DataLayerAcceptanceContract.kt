@@ -84,7 +84,9 @@ abstract class DataLayerAcceptanceContract {
         val route = app.getRoute(sampleItineraryId)
 
         route.isSuccess shouldBe true
-        route.getOrThrow().locations.size shouldBe 8
+        // 範例行程有安排的每一天都有一段
+        route.getOrThrow().days.map { it.date } shouldBe
+            SampleDataProvider.getSampleItinerary().items.map { it.date }.distinct().sorted()
     }
 
     @Test

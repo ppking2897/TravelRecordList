@@ -11,14 +11,9 @@ interface RouteRepository {
     /**
      * 依行程目前的項目排出路線
      *
-     * 項目依日期、時間排序，同名地點只留第一次；不到兩個不同地點時回傳失敗。
+     * 項目依日期、時間排序並依天分段，同一天連續在同一個地點只留一站；不到兩個不同地點時回傳失敗。
      */
     suspend fun getRouteForItinerary(itineraryId: String): Result<Route>
-
-    /**
-     * 匯出行程的路線為 JSON 格式
-     */
-    suspend fun exportRoute(itineraryId: String): Result<String>
 
     /**
      * 刪除舊版存下的路線：舊版每按一次「生成路線」就另存一份，App 裡沒有地方再讀到

@@ -4,7 +4,6 @@ package io.github.ppking2897.travelrecord.core.data.local
 import io.github.ppking2897.travelrecord.feature.draft.data.model.DraftResponse
 import io.github.ppking2897.travelrecord.feature.itinerary.data.model.ItineraryResponse
 import io.github.ppking2897.travelrecord.feature.itinerary_item.data.model.ItineraryItemResponse
-import io.github.ppking2897.travelrecord.feature.route.data.model.RouteResponse
 import kotlin.time.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -74,13 +73,6 @@ object JsonSerializer {
      */
     fun deserializeItineraryItem(jsonString: String): ItineraryItemResponse {
         return json.decodeFromString(ItineraryItemResponse.serializer(), jsonString)
-    }
-
-    /**
-     * 將 RouteResponse 序列化為 JSON 字串
-     */
-    fun serializeRoute(route: RouteResponse): String {
-        return json.encodeToString(RouteResponse.serializer(), route)
     }
 
     /**

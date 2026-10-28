@@ -39,7 +39,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.S
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.UpdateItineraryItemUseCase
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 
 /**
@@ -88,7 +87,6 @@ class TestUseCases(
     val generateThumbnail = GenerateThumbnailUseCase(photos)
 
     val getRouteForItinerary = GetRouteForItineraryUseCase(routes)
-    val exportRoute = ExportRouteUseCase(routes)
 
     val saveDraft = SaveDraftUseCase(drafts)
     val loadDraft = LoadDraftUseCase(drafts)

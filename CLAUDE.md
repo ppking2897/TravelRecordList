@@ -35,7 +35,7 @@
 
 | 面向 | 外層 rules | 本專案 |
 |---|---|---|
-| 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：行程與項目存 Room（見下方「本機資料」）；草稿仍透過 `StorageService`（`core/data/local/`）存 JSON；路線不存檔，路線頁打開時依行程現算。`data/model/*Response` 是 JSON 格式（草稿的存檔、路線的分享內容）。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
+| 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：行程與項目存 Room（見下方「本機資料」）；草稿仍透過 `StorageService`（`core/data/local/`）存 JSON；路線不存檔，路線頁打開時依行程現算。`data/model/*Response` 是 JSON 格式（草稿的存檔）。路線的分享內容是可讀的文字，在畫面層組。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
 | Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。換 Room 時維持不變：沒有畫面需要監聽資料變化，不改成 Flow |
 
 ## 本機資料

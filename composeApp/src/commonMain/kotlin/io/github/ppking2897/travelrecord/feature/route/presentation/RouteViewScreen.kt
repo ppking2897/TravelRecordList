@@ -32,8 +32,11 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import io.github.ppking2897.travelrecord.core.presentation.theme.TravelRecordTheme
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Location
+import io.github.ppking2897.travelrecord.core.presentation.util.DateTimeFormatter
 import io.github.ppking2897.travelrecord.feature.route.domain.model.Route
+import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteDay
 import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
+import kotlinx.datetime.LocalDate
 import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -56,7 +59,7 @@ fun RouteViewScreen(
         viewModel.event.collect { event ->
             when (event) {
                 is RouteViewEvent.NavigateBack -> onNavigateBack()
-                is RouteViewEvent.ExportSuccess -> onExportSuccess(event.json)
+                is RouteViewEvent.ExportSuccess -> onExportSuccess(event.text)
                 is RouteViewEvent.ShowError -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
@@ -90,6 +93,12 @@ fun RouteViewScreen(
     )
 }
 
+/** 段落標題「第 1 天 · 2026/10/14」；日期在行程範圍外時只寫日期 */
+private fun RouteDay.title(): String {
+    val date = DateTimeFormatter.formatDate(date)
+    return dayNumber?.let { "第 $it 天 · $date" } ?: date
+}
+
 @Composable
 private fun RouteInfoCard(route: Route) {
     Card(
@@ -118,7 +127,7 @@ private fun RouteInfoCard(route: Route) {
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "${route.locations.size} 個地點",
+                    text = "${route.placeCount} 個地點",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -260,26 +269,32 @@ private fun RouteViewScreenPreview() {
             RouteViewScreenContent(
                 route = Route(
                     title = "東京一日遊",
-                    locations = listOf(
-                        RouteLocation(
-                            location = Location(
-                                name = "淺草寺",
-                                latitude = 35.7148,
-                                longitude = 139.7967,
-                                address = "東京都台東區淺草2-3-1"
-                            ),
-                            order = 0,
-                            notes = "參觀雷門和五重塔"
-                        ),
-                        RouteLocation(
-                            location = Location(
-                                name = "晴空塔",
-                                latitude = 35.7101,
-                                longitude = 139.8107,
-                                address = "東京都墨田區押上1-1-2"
-                            ),
-                            order = 1,
-                            notes = "登塔觀景"
+                    days = listOf(
+                        RouteDay(
+                            date = LocalDate(2026, 9, 15),
+                            dayNumber = 1,
+                            stops = listOf(
+                                RouteLocation(
+                                    location = Location(
+                                        name = "淺草寺",
+                                        latitude = 35.7148,
+                                        longitude = 139.7967,
+                                        address = "東京都台東區淺草2-3-1"
+                                    ),
+                                    order = 0,
+                                    notes = "參觀雷門和五重塔"
+                                ),
+                                RouteLocation(
+                                    location = Location(
+                                        name = "晴空塔",
+                                        latitude = 35.7101,
+                                        longitude = 139.8107,
+                                        address = "東京都墨田區押上1-1-2"
+                                    ),
+                                    order = 1,
+                                    notes = "登塔觀景"
+                                )
+                            )
                         )
                     ),
                     createdFrom = "1"
@@ -430,14 +445,23 @@ private fun RouteViewScreenContent(
                     )
                 }
                 
-                // 地點列表
-                itemsIndexed(route.locations) { index, routeLocation ->
-                    RouteLocationCard(
-                        routeLocation = routeLocation,
-                        isFirst = index == 0,
-                        isLast = index == route.locations.lastIndex,
-                        onOpenMapClick = onOpenMapClick
-                    )
+                // 依天分段，每段的編號從 1 開始
+                route.days.forEach { day ->
+                    item(key = "day_${day.date}") {
+                        Text(
+                            text = day.title(),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = Spacing.sm)
+                        )
+                    }
+                    itemsIndexed(day.stops) { index, routeLocation ->
+                        RouteLocationCard(
+                            routeLocation = routeLocation,
+                            isFirst = index == 0,
+                            isLast = index == day.stops.lastIndex,
+                            onOpenMapClick = onOpenMapClick
+                        )
+                    }
                 }
             }
         }

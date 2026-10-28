@@ -133,7 +133,7 @@ fun TravelApp() {
                 AppTab.Plan -> PlanNavHost(
                     backStack = planBackStack,
                     modifier = contentModifier,
-                    onShareRoute = { json -> shareLauncher.share(json, "分享行程路線") }
+                    onShareRoute = { text -> shareLauncher.share(text, "分享行程路線") }
                 )
 
                 AppTab.Today -> TodayScreen(

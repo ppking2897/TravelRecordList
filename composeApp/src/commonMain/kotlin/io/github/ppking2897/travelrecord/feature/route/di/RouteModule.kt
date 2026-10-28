@@ -2,7 +2,6 @@ package io.github.ppking2897.travelrecord.feature.route.di
 
 import io.github.ppking2897.travelrecord.feature.route.data.repository.RouteRepositoryImpl
 import io.github.ppking2897.travelrecord.feature.route.domain.repository.RouteRepository
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetMapMarkersUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 import io.github.ppking2897.travelrecord.feature.route.presentation.RouteViewViewModel
@@ -16,7 +15,6 @@ val routeModule = module {
     // Use Cases
     factory { GetRouteForItineraryUseCase(get()) }
     factory { GetMapMarkersUseCase(get()) }
-    factory { ExportRouteUseCase(get()) }
 
     // ViewModels
     viewModelOf(::RouteViewViewModel)

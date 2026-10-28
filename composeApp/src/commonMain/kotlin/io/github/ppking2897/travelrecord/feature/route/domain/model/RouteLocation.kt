@@ -6,7 +6,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Loc
  * 路線地點領域模型
  *
  * @property location 地點資訊
- * @property order 順序
+ * @property order 當天的順序，從 0 起算
  * @property notes 備註
  */
 data class RouteLocation(

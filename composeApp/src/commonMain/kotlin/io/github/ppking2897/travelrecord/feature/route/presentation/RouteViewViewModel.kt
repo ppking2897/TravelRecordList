@@ -1,7 +1,6 @@
 package io.github.ppking2897.travelrecord.feature.route.presentation
 
 import androidx.lifecycle.viewModelScope
-import io.github.ppking2897.travelrecord.feature.route.domain.usecase.ExportRouteUseCase
 import io.github.ppking2897.travelrecord.feature.route.domain.usecase.GetRouteForItineraryUseCase
 import io.github.ppking2897.travelrecord.core.presentation.mvi.BaseViewModel
 import kotlinx.coroutines.launch
@@ -12,8 +11,7 @@ import kotlinx.coroutines.launch
  * 負責處理路線檢視相關的業務邏輯
  */
 class RouteViewViewModel(
-    private val getRouteForItineraryUseCase: GetRouteForItineraryUseCase,
-    private val exportRouteUseCase: ExportRouteUseCase
+    private val getRouteForItineraryUseCase: GetRouteForItineraryUseCase
 ) : BaseViewModel<RouteViewIntent, RouteViewState, RouteViewEvent>(
     initialState = RouteViewState()
 ) {
@@ -54,15 +52,15 @@ class RouteViewViewModel(
     }
 
     /**
-     * 匯出路線為 JSON
+     * 依行程目前的項目排出路線，轉成分享用的文字
      */
     private suspend fun exportRoute(itineraryId: String) {
         updateState { copy(isExporting = true) }
 
-        exportRouteUseCase(itineraryId)
-            .onSuccess { json ->
+        getRouteForItineraryUseCase(itineraryId)
+            .onSuccess { route ->
                 updateState { copy(isExporting = false) }
-                sendEvent(RouteViewEvent.ExportSuccess(json))
+                sendEvent(RouteViewEvent.ExportSuccess(route.toShareText()))
             }
             .onFailure { exception ->
                 updateState { copy(isExporting = false) }

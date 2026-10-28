@@ -29,6 +29,7 @@ sealed class RouteViewIntent {
  */
 sealed class RouteViewEvent {
     object NavigateBack : RouteViewEvent()
-    data class ExportSuccess(val json: String) : RouteViewEvent()
+    /** 要分享的路線文字 */
+    data class ExportSuccess(val text: String) : RouteViewEvent()
     data class ShowError(val message: String) : RouteViewEvent()
 }
