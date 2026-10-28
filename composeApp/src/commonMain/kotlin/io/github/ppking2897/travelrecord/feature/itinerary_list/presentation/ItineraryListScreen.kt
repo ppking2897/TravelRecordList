@@ -175,16 +175,19 @@ private fun ItineraryPlanningDashboard(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onAddClick,
-                // 手帳風：膠囊形、墨色框、不加陰影
-                modifier = Modifier.border(CardStyle.borderWidth, MaterialTheme.colorScheme.outline, CircleShape),
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("建立行程") }
-            )
+            // 一筆行程都沒有時，空狀態已經有「建立第一個行程」，不再重複一顆
+            if (dashboard.emptyState != DashboardEmptyState.NoItineraries) {
+                ExtendedFloatingActionButton(
+                    onClick = onAddClick,
+                    // 手帳風：膠囊形、墨色框、不加陰影
+                    modifier = Modifier.border(CardStyle.borderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("建立行程") }
+                )
+            }
         }
     ) { paddingValues ->
         PullToRefreshBox(
