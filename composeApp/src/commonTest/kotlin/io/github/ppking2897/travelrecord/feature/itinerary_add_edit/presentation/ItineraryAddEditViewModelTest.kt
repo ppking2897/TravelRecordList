@@ -15,6 +15,8 @@ import io.github.ppking2897.travelrecord.test.inMemoryDraftRepository
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -226,6 +228,7 @@ class ItineraryAddEditViewModelTest {
             first,
             ItineraryAddEditIntent.LoadDraft,
             ItineraryAddEditIntent.UpdateTitle("京都大阪 5 日遊"),
+            *datesOfNewTrip,
             ItineraryAddEditIntent.Save,
         )
 
@@ -239,7 +242,7 @@ class ItineraryAddEditViewModelTest {
     fun `打字後馬上建立`() = runTest(dispatcher) {
         val useCases = useCasesOf()
         val first = viewModelWith(useCases)
-        act(first, ItineraryAddEditIntent.LoadDraft)
+        act(first, ItineraryAddEditIntent.LoadDraft, *datesOfNewTrip)
         type(first, "京都大阪 5 日遊")
         act(first, ItineraryAddEditIntent.Save)
 
@@ -370,7 +373,131 @@ class ItineraryAddEditViewModelTest {
         }
     }
 
+    // ── 規格調整第 4 組：行程一定要有日期（.claude/docs/SpecAdjustments.md）──
+
+    @Test
+    fun `新增行程沒選日期不能儲存`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+
+        act(viewModel, ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.UpdateTitle("東京 3 日遊"), ItineraryAddEditIntent.Save)
+
+        useCases.titles() shouldNotContain "東京 3 日遊"
+        viewModel.state.value.dateError shouldBe "請選擇開始與結束日期"
+    }
+
+    @Test
+    fun `只選了開始日期也不能儲存`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+
+        act(
+            viewModel,
+            ItineraryAddEditIntent.LoadDraft,
+            ItineraryAddEditIntent.UpdateTitle("東京 3 日遊"),
+            ItineraryAddEditIntent.UpdateStartDate(nov10),
+            ItineraryAddEditIntent.Save,
+        )
+
+        useCases.titles() shouldNotContain "東京 3 日遊"
+        viewModel.state.value.dateError shouldBe "請選擇開始與結束日期"
+    }
+
+    @Test
+    fun `補上日期後就能儲存`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+        act(
+            viewModel,
+            ItineraryAddEditIntent.LoadDraft,
+            ItineraryAddEditIntent.UpdateTitle("東京 3 日遊"),
+            ItineraryAddEditIntent.UpdateStartDate(nov10),
+            ItineraryAddEditIntent.Save,
+        )
+        viewModel.state.value.dateError shouldBe "請選擇開始與結束日期"
+
+        act(viewModel, ItineraryAddEditIntent.UpdateEndDate(nov12))
+        viewModel.state.value.dateError shouldBe null
+
+        act(viewModel, ItineraryAddEditIntent.Save)
+        val tokyo = useCases.getAllItineraries().getOrThrow().single { it.title == "東京 3 日遊" }
+        tokyo.startDate shouldBe nov10
+        tokyo.endDate shouldBe nov12
+    }
+
+    @Test
+    fun `標題和日期都沒填時先提示標題`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+
+        act(viewModel, ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.Save)
+
+        viewModel.state.value.titleError shouldBe "標題不可為空"
+        viewModel.state.value.dateError shouldBe null
+        useCases.titles() shouldHaveSize 2
+    }
+
+    @Test
+    fun `編輯沒日期的舊行程要先補日期`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+
+        act(
+            viewModel,
+            ItineraryAddEditIntent.LoadItinerary("hokkaido"),
+            ItineraryAddEditIntent.UpdateTitle("北海道 5 日遊"),
+            ItineraryAddEditIntent.Save,
+        )
+
+        viewModel.state.value.dateError shouldBe "請選擇開始與結束日期"
+        useCases.getItinerary("hokkaido").getOrThrow()?.title shouldBe "北海道"
+
+        act(
+            viewModel,
+            ItineraryAddEditIntent.UpdateStartDate(LocalDate(2026, 12, 1)),
+            ItineraryAddEditIntent.UpdateEndDate(LocalDate(2026, 12, 5)),
+            ItineraryAddEditIntent.Save,
+        )
+
+        val saved = useCases.getItinerary("hokkaido").getOrThrow()
+        saved?.title shouldBe "北海道 5 日遊"
+        saved?.startDate shouldBe LocalDate(2026, 12, 1)
+        saved?.endDate shouldBe LocalDate(2026, 12, 5)
+    }
+
+    @Test
+    fun `編輯有日期的行程照舊`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+
+        act(
+            viewModel,
+            ItineraryAddEditIntent.LoadItinerary("kyoto"),
+            ItineraryAddEditIntent.UpdateTitle("京都 5 日遊"),
+            ItineraryAddEditIntent.Save,
+        )
+
+        val saved = useCases.getItinerary("kyoto").getOrThrow()
+        saved?.title shouldBe "京都 5 日遊"
+        saved?.startDate shouldBe LocalDate(2026, 10, 1)
+        saved?.endDate shouldBe LocalDate(2026, 10, 5)
+    }
+
     // ── 測試工具 ──
+
+    private val nov10 = LocalDate(2026, 11, 10)
+    private val nov12 = LocalDate(2026, 11, 12)
+
+    /** 新增行程要有日期才存得進去（第 4 組起），只測草稿的情境用這組日期 */
+    private val datesOfNewTrip = arrayOf<ItineraryAddEditIntent>(
+        ItineraryAddEditIntent.UpdateStartDate(LocalDate(2026, 11, 20)),
+        ItineraryAddEditIntent.UpdateEndDate(LocalDate(2026, 11, 24)),
+    )
+
+    /** 舊版留下、沒有日期的行程 */
+    private val hokkaido = testItinerary("hokkaido", title = "北海道").copy(startDate = null, endDate = null)
+
+    private suspend fun TestUseCases.titles(): List<String> = getAllItineraries().getOrThrow().map { it.title }
 
     private val photoBytes = byteArrayOf(1, 2, 3)
 
@@ -379,7 +506,7 @@ class ItineraryAddEditViewModelTest {
         drafts: DraftRepository = inMemoryDraftRepository(),
     ): TestUseCases {
         val itemRepository = InMemoryItineraryItemRepository()
-        val itineraryRepository = wrap(InMemoryItineraryRepository(itemRepository, kyoto))
+        val itineraryRepository = wrap(InMemoryItineraryRepository(itemRepository, kyoto, hokkaido))
         return TestUseCases(itineraryRepository, itemRepository, imageStorage = imageStorage, drafts = drafts)
     }
 

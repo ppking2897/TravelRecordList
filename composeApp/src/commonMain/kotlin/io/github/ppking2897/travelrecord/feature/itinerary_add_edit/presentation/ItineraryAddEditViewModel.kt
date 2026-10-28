@@ -241,6 +241,12 @@ class ItineraryAddEditViewModel(
             return
         }
 
+        // 新增與編輯都要有開始與結束日期，沒日期的舊行程也要先補上才存得進去
+        if (snapshot.startDate == null || snapshot.endDate == null) {
+            updateState { copy(dateError = "請選擇開始與結束日期") }
+            return
+        }
+
         if (snapshot.startDate != null && snapshot.endDate != null &&
             snapshot.endDate!! < snapshot.startDate!!) {
             updateState { copy(dateError = "結束日期不能早於開始日期") }

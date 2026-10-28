@@ -457,7 +457,56 @@ class ItineraryDetailViewModelTest {
         viewModel.state.value.isSelectionMode shouldBe false
     }
 
+    // ── 規格調整第 4 組：沒日期的行程提示補日期（.claude/docs/SpecAdjustments.md）──
+
+    @Test
+    fun `沒日期的行程在詳情頁提示補日期`() = runTest(dispatcher) {
+        val viewModel = loadedHokkaido(useCasesOf(trip = hokkaido))
+
+        viewModel.state.value.needsDates shouldBe true
+    }
+
+    @Test
+    fun `只填了一個日期的行程也提示`() = runTest(dispatcher) {
+        val viewModel = loadedHokkaido(useCasesOf(trip = hokkaido.copy(startDate = dec1)))
+
+        viewModel.state.value.needsDates shouldBe true
+    }
+
+    @Test
+    fun `補完日期回到詳情後提示消失`() = runTest(dispatcher) {
+        val useCases = useCasesOf(trip = hokkaido)
+        val viewModel = loadedHokkaido(useCases)
+        viewModel.state.value.needsDates shouldBe true
+
+        useCases.updateItinerary(hokkaido.copy(startDate = dec1, endDate = dec5), now).getOrThrow()
+        act(viewModel, ItineraryDetailIntent.LoadItinerary("hokkaido"))
+
+        viewModel.state.value.needsDates shouldBe false
+        viewModel.state.value.dateRange shouldBe dec1..dec5
+    }
+
+    @Test
+    fun `有日期的行程不顯示提示`() = runTest(dispatcher) {
+        val viewModel = loaded(useCasesOf())
+
+        viewModel.state.value.needsDates shouldBe false
+    }
+
     // ── 測試工具 ──
+
+    private val dec1 = LocalDate(2026, 12, 1)
+    private val dec5 = LocalDate(2026, 12, 5)
+
+    /** 舊版留下、沒有日期的行程 */
+    private val hokkaido = testItinerary("hokkaido", title = "北海道").copy(startDate = null, endDate = null)
+
+    /** 建立 ViewModel 並讀取北海道這趟行程 */
+    private fun TestScope.loadedHokkaido(useCases: TestUseCases): ItineraryDetailViewModel {
+        val viewModel = viewModelWith(useCases)
+        act(viewModel, ItineraryDetailIntent.LoadItinerary("hokkaido"))
+        return viewModel
+    }
 
     private fun item(
         id: String,

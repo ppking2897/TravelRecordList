@@ -135,6 +135,7 @@ fun ItineraryDetailScreen(
         allGroupedItems = state.allGroupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
         dateRange = dateRange,
+        needsDates = state.needsDates,
         expandedItemIds = state.expandedItemIds,
         isLoading = isLoading,
         error = error,
@@ -231,6 +232,7 @@ private fun ItineraryDetailScreenContent(
     allGroupedItems: List<ItemsByDate> = groupedItems,
     selectedDate: LocalDate?,
     dateRange: ClosedRange<LocalDate>?,
+    needsDates: Boolean,
     expandedItemIds: Set<String>,
     isLoading: Boolean,
     error: String?,
@@ -442,6 +444,10 @@ private fun ItineraryDetailScreenContent(
                     )
                 }
 
+                if (needsDates) {
+                    MissingDatesCard(onSetDates = onEditItineraryClick)
+                }
+
                 selectedDate?.let { date ->
                     DayPlanningSummary(
                         date = date,
@@ -593,6 +599,40 @@ private fun DayPlanningSummary(
     }
 }
 
+/** 行程日期沒填完整時放在時間軸的位置，提醒先補日期 */
+@Composable
+private fun MissingDatesCard(onSetDates: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ListStyle.contentPadding, end = ListStyle.contentPadding, top = Spacing.xs),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(CardStyle.cornerRadius),
+        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Text(
+                text = "這趟行程的日期還沒設定完整",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "設定日期後才能新增項目，也才會出現在今日與回憶。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(onClick = onSetDates) {
+                Icon(Icons.Default.Edit, contentDescription = null)
+                Spacer(modifier = Modifier.width(Spacing.sm))
+                Text("設定日期")
+            }
+        }
+    }
+}
+
 @Composable
 private fun EmptyDatePlanningState(
     selectedDate: LocalDate?,
@@ -681,6 +721,7 @@ private fun ItineraryDetailScreenPreview() {
                 ),
                 selectedDate = null,
                 dateRange = LocalDate(2024, 3, 15)..LocalDate(2024, 3, 17),
+                needsDates = false,
                 expandedItemIds = emptySet(),
                 isLoading = false,
                 error = null,

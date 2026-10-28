@@ -10,7 +10,7 @@
 
 ### Requirement: 讀取行程與項目 <!-- ADDED 2026-10-16 -->
 
-進入行程詳情時，系統 SHALL 讀取該行程與它的所有項目。開始與結束日期都有填時 SHALL 顯示時間軸；只填一個或都沒填時不顯示。行程不存在時 SHALL 顯示「找不到行程」。讀取項目失敗時 SHALL 照常顯示行程，並顯示錯誤訊息。
+進入行程詳情時，系統 SHALL 讀取該行程與它的所有項目。開始與結束日期都有填時 SHALL 顯示時間軸；只填一個或都沒填時不顯示時間軸，改在那個位置 SHALL 顯示「這趟行程的日期還沒設定完整」與「設定日期」，按下打開這趟行程的編輯（情境見 [SpecAdjustments.md](SpecAdjustments.md) 第 4 組）。行程不存在時 SHALL 顯示「找不到行程」。讀取項目失敗時 SHALL 照常顯示行程，並顯示錯誤訊息。
 
 #### Scenario: 讀取成功
 - GIVEN 「京都大阪 5 日遊」（10/14–10/18）有 10/14 的「伏見稻荷」與 10/15 的「金閣寺」
@@ -21,6 +21,7 @@
 - GIVEN 行程只填了開始日
 - WHEN 使用者打開這趟行程的詳情
 - THEN 不顯示時間軸
+- AND 那個位置顯示「這趟行程的日期還沒設定完整」與「設定日期」
 
 #### Scenario: 找不到行程
 - GIVEN 行程已被刪除
@@ -287,7 +288,7 @@
 | Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
 |----------|------|------|--------|---------|
 | 讀取成功 | 邏輯 | ✅ | 2026-10-16 | `ItineraryDetailViewModelTest`；突變：讀取成功沒帶時間軸範圍、沒結束讀取中 → 紅 |
-| 日期沒填完整時不顯示時間軸 | 邏輯 | ✅ | 2026-10-16 | `ItineraryDetailViewModelTest`；突變：只填開始日也有時間軸 → 紅 |
+| 日期沒填完整時不顯示時間軸 | 邏輯 | ✅ | 2026-10-28 | `ItineraryDetailViewModelTest`；突變：只填開始日也有時間軸 → 紅。提示由 `ItineraryDetailViewModelTest#只填了一個日期的行程也提示` 驗（[SpecAdjustments.md](SpecAdjustments.md) Slice 4） |
 | 找不到行程 | 邏輯 | ✅ | 2026-10-16 | `ItineraryDetailViewModelTest`；突變：找不到行程沒訊息 → 紅 |
 | 讀取項目失敗 | 邏輯 | ✅ | 2026-10-16 | `ItineraryDetailViewModelTest`；突變：讀取項目失敗沒訊息 → 紅 |
 | 讀取中 | UI | 未測 | — | emulator 手測 |
@@ -401,3 +402,4 @@
 - **2026-10-23** MODIFIED: Requirement「生成路線」（PREVIOUSLY: 每按一次就另存一份路線，路線頁帶剛存的路線；失敗訊息是英文 / CHANGE: 路線不存檔，路線頁帶行程、打開時依行程現算；失敗訊息 2026-10-20 已改成中文，待辦的對應列移除）
 - **2026-10-28** MODIFIED: Requirement「管理項目照片」（PREVIOUSLY: 縮圖選單刪照片不確認 / CHANGE: 縮圖選單也先確認，文字跟預覽畫面一樣）。依 [SpecAdjustments.md](SpecAdjustments.md) 第 3 組，待辦的對應列移除。
 - **2026-10-28** 本頁的排序行為不變；今日、地圖、路線、回憶故事改成跟本頁一樣把沒排時間的排在當天最後，組內排序改用共用的規則。待辦「沒排時間的項目在這頁排最後、在今日頁排最前」移除。依 [SpecAdjustments.md](SpecAdjustments.md) 第 2 組。
+- **2026-10-28** MODIFIED: Requirement「讀取行程與項目」（PREVIOUSLY: 日期沒填完整時只是不顯示時間軸 / CHANGE: 在時間軸的位置提示「這趟行程的日期還沒設定完整」與「設定日期」，按下打開編輯行程）。依 [SpecAdjustments.md](SpecAdjustments.md) 第 4 組。

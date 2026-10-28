@@ -19,7 +19,11 @@ data class ItineraryDetailState(
     // 批量操作相關狀態
     val isSelectionMode: Boolean = false,
     val selectedItemIds: Set<String> = emptySet()
-)
+) {
+    /** 行程的開始或結束日期沒填，要在時間軸的位置提示補上日期 */
+    val needsDates: Boolean
+        get() = itinerary != null && (itinerary.startDate == null || itinerary.endDate == null)
+}
 
 sealed class ItineraryDetailIntent {
     data class LoadItinerary(val id: String) : ItineraryDetailIntent()
