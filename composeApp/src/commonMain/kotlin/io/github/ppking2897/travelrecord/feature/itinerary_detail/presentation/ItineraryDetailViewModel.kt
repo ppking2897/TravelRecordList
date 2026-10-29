@@ -54,6 +54,8 @@ class ItineraryDetailViewModel(
             when (intent) {
                 is ItineraryDetailIntent.LoadItinerary -> loadItinerary(intent.id)
                 is ItineraryDetailIntent.SelectDate -> selectDate(intent.date)
+                is ItineraryDetailIntent.ToggleHashtagFilter -> toggleHashtagFilter(intent.tag)
+                is ItineraryDetailIntent.ClearHashtagFilter -> clearHashtagFilter()
                 is ItineraryDetailIntent.ToggleItemCompletion -> toggleItemCompletion(intent.itemId)
                 is ItineraryDetailIntent.DeleteItem -> deleteItem(intent.itemId)
                 is ItineraryDetailIntent.DeleteItinerary -> deleteItinerary(intent.id)
@@ -85,14 +87,8 @@ class ItineraryDetailViewModel(
 
                     getItemsByItineraryUseCase(id)
                         .onSuccess { items ->
-                            // 保持先前的日期篩選
-                            val currentSelectedDate = state.value.selectedDate
-                            val filtered = if (currentSelectedDate != null) {
-                                filterItemsByDateUseCase(items, currentSelectedDate)
-                            } else {
-                                items
-                            }
-                            val grouped = groupItemsByDateUseCase(filtered)
+                            // 保持先前的日期與標籤篩選
+                            val grouped = filteredGroups(items, state.value.selectedDate, state.value.selectedHashtag)
                             val allGrouped = groupItemsByDateUseCase(items)
                             updateState {
                                 copy(
@@ -133,12 +129,7 @@ class ItineraryDetailViewModel(
         state.value.itinerary?.let { itinerary ->
             getItemsByItineraryUseCase(itinerary.id)
                 .onSuccess { items ->
-                    val filtered = if (date != null) {
-                        filterItemsByDateUseCase(items, date)
-                    } else {
-                        items
-                    }
-                    val grouped = groupItemsByDateUseCase(filtered)
+                    val grouped = filteredGroups(items, date, state.value.selectedHashtag)
                     val allGrouped = groupItemsByDateUseCase(items)
                     updateState {
                         copy(
@@ -148,6 +139,36 @@ class ItineraryDetailViewModel(
                     }
                 }
         }
+    }
+
+    /** 換成新的標籤時回到看整趟行程；取消時保留選中的日期 */
+    private fun toggleHashtagFilter(tag: String) {
+        if (state.value.selectedHashtag == tag) {
+            clearHashtagFilter()
+            return
+        }
+        val items = state.value.allGroupedItems.flatMap { it.items }
+        updateState {
+            copy(selectedHashtag = tag, selectedDate = null, groupedItems = filteredGroups(items, null, tag))
+        }
+    }
+
+    private fun clearHashtagFilter() {
+        val items = state.value.allGroupedItems.flatMap { it.items }
+        updateState {
+            copy(selectedHashtag = null, groupedItems = filteredGroups(items, selectedDate, null))
+        }
+    }
+
+    /**
+     * 列表顯示的分組：先套日期、再套標籤
+     *
+     * 讀取、選日期、點標籤都走這裡，兩種篩選才不會在其中一條路徑被洗掉。
+     */
+    private fun filteredGroups(items: List<ItineraryItem>, date: LocalDate?, tag: String?): List<ItemsByDate> {
+        val byDate = if (date != null) filterItemsByDateUseCase(items, date) else items
+        val byTag = if (tag != null) byDate.filter { item -> item.hashtags.any { it.tag == tag } } else byDate
+        return groupItemsByDateUseCase(byTag)
     }
 
     private suspend fun toggleItemCompletion(itemId: String) {

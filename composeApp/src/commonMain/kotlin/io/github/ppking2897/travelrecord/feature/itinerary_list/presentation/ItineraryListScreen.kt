@@ -62,6 +62,7 @@ import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import io.github.ppking2897.travelrecord.core.presentation.components.DefaultCoverPlaceholder
 import io.github.ppking2897.travelrecord.core.presentation.components.DeleteConfirmDialog
 import io.github.ppking2897.travelrecord.core.presentation.components.LocalImage
+import io.github.ppking2897.travelrecord.core.presentation.components.SwipeActionsBox
 import io.github.ppking2897.travelrecord.core.presentation.theme.CardStyle
 import io.github.ppking2897.travelrecord.core.presentation.theme.IconSize
 import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
@@ -392,118 +393,126 @@ private fun ItineraryDashboardCard(
     var showMenu by remember { mutableStateOf(false) }
     val stats = remember(itinerary.items) { itinerary.cardStats() }
 
-    Card(
+    // 左滑刪除（先確認）、右滑編輯，跟右上選單的「編輯」「刪除」做一樣的事
+    SwipeActionsBox(
+        onSwipeToDelete = onDelete,
+        onSwipeToEdit = onEdit,
+        enabled = true,
         modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
-        colors = CardDefaults.cardColors(
-            containerColor = if (emphasized) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLowest
-            }
-        ),
-        shape = RoundedCornerShape(CardStyle.cornerRadius),
-        border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CardStyle.contentPadding),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically
+                .clickable(onClick = onClick),
+            elevation = CardDefaults.cardElevation(defaultElevation = CardStyle.listCardElevation),
+            colors = CardDefaults.cardColors(
+                containerColor = if (emphasized) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLowest
+                }
+            ),
+            shape = RoundedCornerShape(CardStyle.cornerRadius),
+            border = BorderStroke(CardStyle.borderWidth, MaterialTheme.colorScheme.outline)
         ) {
-            TripCover(
-                itinerary = itinerary,
-                modifier = Modifier.size(if (compact) 72.dp else 96.dp)
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(CardStyle.contentPadding),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = itinerary.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    PhaseBadge(phase = phase)
-                }
-
-                formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
-                    Text(
-                        text = dateText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Text(
-                    text = "${stats.itemCount} 個地點 · ${stats.completedCount} 已完成 · ${stats.photoCount} 張照片",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                TripCover(
+                    itinerary = itinerary,
+                    modifier = Modifier.size(if (compact) 72.dp else 96.dp)
                 )
 
-                mainLocationOf(itinerary.items)?.let { location ->
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Place,
-                            contentDescription = null,
-                            modifier = Modifier.size(IconSize.xs),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                         Text(
-                            text = location,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            text = itinerary.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        PhaseBadge(phase = phase)
+                    }
+
+                    formatDateRange(itinerary.startDate, itinerary.endDate)?.let { dateText ->
+                        Text(
+                            text = dateText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
-            }
 
-            Box {
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "更多操作")
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("編輯") },
-                        onClick = {
-                            showMenu = false
-                            onEdit()
-                        },
-                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                    Text(
+                        text = "${stats.itemCount} 個地點 · ${stats.completedCount} 已完成 · ${stats.photoCount} 張照片",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    DropdownMenuItem(
-                        text = { Text("刪除") },
-                        onClick = {
-                            showMenu = false
-                            onDelete()
-                        },
-                        leadingIcon = {
+
+                    mainLocationOf(itinerary.items)?.let { location ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Icon(
-                                Icons.Default.Delete,
+                                Icons.Default.Place,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
+                                modifier = Modifier.size(IconSize.xs),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = location,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
-                    )
+                    }
+                }
+
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "更多操作")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("編輯") },
+                            onClick = {
+                                showMenu = false
+                                onEdit()
+                            },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("刪除") },
+                            onClick = {
+                                showMenu = false
+                                onDelete()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }

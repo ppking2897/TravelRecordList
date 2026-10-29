@@ -5,6 +5,7 @@ package io.github.ppking2897.travelrecord.feature.itinerary_detail.presentation
 import io.github.ppking2897.travelrecord.core.domain.service.ImageStorageService
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.model.Itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary.domain.repository.ItineraryRepository
+import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Hashtag
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.ItineraryItem
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.FilterItemsByDateUseCase
@@ -18,6 +19,7 @@ import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryRepository
 import io.github.ppking2897.travelrecord.test.TestUseCases
+import io.github.ppking2897.travelrecord.test.instantAt
 import io.github.ppking2897.travelrecord.test.testItem
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.github.ppking2897.travelrecord.test.testPhoto
@@ -498,6 +500,105 @@ class ItineraryDetailViewModelTest {
     private val dec1 = LocalDate(2026, 12, 1)
     private val dec5 = LocalDate(2026, 12, 5)
 
+    // ── 點標籤篩選同標籤的項目（SpecAdjustments.md 第 6 組） ──
+
+    @Test
+    fun `點標籤只列出同標籤的項目`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"))
+
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"), oct16 to listOf("天下一品"))
+        viewModel.state.value.selectedHashtag shouldBe "拉麵"
+    }
+
+    @Test
+    fun `再點一次取消篩選`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.ToggleHashtagFilter("拉麵"))
+
+        viewModel.state.value.groups shouldBe allRamenTripGroups
+        viewModel.state.value.selectedHashtag shouldBe null
+
+        // 按篩選條的 ✕ 也一樣
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.ClearHashtagFilter)
+
+        viewModel.state.value.groups shouldBe allRamenTripGroups
+        viewModel.state.value.selectedHashtag shouldBe null
+    }
+
+    @Test
+    fun `點別的標籤換成新的篩選`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.ToggleHashtagFilter("宵夜"))
+
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"))
+        viewModel.state.value.selectedHashtag shouldBe "宵夜"
+    }
+
+    @Test
+    fun `點標籤時看整趟行程`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.SelectDate(oct14), ItineraryDetailIntent.ToggleHashtagFilter("拉麵"))
+
+        viewModel.state.value.selectedDate shouldBe null
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"), oct16 to listOf("天下一品"))
+    }
+
+    @Test
+    fun `篩選中選某一天，兩個條件一起套用`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.SelectDate(oct16))
+
+        viewModel.state.value.groups shouldBe listOf(oct16 to listOf("天下一品"))
+        viewModel.state.value.selectedHashtag shouldBe "拉麵"
+
+        // 再點「全部」
+        act(viewModel, ItineraryDetailIntent.SelectDate(null))
+
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"), oct16 to listOf("天下一品"))
+    }
+
+    @Test
+    fun `刪除項目後篩選還在`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.DeleteItem("tenkaippin"))
+
+        viewModel.state.value.selectedHashtag shouldBe "拉麵"
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"))
+    }
+
+    @Test
+    fun `編輯項目回來後篩選還在`() = runTest(dispatcher) {
+        val useCases = ramenTrip()
+        val viewModel = loaded(useCases)
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"))
+
+        // 在編輯項目頁存檔：備註加上 #拉麵，標籤是存檔時從備註抓出來的
+        useCases.updateItem(ramenFushimi.copy(notes = "#神社 #拉麵"), currentTimestamp = now).getOrThrow()
+        // 回到行程詳情時畫面會再讀一次
+        act(viewModel, ItineraryDetailIntent.LoadItinerary("kyoto"))
+
+        viewModel.state.value.selectedHashtag shouldBe "拉麵"
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵", "伏見稻荷"), oct16 to listOf("天下一品"))
+    }
+
+    @Test
+    fun `篩不到項目時說明原因`() = runTest(dispatcher) {
+        val viewModel = loaded(ramenTrip())
+
+        act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.SelectDate(oct15))
+
+        // 畫面依「列表是空的、還在篩標籤」顯示「沒有 #拉麵 的項目」
+        viewModel.state.value.groupedItems.shouldBeEmpty()
+        viewModel.state.value.selectedHashtag shouldBe "拉麵"
+    }
+
     /** 舊版留下、沒有日期的行程 */
     private val hokkaido = testItinerary("hokkaido", title = "北海道").copy(startDate = null, endDate = null)
 
@@ -515,6 +616,21 @@ class ItineraryDetailViewModelTest {
         arrival: LocalTime? = null,
         departure: LocalTime? = null,
     ): ItineraryItem = testItem(id, "kyoto", date = date, arrivalTime = arrival, departureTime = departure, locationName = location)
+
+    /** 項目的備註寫著這些 #標籤，存檔時抓出的標籤也一起放好 */
+    private fun tagged(id: String, location: String, date: LocalDate, vararg tags: String): ItineraryItem =
+        item(id, location, date).copy(
+            notes = tags.joinToString(" ") { "#$it" },
+            hashtags = tags.map { Hashtag(tag = it, usageCount = 1, firstUsed = instantAt(0), lastUsed = instantAt(0)) },
+        )
+
+    // 第 6 組情境的資料
+    private val ramenIchiran = tagged("ichiran", "一蘭拉麵", oct14, "拉麵", "宵夜")
+    private val ramenFushimi = tagged("fushimi", "伏見稻荷", oct14, "神社")
+    private val ramenTenkaippin = tagged("tenkaippin", "天下一品", oct16, "拉麵")
+    private val allRamenTripGroups = listOf(oct14 to listOf("一蘭拉麵", "伏見稻荷"), oct16 to listOf("天下一品"))
+
+    private fun ramenTrip() = useCasesOf(ramenIchiran, ramenFushimi, ramenTenkaippin)
 
     /** 金閣寺有照片 A（封面）與 B */
     private fun kinkakuWithPhotos(): ItineraryItem =

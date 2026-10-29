@@ -12,6 +12,8 @@ data class ItineraryDetailState(
     /** 未套用任何過濾的完整分組，供 TimelineNavigator 顯示每日計數用 */
     val allGroupedItems: List<ItemsByDate> = emptyList(),
     val selectedDate: LocalDate? = null,
+    /** 正在篩的標籤（不含 #），跟日期篩選一起套用在 groupedItems */
+    val selectedHashtag: String? = null,
     val dateRange: ClosedRange<LocalDate>? = null,
     val expandedItemIds: Set<String> = emptySet(),
     val isLoading: Boolean = false,
@@ -28,6 +30,10 @@ data class ItineraryDetailState(
 sealed class ItineraryDetailIntent {
     data class LoadItinerary(val id: String) : ItineraryDetailIntent()
     data class SelectDate(val date: LocalDate?) : ItineraryDetailIntent()
+    /** 點卡片上的標籤：點的是正在篩的就取消，不是就換成它，並回到看整趟行程 */
+    data class ToggleHashtagFilter(val tag: String) : ItineraryDetailIntent()
+    /** 篩選條的 ✕ */
+    object ClearHashtagFilter : ItineraryDetailIntent()
     data class ToggleItemCompletion(val itemId: String) : ItineraryDetailIntent()
     data class DeleteItem(val itemId: String) : ItineraryDetailIntent()
     data class DeleteItinerary(val id: String) : ItineraryDetailIntent()

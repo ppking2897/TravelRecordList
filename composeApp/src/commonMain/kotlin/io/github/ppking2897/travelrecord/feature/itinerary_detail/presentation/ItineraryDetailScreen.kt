@@ -134,6 +134,7 @@ fun ItineraryDetailScreen(
         groupedItems = groupedItems.map { ItemsByDate(it.date, it.items) },
         allGroupedItems = state.allGroupedItems.map { ItemsByDate(it.date, it.items) },
         selectedDate = selectedDate,
+        selectedHashtag = state.selectedHashtag,
         dateRange = dateRange,
         needsDates = state.needsDates,
         expandedItemIds = state.expandedItemIds,
@@ -152,6 +153,8 @@ fun ItineraryDetailScreen(
         onDeleteItineraryClick = { showDeleteItineraryDialog = true },
         onGenerateRouteClick = { viewModel.processIntent(ItineraryDetailIntent.GenerateRoute) },
         onSelectDate = { viewModel.processIntent(ItineraryDetailIntent.SelectDate(it)) },
+        onHashtagClick = { viewModel.processIntent(ItineraryDetailIntent.ToggleHashtagFilter(it)) },
+        onClearHashtagFilter = { viewModel.processIntent(ItineraryDetailIntent.ClearHashtagFilter) },
         onToggleItemCompletion = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemCompletion(it)) },
         onToggleItemExpansion = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemExpansion(it)) },
         onDeleteItem = { itemId ->
@@ -231,6 +234,7 @@ private fun ItineraryDetailScreenContent(
     groupedItems: List<ItemsByDate>,
     allGroupedItems: List<ItemsByDate> = groupedItems,
     selectedDate: LocalDate?,
+    selectedHashtag: String?,
     dateRange: ClosedRange<LocalDate>?,
     needsDates: Boolean,
     expandedItemIds: Set<String>,
@@ -247,6 +251,8 @@ private fun ItineraryDetailScreenContent(
     onDeleteItineraryClick: () -> Unit,
     onGenerateRouteClick: () -> Unit,
     onSelectDate: (LocalDate?) -> Unit,
+    onHashtagClick: (String) -> Unit,
+    onClearHashtagFilter: () -> Unit,
     onToggleItemCompletion: (String) -> Unit,
     onToggleItemExpansion: (String) -> Unit,
     onDeleteItem: (String) -> Unit,
@@ -448,11 +454,16 @@ private fun ItineraryDetailScreenContent(
                     MissingDatesCard(onSetDates = onEditItineraryClick)
                 }
 
+                selectedHashtag?.let { tag ->
+                    HashtagFilterBar(tag = tag, onClear = onClearHashtagFilter)
+                }
+
                 selectedDate?.let { date ->
                     DayPlanningSummary(
                         date = date,
                         dayNumber = dateRange?.let { dayIndexFor(it, date) + 1 },
-                        items = groupedItems.firstOrNull { it.date == date }?.items.orEmpty(),
+                        // 一律算整天：依標籤篩選時列表可能是空的，摘要不能因此寫成那天沒排東西
+                        items = allGroupedItems.firstOrNull { it.date == date }?.items.orEmpty(),
                         onAddFirstItem = {
                             val range = dateRange
                             if (range != null) {
@@ -486,7 +497,16 @@ private fun ItineraryDetailScreenContent(
                     }
 
                     // 項目列表
-                    if (groupedItems.isEmpty()) {
+                    if (groupedItems.isEmpty() && selectedHashtag != null) {
+                        item {
+                            Text(
+                                text = "沒有 #$selectedHashtag 的項目",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = Spacing.lg)
+                            )
+                        }
+                    } else if (groupedItems.isEmpty()) {
                         item {
                             EmptyDatePlanningState(
                                 selectedDate = selectedDate,
@@ -533,6 +553,9 @@ private fun ItineraryDetailScreenContent(
                                         onAddPhoto = onAddPhoto,
                                         onSetCoverPhoto = onSetCoverPhoto,
                                         onDeletePhoto = onDeletePhoto,
+                                        selectedHashtag = selectedHashtag,
+                                        // 多選模式時點標籤等於點卡片（選取）
+                                        onHashtagClick = if (isSelectionMode) null else onHashtagClick,
                                         isSelectionMode = isSelectionMode,
                                         isSelected = selectedItemIds.contains(item.id),
                                         onSelectionToggle = { onToggleItemSelection(item.id) }
@@ -596,6 +619,37 @@ private fun DayPlanningSummary(
                 }
             }
         }
+    }
+}
+
+/** 正在依標籤篩選：顯示篩的是哪個標籤，按下就取消 */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HashtagFilterBar(tag: String, onClear: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = ListStyle.contentPadding),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "篩選標籤",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        InputChip(
+            selected = true,
+            onClick = onClear,
+            label = { Text("#$tag") },
+            trailingIcon = {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "取消篩選",
+                    modifier = Modifier.size(InputChipDefaults.IconSize)
+                )
+            }
+        )
     }
 }
 
@@ -720,6 +774,7 @@ private fun ItineraryDetailScreenPreview() {
                     )
                 ),
                 selectedDate = null,
+                selectedHashtag = null,
                 dateRange = LocalDate(2024, 3, 15)..LocalDate(2024, 3, 17),
                 needsDates = false,
                 expandedItemIds = emptySet(),
@@ -733,6 +788,8 @@ private fun ItineraryDetailScreenPreview() {
                 onDeleteItineraryClick = {},
                 onGenerateRouteClick = {},
                 onSelectDate = {},
+                onHashtagClick = {},
+                onClearHashtagFilter = {},
                 onToggleItemCompletion = {},
                 onToggleItemExpansion = {},
                 onDeleteItem = {},

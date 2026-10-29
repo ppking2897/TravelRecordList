@@ -264,7 +264,7 @@
 - 標記完成時的完成時間與修改時間取自 Koin 注入的 `Clock`（正式執行給手機時鐘，測試給固定時鐘），比照今日頁；這頁只用到「現在的時刻」，不需要時區。
 - 刪除項目、刪除行程、批次刪除的確認視窗由畫面控制；刪除行程成功後 ViewModel 送 `NavigateBack`。
 - 「新增這天」送 `QuickAddItem(dayIndex)`，ViewModel 換算成「開始日 + dayIndex」，超出範圍時夾在開始日與結束日之間，再送 `NavigateToQuickAddItem`。
-- ViewModel 另有依標籤篩選（`FilterByHashtag`）與全選（`SelectAll`），畫面都沒有接上；依標籤篩選也只做了一半（切換日期或重新讀取會洗掉標籤篩選）。2026-10-16 決定兩者都刪除（含只給它用的 `FilterByHashtagUseCase`），之後有規劃再照規格重做。
+- ViewModel 另有依標籤篩選（`FilterByHashtag`）與全選（`SelectAll`），畫面都沒有接上；依標籤篩選也只做了一半（切換日期或重新讀取會洗掉標籤篩選）。2026-10-16 決定兩者都刪除（含只給它用的 `FilterByHashtagUseCase`），之後有規劃再照規格重做。依標籤篩選 2026-10-28 照規格重做，日期與標籤由同一個函式一起套用，情境在 [SpecAdjustments.md](SpecAdjustments.md) 第 6 組。
 
 ---
 
@@ -378,7 +378,6 @@
 | 項目 | 屬於誰 | 阻擋上線？ |
 |------|-------|----------|
 | 2026-10-16 決定在 5b 修（先寫測試再修）。標記完成後，時間軸的「(已完成/總數)」不會更新：標記完成只改列表用的分組，沒有改時間軸用的分組；產品規格書已知問題 #9 | App | 否 |
-| 卡片上的 #標籤點了沒反應；產品規格書已知問題 #11。ViewModel 裡未接上的依標籤篩選已決定刪除（2026-10-16），要做時照產品規格書待確認 #14 重寫 | App | 否 |
 
 ---
 
@@ -403,3 +402,4 @@
 - **2026-10-28** MODIFIED: Requirement「管理項目照片」（PREVIOUSLY: 縮圖選單刪照片不確認 / CHANGE: 縮圖選單也先確認，文字跟預覽畫面一樣）。依 [SpecAdjustments.md](SpecAdjustments.md) 第 3 組，待辦的對應列移除。
 - **2026-10-28** 本頁的排序行為不變；今日、地圖、路線、回憶故事改成跟本頁一樣把沒排時間的排在當天最後，組內排序改用共用的規則。待辦「沒排時間的項目在這頁排最後、在今日頁排最前」移除。依 [SpecAdjustments.md](SpecAdjustments.md) 第 2 組。
 - **2026-10-28** MODIFIED: Requirement「讀取行程與項目」（PREVIOUSLY: 日期沒填完整時只是不顯示時間軸 / CHANGE: 在時間軸的位置提示「這趟行程的日期還沒設定完整」與「設定日期」，按下打開編輯行程）。依 [SpecAdjustments.md](SpecAdjustments.md) 第 4 組。
+- **2026-10-28** 依 [SpecAdjustments.md](SpecAdjustments.md) 第 6 組：卡片上的 #標籤可以點來篩選同標籤的項目（跟選日期一起套用，重新讀取不會洗掉）；項目卡片可以左滑刪除（先確認）、右滑編輯，選單照舊。情境與測試在那份文件，待辦的標籤列移除。

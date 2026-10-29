@@ -11,7 +11,8 @@ import kotlin.time.Clock
 class HashtagRepositoryImpl : HashtagRepository {
 
     companion object {
-        private val HASHTAG_REGEX = Regex("""#([\w\u4e00-\u9fa5]+)""")
+        // 注音鍵盤打出的是全形「＃」，兩種都認
+        private val HASHTAG_REGEX = Regex("""[#＃]([\w\u4e00-\u9fa5]+)""")
     }
 
     override fun extractHashtags(text: String): List<Hashtag> {
