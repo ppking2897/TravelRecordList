@@ -219,7 +219,10 @@ private fun AllTabItem(
         Text(
             text = "第 1 天",
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.alpha(0f)
+            modifier = Modifier.alpha(0f),
+            // 跟每一天的標籤一樣只佔一行，字放大時高度才對得上
+            maxLines = 1,
+            softWrap = false
         )
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))
@@ -318,7 +321,10 @@ private fun TimelineNodeItem(
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold,
             color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            // 字放大時「第 10 天」不折成兩行：折行的那一格會變高，節點與連接線就錯開
+            maxLines = 1,
+            softWrap = false
         )
 
         Spacer(modifier = Modifier.height(TimelineDimensions.labelSpacing))

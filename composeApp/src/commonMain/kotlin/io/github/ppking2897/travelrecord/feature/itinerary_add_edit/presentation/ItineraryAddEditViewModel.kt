@@ -41,6 +41,9 @@ class ItineraryAddEditViewModel(
     /** 「已自動儲存草稿」的隱藏倒數 */
     private var draftHintJob: Job? = null
 
+    /** 草稿讀過了；畫面重建時不再讀 */
+    private var draftLoaded = false
+
     override fun processIntent(intent: ItineraryAddEditIntent) {
         viewModelScope.launch {
             when (intent) {
@@ -63,6 +66,9 @@ class ItineraryAddEditViewModel(
      * 載入現有行程（編輯模式）
      */
     private suspend fun loadItinerary(itineraryId: String) {
+        // 畫面重建（轉螢幕、切深色模式等）時會再送一次；已經讀過就不重讀，免得蓋掉還沒存的修改
+        if (state.value.itinerary?.id == itineraryId) return
+
         updateState { copy(isLoading = true, isEditMode = true) }
 
         getItineraryUseCase(itineraryId)
@@ -103,6 +109,9 @@ class ItineraryAddEditViewModel(
      */
     private suspend fun loadDraft() {
         if (state.value.isEditMode) return
+        // 畫面重建時會再送一次；草稿只讀一次，不然還沒存成草稿的字會被舊草稿蓋掉
+        if (draftLoaded) return
+        draftLoaded = true
 
         loadDraftUseCase(DraftType.ITINERARY)
             .onSuccess { draftData ->
@@ -233,6 +242,9 @@ class ItineraryAddEditViewModel(
      * 儲存行程
      */
     private suspend fun save() {
+        // 連按儲存：存檔中、或已經存好正要離開時，不再存一次
+        if (state.value.isLoading) return
+
         val snapshot = state.value
 
         // 驗證
@@ -276,7 +288,7 @@ class ItineraryAddEditViewModel(
                     if (originalCover != null && originalCover != snapshot.coverPhotoPath) {
                         imageStorageService.deleteImage(originalCover)
                     }
-                    updateState { copy(isLoading = false) }
+                    // 不把 isLoading 改回 false：畫面要離開了，換頁途中再按儲存不能又存一次
                     sendEvent(ItineraryAddEditEvent.SaveSuccess(itinerary.id))
                 }
                 .onFailure { exception ->
@@ -302,7 +314,7 @@ class ItineraryAddEditViewModel(
                     // 清除草稿
                     deleteDraftUseCase(DraftType.ITINERARY)
 
-                    updateState { copy(isLoading = false) }
+                    // 不把 isLoading 改回 false，理由同上
                     sendEvent(ItineraryAddEditEvent.SaveSuccess(itinerary.id))
                 }
                 .onFailure { exception ->

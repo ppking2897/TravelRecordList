@@ -5,6 +5,7 @@ package io.github.ppking2897.travelrecord.feature.memory.data.service
 import io.github.ppking2897.travelrecord.test.testItem
 import io.github.ppking2897.travelrecord.test.testItinerary
 import io.github.ppking2897.travelrecord.test.testPhoto
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
@@ -41,7 +42,25 @@ class LocalRuleBasedMemoryStoryGeneratorTest {
         story.summary shouldBe "10 月的京都之旅，走了 3 天、5 個地方。"
         story.narrative shouldBe "10 月 14 日，旅程從伏見稻荷展開。這 3 天裡走過 5 個地方，每一處都留下了打卡紀錄。" +
             "最後一站嵐山成了旅程的句點——相簿裡留下 2 張照片，剩下的就放在心裡。"
+
+        // 其他幾種開頭與結尾：沒有開始日、只去一個地方、沒有項目
+        val noStartDate = generator.generate(
+            testItinerary("kyoto", title = "京都").copy(startDate = null, endDate = null),
+            listOf(visited("arashiyama", LocalDate(2026, 10, 16), null, "嵐山"))
+        )
+        val noItems = generator.generate(
+            testItinerary("kyoto", title = "京都").copy(startDate = LocalDate(2026, 10, 14)),
+            emptyList()
+        )
+        listOf(noStartDate, noItems).forEach { other ->
+            listOf(other.title, other.summary, other.narrative).forEach { text ->
+                withClue(text) { text.contains(spaceBetweenWords) shouldBe false }
+            }
+        }
     }
+
+    /** 兩邊都不是數字的空格，也就是中文字或地名旁多出來的空格；「3 天」「10 月 14 日」的空格不算 */
+    private val spaceBetweenWords = Regex("""(?<=\D) (?=\D)""")
 
     @Test
     fun `回憶故事的第一站與最後一站`() = runTest {

@@ -13,6 +13,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -158,11 +159,11 @@ private fun RouteLocationCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
+                // 編號方塊上下的連接線用直的；橫線放在 2dp 寬的格子裡只剩一個點
                 if (!isFirst) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(16.dp),
+                    VerticalDivider(
+                        modifier = Modifier.height(16.dp),
+                        thickness = 2.dp,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -184,10 +185,9 @@ private fun RouteLocationCard(
                 }
                 
                 if (!isLast) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .width(2.dp)
-                            .height(16.dp),
+                    VerticalDivider(
+                        modifier = Modifier.height(16.dp),
+                        thickness = 2.dp,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

@@ -376,9 +376,9 @@ private fun previewMemories(): List<TripMemory> {
         modifiedAt = now
     )
     val story = MemoryStory(
-        title = "春天的 京都",
-        summary = "3 月的 京都 之旅，走了 5 天、8 個地方。",
-        narrative = "3 月 10 日，旅程從 伏見稲荷大社 展開。這 5 天裡走過 8 個地方，其中 6 處完成了打卡，其他留給下一次的回望。最後一站 日本環球影城 成了旅程的句點——相簿裡留下 24 張照片，足夠讓回憶細細展開。",
+        title = "春天的京都",
+        summary = "3 月的京都之旅，走了 5 天、8 個地方。",
+        narrative = "3 月 10 日，旅程從伏見稲荷大社展開。這 5 天裡走過 8 個地方，其中 6 處完成了打卡，其他留給下一次的回望。最後一站日本環球影城成了旅程的句點——相簿裡留下 24 張照片，足夠讓回憶細細展開。",
         dailyHighlights = listOf(
             DailyHighlight(start, "千本鳥居參拜", 2),
             DailyHighlight(LocalDate(2026, 3, 11), "參觀金閣寺", 2),

@@ -31,8 +31,9 @@ class InitializeSampleDataUseCase(
             val existingItineraries = itineraryRepository.getAllItineraries().getOrThrow()
 
             if (existingItineraries.isNotEmpty()) {
-                // 已有資料，不需要插入；記下來，之後行程刪光也不再放
-                sampleDataRecord.markSampleDataAdded().getOrThrow()
+                // 已有資料，不需要插入；記下來，之後行程刪光也不再放。
+                // 寫不進去也照常啟動：下次啟動仍有行程，會再走這裡補寫
+                sampleDataRecord.markSampleDataAdded()
                 return@runCatching false
             }
 
@@ -52,7 +53,8 @@ class InitializeSampleDataUseCase(
                     itemRepository.addItem(item).getOrThrow()
                 }
             }
-            sampleDataRecord.markSampleDataAdded().getOrThrow()
+            // 寫不進去也照常啟動：下次啟動已經有範例行程，會走上面補寫紀錄，不會再放一次
+            sampleDataRecord.markSampleDataAdded()
 
             true
         }

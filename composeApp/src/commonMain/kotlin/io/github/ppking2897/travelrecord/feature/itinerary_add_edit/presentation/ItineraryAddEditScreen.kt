@@ -171,7 +171,11 @@ fun ItineraryAddEditScreen(
             title = { Text("捨棄變更？") },
             text = { Text("您有未儲存的變更，確定要離開嗎？") },
             confirmButton = {
-                TextButton(onClick = { viewModel.processIntent(ItineraryAddEditIntent.Discard) }) {
+                // 先關掉對話框：換頁動畫期間對話框還在，連點兩下會多退一頁
+                TextButton(onClick = {
+                    showDiscardDialog = false
+                    viewModel.processIntent(ItineraryAddEditIntent.Discard)
+                }) {
                     Text("捨棄")
                 }
             },

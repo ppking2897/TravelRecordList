@@ -159,7 +159,7 @@ Repository 回傳型別不在此項：規則的 `Flow<ApiResult<T>>` 是為打�
 **第 1 批（2026-10-27 決定）**
 
 - [x] 建立行程時開始與結束日期必填；既有沒日期的行程，在詳情頁提示補日期（待確認 #4） → 2026-10-28 完成，單元測試與 Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 4 組）
-- [x] 路線分享改成「第 1 天：伏見稻荷 → 金閣寺」這種可讀文字，路線改成分天；地圖與路線合併留到做真地圖時（待確認 #5） → 2026-10-28 前半完成，單元測試通過，Android 實機驗證待做（[SpecAdjustments.md](SpecAdjustments.md) 第 5 組）；地圖與路線合併仍留到做真地圖時
+- [x] 路線分享改成「第 1 天：伏見稻荷 → 金閣寺」這種可讀文字，路線改成分天；地圖與路線合併留到做真地圖時（待確認 #5） → 2026-10-28 前半完成，單元測試通過，2026-10-30 Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 5 組）；地圖與路線合併仍留到做真地圖時
 - [x] 用語統一：「規劃中」、「第 N 天」、完整日期寫 2026/10/20，故事文字去掉多餘空格（待確認 #16） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
 - [x] 首頁拿掉「最近編輯」區塊與右上角的足跡按鈕（待確認 #12、#13） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
 - [x] 沒排時間的項目，各畫面一律排在當天最後（待確認 #6） → 2026-10-28 完成，單元測試與 Android 實機驗證（地圖頁只靠單元測試）（[SpecAdjustments.md](SpecAdjustments.md) 第 2 組）
@@ -178,8 +178,8 @@ Repository 回傳型別不在此項：規則的 `Flow<ApiResult<T>>` 是為打�
 
 - [x] 「今日」分頁的圖示從「＋」換成日曆上標一個點的「今天」圖示（待確認 #1 後半） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
 - [x] 足跡、回憶的空狀態加「去看行程」按鈕，切到行程分頁（待確認 #15、UI 改善 #7） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
-- [x] 點項目上的標籤，篩出這趟行程裡同標籤的項目，再點一次取消（待確認 #14） → 2026-10-28 完成，單元測試通過，Android 實機驗證待做（[SpecAdjustments.md](SpecAdjustments.md) 第 6 組）
-- [x] 行程卡片與項目卡片：左滑刪除（先確認）、右滑編輯，原本的選單照樣能用（UI 改善 #8） → 2026-10-28 完成，Android 實機驗證待做（同上）
+- [x] 點項目上的標籤，篩出這趟行程裡同標籤的項目，再點一次取消（待確認 #14） → 2026-10-28 完成，單元測試通過，2026-10-29 Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 6 組）
+- [x] 行程卡片與項目卡片：左滑刪除（先確認）、右滑編輯，原本的選單照樣能用（UI 改善 #8） → 2026-10-28 完成，2026-10-29 Android 實機驗證通過（同上）
 
 ## UI 改善
 
@@ -193,11 +193,11 @@ Repository 回傳型別不在此項：規則的 `Flow<ApiResult<T>>` 是為打�
 | 4 | 骨架載入擴到其他畫面 | `uiux-fix-plan.md` 3.4 | 只有行程列表用 `ShimmerPlaceholder` | 不需要 |
 | 5 | 行程標題改為單行輸入（待你確認） | 實機：標題「test」的卡片多出一行 | 標題欄可輸入換行 | 不需要 |
 | 6 | 清掉沒人用的共用空狀態元件 | 程式碼盤點 | `EmptyState`、`EmptyStateEnhanced` 皆 0 處使用 | 不需要 |
-| 7 | 足跡、回憶的空狀態加上下一步按鈕（2026-10-27 定為「去看行程」，切到行程分頁） | [NN/g 空狀態三原則](https://www.nngroup.com/articles/empty-state-interface-design/)：說明狀態、教怎麼開始、給直接路徑 | 行程、今日、詳情有按鈕；足跡、回憶只有文字 | 需要 |
-| 8 | 卡片左右滑手勢，並保留按鈕替代（2026-10-27 定為左滑刪除、右滑編輯） | [WCAG 2.5.1](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html)（A 級）：路徑手勢要有單指點擊的替代 | 已做（2026-10-28，規格調整第 6 組；實機驗證待做） | 需要 |
+| 7 | 足跡、回憶的空狀態加上下一步按鈕（2026-10-27 定為「去看行程」，切到行程分頁） | [NN/g 空狀態三原則](https://www.nngroup.com/articles/empty-state-interface-design/)：說明狀態、教怎麼開始、給直接路徑 | 已做（2026-10-27，規格調整第 1 組：足跡、回憶的空狀態加「去看行程」） | 需要 |
+| 8 | 卡片左右滑手勢，並保留按鈕替代（2026-10-27 定為左滑刪除、右滑編輯） | [WCAG 2.5.1](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html)（A 級）：路徑手勢要有單指點擊的替代 | 已做（2026-10-28，規格調整第 6 組；2026-10-29 實機驗證通過） | 需要 |
 | 9 | 地圖與列表同步選取 | [旅遊 App 設計範例](https://screensdesign.com/articles/travel-itinerary-app-design-examples/)（二手）：列表講順序、地圖講距離，切換時保留選中的日期與項目 | 地圖目前是列表版，做真地圖時一起設計 | 需要 |
 | 10 | 行程項目卡片的資訊順序 | 同上（二手）：日期、當地時間、地點、停留時間、預約狀態、下一步，順序固定 | 尚未盤點現有卡片欄位 | 需要 |
-| 11 | 時間軸「Day N」與中文介面混用（2026-10-27 定為「第 N 天」） | 實機 | `TimelineNavigator` 寫死 "Day N" | 需要 |
+| 11 | 時間軸「Day N」與中文介面混用（2026-10-27 定為「第 N 天」） | 實機 | 已做（2026-10-27，規格調整第 1 組：時間軸、摘要卡、地圖頁都改成「第 N 天」） | 需要 |
 | 12 | 自訂字級與圓角 | `ui-review.md` 第五節 | Theme 只定了色彩，Typography、Shapes 用 Material 預設（2026-10-27：字級已依手帳風示意圖自訂；圓角在各元件上依示意圖調整，Theme 的 Shapes 仍是預設） | 需要 |
 | 13 | Material 3 Expressive（新動態、形狀、元件） | [Compose Material3 版本紀錄](https://developer.android.com/jetpack/androidx/releases/compose-material3)：1.5.0 正把 Expressive API 移出實驗階段（1.5.0-beta01，2026-10-07） | 專案用 Compose Multiplatform 1.10.3；等它的穩定版跟上再評估 | 先不採用 |
 

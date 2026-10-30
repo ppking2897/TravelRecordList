@@ -14,6 +14,7 @@ import io.github.ppking2897.travelrecord.test.FailingUpdateItemRepository
 import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryRepository
+import io.github.ppking2897.travelrecord.test.StubItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.SwitchableReadItineraryRepository
 import io.github.ppking2897.travelrecord.test.TestUseCases
 import io.github.ppking2897.travelrecord.test.testItem
@@ -149,13 +150,17 @@ class TodayViewModelTest {
 
     @Test
     fun `沒排時間的項目排在最後面`() = runTest(dispatcher) {
-        val viewModel = kyotoViewModelWith(
-            item("gion", "祇園晚餐"),
-            item("kiyomizu", "清水寺", arrival = LocalTime(14, 30)),
-            item("nishiki", "錦市場", arrival = LocalTime(14, 30)),
-            item("fushimi", "伏見稻荷", departure = LocalTime(9, 0)),
-            item("yasaka", "八坂神社"),
+        // 讀出時照給的順序回傳、不先排好，才看得出今日頁自己有沒有排序
+        val unsorted = StubItineraryItemRepository(
+            listOf(
+                item("gion", "祇園晚餐"),
+                item("kiyomizu", "清水寺", arrival = LocalTime(14, 30)),
+                item("nishiki", "錦市場", arrival = LocalTime(14, 30)),
+                item("fushimi", "伏見稻荷", departure = LocalTime(9, 0)),
+                item("yasaka", "八坂神社"),
+            )
         )
+        val viewModel = viewModelWith(useCasesOf(unsorted, kyoto))
 
         act(viewModel, TodayIntent.LoadToday)
 

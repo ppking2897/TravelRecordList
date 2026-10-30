@@ -10,6 +10,7 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Iti
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.itemDayOrder
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.repository.ItineraryItemRepository
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
@@ -160,6 +161,17 @@ class FailingReadItemRepository(
 ) : ItineraryItemRepository by base {
     override suspend fun getItemsByItinerary(itineraryId: String): Result<List<ItineraryItem>> =
         Result.failure(IllegalStateException("讀取項目失敗"))
+}
+
+/** 讀取某行程的項目要等 [delayMs] 毫秒（測試的虛擬時間），用來在讀取途中送下一個指令；其餘行為同 [base] */
+class SlowReadItemRepository(
+    private val base: ItineraryItemRepository,
+    private val delayMs: Long = 100,
+) : ItineraryItemRepository by base {
+    override suspend fun getItemsByItinerary(itineraryId: String): Result<List<ItineraryItem>> {
+        delay(delayMs)
+        return base.getItemsByItinerary(itineraryId)
+    }
 }
 
 /** 刪除項目一律失敗，其餘行為同 [base] */

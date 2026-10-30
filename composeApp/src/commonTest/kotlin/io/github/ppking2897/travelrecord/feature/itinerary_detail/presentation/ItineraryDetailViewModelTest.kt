@@ -18,6 +18,7 @@ import io.github.ppking2897.travelrecord.test.FailingUpdateItemRepository
 import io.github.ppking2897.travelrecord.test.FakeImageStorageService
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryItemRepository
 import io.github.ppking2897.travelrecord.test.InMemoryItineraryRepository
+import io.github.ppking2897.travelrecord.test.SlowReadItemRepository
 import io.github.ppking2897.travelrecord.test.TestUseCases
 import io.github.ppking2897.travelrecord.test.instantAt
 import io.github.ppking2897.travelrecord.test.testItem
@@ -37,6 +38,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.LocalDate
@@ -549,6 +551,20 @@ class ItineraryDetailViewModelTest {
     }
 
     @Test
+    fun `選日期還在讀取時點標籤`() = runTest(dispatcher) {
+        val viewModel = loaded(useCasesOf(ramenIchiran, ramenFushimi, ramenTenkaippin, wrapItems = { SlowReadItemRepository(it) }))
+
+        // 點第 3 天，資料還在讀就點 #拉麵
+        viewModel.processIntent(ItineraryDetailIntent.SelectDate(oct16))
+        runCurrent()
+        viewModel.processIntent(ItineraryDetailIntent.ToggleHashtagFilter("拉麵"))
+        advanceUntilIdle()
+
+        viewModel.state.value.selectedDate shouldBe null
+        viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"), oct16 to listOf("天下一品"))
+    }
+
+    @Test
     fun `篩選中選某一天，兩個條件一起套用`() = runTest(dispatcher) {
         val viewModel = loaded(ramenTrip())
 
@@ -571,6 +587,8 @@ class ItineraryDetailViewModelTest {
 
         viewModel.state.value.selectedHashtag shouldBe "拉麵"
         viewModel.state.value.groups shouldBe listOf(oct14 to listOf("一蘭拉麵"))
+        // 刪除後重新讀取，時間軸照樣算整天：10/14 還有一蘭拉麵與伏見稻荷
+        viewModel.state.value.timelineCountOn(oct14) shouldBe 2
     }
 
     @Test
@@ -590,13 +608,21 @@ class ItineraryDetailViewModelTest {
 
     @Test
     fun `篩不到項目時說明原因`() = runTest(dispatcher) {
-        val viewModel = loaded(ramenTrip())
+        // 只有這條情境：10/15 另有兩個沒有標籤的項目
+        val viewModel = loaded(
+            useCasesOf(
+                ramenIchiran, ramenFushimi, ramenTenkaippin,
+                item("kinkaku", "金閣寺", oct15), item("chikurin", "竹林", oct15),
+            )
+        )
 
         act(viewModel, ItineraryDetailIntent.ToggleHashtagFilter("拉麵"), ItineraryDetailIntent.SelectDate(oct15))
 
         // 畫面依「列表是空的、還在篩標籤」顯示「沒有 #拉麵 的項目」
         viewModel.state.value.groupedItems.shouldBeEmpty()
         viewModel.state.value.selectedHashtag shouldBe "拉麵"
+        // 當日摘要卡與時間軸照樣算整天
+        viewModel.state.value.timelineCountOn(oct15) shouldBe 2
     }
 
     /** 舊版留下、沒有日期的行程 */

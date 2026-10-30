@@ -138,6 +138,16 @@ class RouteRepositoryImplTest {
         )
 
         route.dayStops shouldBe listOf(1 to listOf("飯店", "伏見稻荷"), 4 to listOf("金閣寺", "飯店"))
+
+        // 前一天最後一站跟隔天第一站同名（晚上回飯店、隔天從飯店出發）也照實列出
+        val overnight = routeOf(
+            item("fushimi-2", "伏見稻荷", oct14, LocalTime(10, 0)),
+            item("hotel-night", "飯店", oct14, LocalTime(20, 0)),
+            item("hotel-morning", "飯店", oct15, LocalTime(8, 0)),
+            item("kinkaku-2", "金閣寺", oct15, LocalTime(10, 0)),
+        )
+
+        overnight.dayStops shouldBe listOf(1 to listOf("伏見稻荷", "飯店"), 2 to listOf("飯店", "金閣寺"))
     }
 
     @Test
@@ -175,6 +185,30 @@ class RouteRepositoryImplTest {
         )
 
         route.days.map { it.date to it.dayNumber } shouldBe listOf(oct14 to 1, oct17 to null)
+
+        // 早於開始日的也算範圍外
+        val startsLater = routeOf(
+            item("fushimi", "伏見稻荷", oct14),
+            item("kinkaku", "金閣寺", oct15),
+            trip = kyoto.copy(startDate = oct15),
+        )
+        startsLater.days.map { it.date to it.dayNumber } shouldBe listOf(oct14 to null, oct15 to 1)
+
+        // 舊版留下、沒有日期的行程沒有範圍，每天都用日期標示
+        val noDates = routeOf(
+            item("fushimi", "伏見稻荷", oct14),
+            item("kinkaku", "金閣寺", oct15),
+            trip = kyoto.copy(startDate = null, endDate = null),
+        )
+        noDates.days.map { it.dayNumber } shouldBe listOf(null, null)
+
+        // 只填了開始日也一樣沒有範圍
+        val startOnly = routeOf(
+            item("fushimi", "伏見稻荷", oct14),
+            item("kinkaku", "金閣寺", oct15),
+            trip = kyoto.copy(endDate = null),
+        )
+        startOnly.days.map { it.dayNumber } shouldBe listOf(null, null)
     }
 
     @Test

@@ -212,6 +212,9 @@ class AddEditItemViewModel(
      * 儲存項目
      */
     private suspend fun save() {
+        // 連按儲存：存檔中、或已經存好正要離開時，不再存一次
+        if (state.value.isLoading) return
+
         val snapshot = state.value
 
         // 驗證
@@ -256,7 +259,7 @@ class AddEditItemViewModel(
             currentTimestamp = Clock.System.now()
         )
             .onSuccess {
-                updateState { copy(isLoading = false) }
+                // 不把 isLoading 改回 false：畫面要離開了，換頁途中再按儲存不能又存一次
                 sendEvent(AddEditItemEvent.SaveSuccess)
             }
             .onFailure { exception ->

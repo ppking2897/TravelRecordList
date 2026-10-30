@@ -43,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.OutlinedTextField
@@ -57,6 +58,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,7 +101,8 @@ fun TodayScreen(
     val state by viewModel.state.collectAsState()
     val snackbarHostState = LocalSnackbarHostState.current
     val scope = rememberCoroutineScope()
-    var showQuickRecordSheet by remember { mutableStateOf(false) }
+    // 跨轉螢幕保存：存檔中轉螢幕，面板要還在，存檔失敗時才看得到錯誤
+    var showQuickRecordSheet by rememberSaveable { mutableStateOf(false) }
     var selectedItemIdForPhoto by remember { mutableStateOf<String?>(null) }
 
     val quickRecordImagePicker = rememberImagePickerLauncher(
@@ -575,9 +579,16 @@ private fun QuickRecordSheet(
     onSave: () -> Unit,
     locationSearchService: LocationSearchService?
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 存檔中不能關面板（往下滑、點外面、按返回都不行）：關掉後存檔失敗就看不到錯誤
+    val isSaving by rememberUpdatedState(state.isSavingQuickRecord)
+    // 同一個 lambda 一直沿用：面板狀態以它為 key，換了會重建
+    val confirmValueChange = remember { { value: SheetValue -> value != SheetValue.Hidden || !isSaving } }
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = confirmValueChange
+    )
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!isSaving) onDismiss() },
         sheetState = sheetState
     ) {
         Column(

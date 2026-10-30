@@ -58,6 +58,9 @@ class EditItemViewModel(
     }
 
     private suspend fun loadItem(itemId: String) {
+        // 畫面重建（轉螢幕、切深色模式等）時會再送一次；已經讀過就不重讀，免得蓋掉還沒存的修改
+        if (state.value.item?.id == itemId) return
+
         updateState { copy(isLoading = true, error = null) }
 
         getItineraryItemUseCase(itemId)
@@ -239,6 +242,9 @@ class EditItemViewModel(
      * 儲存項目
      */
     private suspend fun save() {
+        // 連按儲存：存檔中、或已經存好正要離開時，不再存一次
+        if (state.value.isLoading) return
+
         val snapshot = state.value
 
         // 驗證
@@ -310,7 +316,7 @@ class EditItemViewModel(
             currentTimestamp = currentTimestamp
         )
             .onSuccess {
-                updateState { copy(isLoading = false) }
+                // 不把 isLoading 改回 false：畫面要離開了，換頁途中再按儲存不能又存一次
                 sendEvent(EditItemEvent.SaveSuccess)
             }
             .onFailure { exception ->

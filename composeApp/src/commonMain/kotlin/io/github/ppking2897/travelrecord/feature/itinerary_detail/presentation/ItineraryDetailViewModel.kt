@@ -129,7 +129,8 @@ class ItineraryDetailViewModel(
         state.value.itinerary?.let { itinerary ->
             getItemsByItineraryUseCase(itinerary.id)
                 .onSuccess { items ->
-                    val grouped = filteredGroups(items, date, state.value.selectedHashtag)
+                    // 用讀完當下選中的日期：讀取途中點了標籤，日期已經被清回「全部」
+                    val grouped = filteredGroups(items, state.value.selectedDate, state.value.selectedHashtag)
                     val allGrouped = groupItemsByDateUseCase(items)
                     updateState {
                         copy(

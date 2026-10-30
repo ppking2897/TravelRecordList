@@ -12,8 +12,10 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -90,7 +92,41 @@ class EditItemViewModelTest {
         }
     }
 
+    @Test
+    fun `畫面重建後修改還在`() = runTest(dispatcher) {
+        val viewModel = editViewModel()
+        act(viewModel, EditItemIntent.LoadItem("kiyomizu"), EditItemIntent.UpdateNotes("記得買御守"))
+
+        // 畫面重建時會再送一次讀取
+        act(viewModel, EditItemIntent.LoadItem("kiyomizu"))
+
+        viewModel.state.value.notes shouldBe "記得買御守"
+        viewModel.state.value.hasUnsavedChanges shouldBe true
+    }
+
+    @Test
+    fun `連按儲存只存一次`() = runTest(dispatcher) {
+        val viewModel = editViewModel()
+        val events = eventsOf(viewModel)
+        act(viewModel, EditItemIntent.LoadItem("kiyomizu"), EditItemIntent.UpdateNotes("記得買御守"))
+
+        // 很快地連按兩下，第二下送出時第一下還沒跑
+        viewModel.processIntent(EditItemIntent.Save)
+        viewModel.processIntent(EditItemIntent.Save)
+        advanceUntilIdle()
+
+        // 每個 SaveSuccess 都會讓畫面回上一頁
+        events.count { it == EditItemEvent.SaveSuccess } shouldBe 1
+    }
+
     // ── 測試工具 ──
+
+    /** 從現在起收集 [viewModel] 發出的事件 */
+    private fun TestScope.eventsOf(viewModel: EditItemViewModel): List<EditItemEvent> {
+        val events = mutableListOf<EditItemEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.event.collect { events += it } }
+        return events
+    }
 
     private fun editViewModel() = EditItemViewModel(
         useCases.updateItem,

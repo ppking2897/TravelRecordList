@@ -373,6 +373,42 @@ class ItineraryAddEditViewModelTest {
         }
     }
 
+    @Test
+    fun `畫面重建後修改還在`() = runTest(dispatcher) {
+        // 編輯行程：改了標題，畫面重建時會再送一次讀取
+        val editing = viewModelWith(useCasesOf())
+        act(editing, ItineraryAddEditIntent.LoadItinerary("kyoto"), ItineraryAddEditIntent.UpdateTitle("京都 5 日遊"))
+        act(editing, ItineraryAddEditIntent.LoadItinerary("kyoto"))
+
+        editing.state.value.title shouldBe "京都 5 日遊"
+        editing.state.value.hasUnsavedChanges shouldBe true
+
+        // 新增行程：草稿裡是之前存的「京都」，剛打的字還沒存成草稿就重建
+        val useCases = useCasesOf()
+        act(viewModelWith(useCases), ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.UpdateTitle("京都"))
+        val adding = viewModelWith(useCases)
+        act(adding, ItineraryAddEditIntent.LoadDraft)
+        type(adding, "東京 3 日遊")
+        act(adding, ItineraryAddEditIntent.LoadDraft)
+
+        adding.state.value.title shouldBe "東京 3 日遊"
+        adding.state.value.hasUnsavedChanges shouldBe true
+    }
+
+    @Test
+    fun `連按儲存只存一次`() = runTest(dispatcher) {
+        val useCases = useCasesOf()
+        val viewModel = viewModelWith(useCases)
+        act(viewModel, ItineraryAddEditIntent.LoadDraft, ItineraryAddEditIntent.UpdateTitle("東京 3 日遊"), *datesOfNewTrip)
+
+        // 很快地連按兩下，第二下送出時第一下還沒跑
+        viewModel.processIntent(ItineraryAddEditIntent.Save)
+        viewModel.processIntent(ItineraryAddEditIntent.Save)
+        advanceUntilIdle()
+
+        useCases.titles().count { it == "東京 3 日遊" } shouldBe 1
+    }
+
     // ── 規格調整第 4 組：行程一定要有日期（.claude/docs/SpecAdjustments.md）──
 
     @Test
