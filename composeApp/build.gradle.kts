@@ -150,4 +150,6 @@ tasks.withType<Test>().configureEach {
     dependsOn(extractSqliteHostNative)
     systemProperty("androidx.sqlite.driver.bundled.path", sqliteNativeDir.get().asFile.absolutePath)
     systemProperty("androidx.sqlite.driver.bundled.name", sqliteNative.second)
+    // 架構測試讀原始碼比對 import；沒用到的 import 不改變編譯結果，不列為輸入會被判成 UP-TO-DATE 而不重跑
+    inputs.dir("src").withPathSensitivity(PathSensitivity.RELATIVE)
 }

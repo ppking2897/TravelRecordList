@@ -51,6 +51,7 @@
 
 - 有 `data/` + `domain/` 的是**資料 feature**（`itinerary`、`itinerary_item`、`route`、`draft`、`memory`），擁有 domain model 與資料存取（Repository；`memory` 是 `domain/service`）。
 - 其他是**畫面 feature**，直接 import 資料 feature 的 `domain/model`、`domain/repository`（例：`feature.itinerary_item.domain.model.ItineraryItem`），不自己複製一份 model。
+- 哪一層、哪個套件可以依賴誰，寫成規則與測試在 `.claude/docs/architecture-rules.md`（ARCH001…），違規時 `testAndroidHostTest` 會紅。
 
 ## 新增畫面要接的地方
 
