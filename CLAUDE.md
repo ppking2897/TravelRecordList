@@ -37,7 +37,7 @@
 | 面向 | 外層 rules | 本專案 |
 |---|---|---|
 | 資料來源 | Ktor 打後端 API，`data/model/*Response` 是 API 回應 | **沒有後端**：行程與項目存 Room（見下方「本機資料」）；草稿仍透過 `StorageService`（`core/data/local/`）存 JSON；路線不存檔，路線頁打開時依行程現算。`data/model/*Response` 是 JSON 格式（草稿的存檔）。路線的分享內容是可讀的文字，在畫面層組。對外 HTTP 只有地點搜尋（`core/data/remote/`）|
-| Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。換 Room 時維持不變：沒有畫面需要監聽資料變化，不改成 Flow |
+| Repository 回傳 | `Flow<ApiResult<T>>`（為打 API 設計） | `suspend fun …: Result<T>`（kotlin `Result`；專案內沒有 `ApiResult`）。存 Room 也用這個寫法：沒有畫面需要監聽資料變化，所以不用 Flow |
 
 ## 本機資料
 
@@ -71,7 +71,7 @@
 
 - **產品規格（現況）**：`.claude/docs/product-spec.md`——App 目前實際的行為、已知問題與待確認事項；改了行為要同步更新。功能文件裡說的「產品規格書」就是這份。
 - **改善計畫**：`.claude/docs/improvement-plan.md`——地基任務、UI 改善與後續功能的進度，挑下一個任務前先讀。
-- 這兩份 2026-10-27 從 Claude Docs 搬進來，之後以專案內的版本為準。repo 是公開的，文件裡不寫求職、自傳這類個人用語。
+- 這兩份以專案內的版本為準（Claude Docs 上的舊版不再更新）。repo 是公開的，文件裡不寫求職、自傳這類個人用語。
 - 其他 `.claude/docs/*.md`（uiux-fix-plan、product-analysis、ui-review、ux-improvements）是 4 月與 10/14 的一次性報告，留作紀錄、不再更新，不是 feature-doc 格式。
 
 ## 等待標記
