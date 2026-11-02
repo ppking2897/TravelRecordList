@@ -16,6 +16,7 @@
 - 裝到手機：`./gradlew :androidApp:installDebug`
 - 跑測試（JVM，Windows 可用）：`./gradlew :composeApp:testAndroidHostTest`；`allTests` 會另外嘗試 iOS 測試，非 Mac 上自動略過
 - 看結果：`composeApp/build/test-results/testAndroidHostTest/*.xml`，以 `tests="N"` 的 N 為準，`BUILD SUCCESSFUL` 不代表有跑到測試
+- 架構測試指令：`./gradlew :composeApp:testAndroidHostTest --tests "*ArchitectureRulesTest"`（Claude commit 前由全域 hook 自動跑，沒過會擋下 commit；規則見 `.claude/docs/architecture-rules.md`）
 
 > 指令以本檔為準；`README.md` 的 `:composeApp:assembleDebug`、wasmJs 指令是拆出 `androidApp` 前的舊寫法。
 

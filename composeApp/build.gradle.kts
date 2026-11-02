@@ -152,4 +152,10 @@ tasks.withType<Test>().configureEach {
     systemProperty("androidx.sqlite.driver.bundled.name", sqliteNative.second)
     // 架構測試讀原始碼比對 import；沒用到的 import 不改變編譯結果，不列為輸入會被判成 UP-TO-DATE 而不重跑
     inputs.dir("src").withPathSensitivity(PathSensitivity.RELATIVE)
+    // 測試失敗時在終端機印出完整訊息（哪條規則、哪個檔案），不用另外開測試報告
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStackTraces = false
+    }
 }
