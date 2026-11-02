@@ -159,7 +159,7 @@ Repository 回傳型別不在此項：規則的 `Flow<ApiResult<T>>` 是為打�
 **第 1 批（2026-10-27 決定）**
 
 - [x] 建立行程時開始與結束日期必填；既有沒日期的行程，在詳情頁提示補日期（待確認 #4） → 2026-10-28 完成，單元測試與 Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 4 組）
-- [x] 路線分享改成「第 1 天：伏見稻荷 → 金閣寺」這種可讀文字，路線改成分天；地圖與路線合併留到做真地圖時（待確認 #5） → 2026-10-28 前半完成，單元測試通過，2026-10-30 Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 5 組）；地圖與路線合併仍留到做真地圖時
+- [x] 路線分享改成「第 1 天：伏見稻荷 → 金閣寺」這種可讀文字，路線改成分天；地圖與路線合併留到做真地圖時（待確認 #5） → 2026-10-28 前半完成，單元測試通過，2026-10-29 Android 實機驗證通過、2026-10-30 重看連接線（[SpecAdjustments.md](SpecAdjustments.md) 第 5 組）；地圖與路線合併仍留到做真地圖時
 - [x] 用語統一：「規劃中」、「第 N 天」、完整日期寫 2026/10/20，故事文字去掉多餘空格（待確認 #16） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
 - [x] 首頁拿掉「最近編輯」區塊與右上角的足跡按鈕（待確認 #12、#13） → 2026-10-27 完成，Android 實機驗證通過（[SpecAdjustments.md](SpecAdjustments.md) 第 1 組）
 - [x] 沒排時間的項目，各畫面一律排在當天最後（待確認 #6） → 2026-10-28 完成，單元測試與 Android 實機驗證（地圖頁只靠單元測試）（[SpecAdjustments.md](SpecAdjustments.md) 第 2 組）
