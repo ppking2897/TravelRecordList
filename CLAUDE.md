@@ -18,8 +18,6 @@
 - 看結果：`composeApp/build/test-results/testAndroidHostTest/*.xml`，以 `tests="N"` 的 N 為準，`BUILD SUCCESSFUL` 不代表有跑到測試
 - 架構測試指令：`./gradlew :composeApp:testAndroidHostTest`（跑完整測試，包含架構測試；只跑架構測試的類別會清掉其他測試的結果檔。Claude commit 前由全域 hook 自動跑，任何測試沒過都會擋下 commit；規則見 `.claude/docs/architecture-rules.md`）
 
-> 指令以本檔為準；`README.md` 的 `:composeApp:assembleDebug`、wasmJs 指令是拆出 `androidApp` 前的舊寫法。
-
 ## 與外層 kmp rules 不同的寫法
 
 外層 `.claude/rules/kmp-*` 比本專案的寫法新（rules 4–7 月更新，本專案寫法 4/9 定型）。原則：**「怎麼寫」以 rules 為準，「專案裡有什麼」以專案為準。**
