@@ -11,9 +11,6 @@ import io.github.ppking2897.travelrecord.feature.draft.domain.repository.DraftRe
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
-/**
- * ?�稿資�?存�?實�?
- */
 class DraftRepositoryImpl(
     private val storageService: StorageService
 ) : DraftRepository {
