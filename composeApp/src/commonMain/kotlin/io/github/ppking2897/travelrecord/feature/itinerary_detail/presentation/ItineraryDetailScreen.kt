@@ -72,8 +72,7 @@ fun ItineraryDetailScreen(
     onQuickAddItemClick: (LocalDate) -> Unit,
     onEditItemClick: (String) -> Unit,
     onEditItineraryClick: () -> Unit,
-    onRouteClick: (String) -> Unit,
-    onMapClick: () -> Unit = {}
+    onRouteClick: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val itinerary = state.itinerary
@@ -175,8 +174,7 @@ fun ItineraryDetailScreen(
         onToggleItemSelection = { viewModel.processIntent(ItineraryDetailIntent.ToggleItemSelection(it)) },
         onBatchDelete = { showBatchDeleteDialog = true },
         onBatchMarkComplete = { viewModel.processIntent(ItineraryDetailIntent.BatchMarkComplete) },
-        onCancelSelection = { viewModel.processIntent(ItineraryDetailIntent.ClearSelection) },
-        onMapClick = onMapClick
+        onCancelSelection = { viewModel.processIntent(ItineraryDetailIntent.ClearSelection) }
     )
 
     // 刪除項目確認 Dialog
@@ -263,8 +261,7 @@ private fun ItineraryDetailScreenContent(
     onToggleItemSelection: (String) -> Unit = {},
     onBatchDelete: () -> Unit = {},
     onBatchMarkComplete: () -> Unit = {},
-    onCancelSelection: () -> Unit = {},
-    onMapClick: () -> Unit = {}
+    onCancelSelection: () -> Unit = {}
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
@@ -326,11 +323,11 @@ private fun ItineraryDetailScreenContent(
                 },
                 actions = {
                     if (!isSelectionMode) {
-                        // 地圖按鈕
-                        IconButton(onClick = onMapClick) {
-                            Icon(Icons.Default.Map, contentDescription = "地圖檢視")
+                        // 路線：排得出路線才進路線頁，排不出來留在這裡提示
+                        IconButton(onClick = onGenerateRouteClick) {
+                            Icon(Icons.Default.Map, contentDescription = "路線")
                         }
-                        // 更多選項（含選擇模式、生成路線、編輯、刪除）
+                        // 更多選項（含選擇模式、編輯、刪除）
                         Box {
                             IconButton(onClick = { showMoreMenu = true }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = "更多選項")
@@ -347,16 +344,6 @@ private fun ItineraryDetailScreenContent(
                                     },
                                     leadingIcon = {
                                         Icon(Icons.Default.Checklist, contentDescription = null)
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("生成路線") },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        onGenerateRouteClick()
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Share, contentDescription = null)
                                     }
                                 )
                                 DropdownMenuItem(

@@ -68,6 +68,29 @@
 - WHEN 使用者按這站卡片上的地圖按鈕
 - THEN 終點用「秋葉原」
 
+### Requirement: 行程詳情的地圖圖示直接打開路線頁 <!-- ADDED 2026-11-04 -->
+
+行程詳情頂部的地圖圖示 SHALL 打開路線頁（原本打開地圖頁）。地圖頁跟路線頁功能重疊（規格書待確認 #5），路線頁已能依天看、跳 Google 地圖，所以拿掉地圖頁；「⋮」選單裡的「生成路線」也拿掉，入口只留地圖圖示。
+
+#### Scenario: 地點夠的行程按地圖圖示進入路線頁
+- GIVEN 行程有兩個以上不同的地點
+- WHEN 使用者按行程詳情頂部的地圖圖示
+- THEN 進入這個行程的路線頁
+
+#### Scenario: 地點不夠的行程按地圖圖示留在詳情頁並提示
+- GIVEN 行程只有一個地點
+- WHEN 使用者按行程詳情頂部的地圖圖示
+- THEN 留在行程詳情，提示「至少要有兩個不同的地點才能看路線」
+
+#### Scenario: 「⋮」選單沒有「生成路線」
+- WHEN 使用者打開行程詳情的「⋮」選單
+- THEN 選單只有選擇模式、編輯行程、刪除行程
+
+#### Scenario: 從路線頁返回回到行程詳情
+- GIVEN 使用者從行程詳情的地圖圖示進入路線頁
+- WHEN 使用者按返回（左上角箭頭或系統返回）
+- THEN 回到同一個行程的詳情
+
 ---
 
 ## 技術設計
@@ -92,6 +115,27 @@ https://www.google.com/maps/dir/?api=1
 - 中途站上限：文件寫「手機瀏覽器 3 個、其他 9 個」，所以一次最多 11 站（起點＋9 中途＋終點）
 - 網址長度上限 2,048 字元；11 站全用中文名稱時約 1,000 字元，不另外處理
 - 2026-11-04 實機確認：多站路線指定 `travelmode=transit` 時，Google 地圖 App 的大眾運輸顯示「—」並改用開車；單段大眾運輸在日本可以查到班次與票價
+
+### 地圖圖示改接路線頁（Slice 3）
+
+```diff
+  ItineraryDetailScreen 頂部
+-   地圖圖示 → onMapClick → AppRoute.ItineraryMap
++   地圖圖示 → ItineraryDetailIntent.GenerateRoute（沿用：排得出路線才 NavigateToRoute）
+-   ⋮ 選單「生成路線」
+  App.kt PlanNavHost
+-   is AppRoute.ItineraryMap -> NavEntry { ItineraryMapScreen(...) }
+  core/presentation/navigation/Screen.kt
+-   AppRoute.ItineraryMap
+- feature/itinerary_map/**（Contract、Screen、ViewModel、DI）
+- core/presentation/components/ItineraryMapView（expect + Android、iOS actual）、MapInfoCard
+- feature/route：MapMarker、GetMapMarkersUseCase（＋測試、DI）
+  feature/route/data/repository/RouteRepositoryImpl
+~   錯誤訊息「…才能生成路線」→「…才能看路線」
+```
+
+- 刪除範圍以「拿掉入口後沒有任何呼叫者」為準；做真地圖時地圖改放進路線頁，需要時從 git 歷史找回
+- 版本目錄裡沒被引用的 `maplibre-compose` 不動（改善計畫「真地圖」的待辦）
 
 ### 函式（暫定名稱，實作時可調）
 
@@ -145,6 +189,19 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 | 從目前位置到這一站 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到這站不帶起點並指定大眾運輸`（改壞：帶了起點、沒指定大眾運輸都紅）；實機：按上野公園卡片的地圖按鈕，Google 地圖起點「你的位置」、終點上野公園（人在台灣，Google 顯示找不到路線）；同格式網址到台北 101 開出大眾運輸 2 小時 35 分 |
 | 這一站沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到沒有座標的站用名稱` |
 
+### Slice 3 — 地圖圖示改打開路線頁，拿掉地圖頁
+- **對應 Requirement**: 行程詳情的地圖圖示直接打開路線頁
+- **commit**: 未開始
+- **高風險**: 是（換頁或返回：地圖圖示的目的地改變、拿掉一個 route）
+- **整體狀態**: 🟡（地點不夠時的提示未上實機）
+
+| Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
+|----------|------|------|--------|---------|
+| 地點夠的行程按地圖圖示進入路線頁 | 邏輯 | ✅ | 2026-11-04 | 既有 `ItineraryDetailViewModelTest` 生成路線成功的測試（送出前往路線頁）；實機：東京 3 日遊按地圖圖示進入路線頁 |
+| 地點不夠的行程按地圖圖示留在詳情頁並提示 | 邏輯 | 🟡 | 2026-11-04 | `unit test: ItineraryDetailViewModelTest#地點不足` 預期文字改成「…才能看路線」，改 code 前先跑紅、改後綠；提示文字未上實機（手機上沒有只有一個地點的行程） |
+| 「⋮」選單沒有「生成路線」 | UI | ✅ | 2026-11-04 | 實機：選單只剩選擇模式、編輯行程、刪除行程 |
+| 從路線頁返回回到行程詳情 | UI | ✅ | 2026-11-04 | 實機：左上箭頭、系統返回各一次，都回到東京 3 日遊的詳情 |
+
 ---
 
 ## 待辦 / 跟外部對齊
@@ -161,5 +218,6 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 - **2026-11-04** ADDED: Requirement「相鄰兩站之間可以查大眾運輸怎麼去」
 - **2026-11-04** ADDED: Requirement「每一站可以查從目前位置怎麼過去」（每站卡片的地圖按鈕原本是在 Google 地圖搜尋這個地點，改成從目前位置規劃大眾運輸路線）
 - **2026-11-04** 「在 Google 地圖看這天」按鈕文字改成「當天路線」：原文字太長，把每天的標題擠成兩行
+- **2026-11-04** ADDED: Requirement「行程詳情的地圖圖示直接打開路線頁」（地圖頁與「⋮ → 生成路線」拿掉）
 - **2026-11-04** 路線頁地點卡片拿掉「座標：35.7101, 139.8107」那一行：數字對使用者沒有意義，按鈕仍用資料裡的座標定位
 - **2026-11-04** 先試做「App 內 Google 地圖＋Routes API」後放棄：Routes API 在日本查不到大眾運輸（紀錄在 improvement-plan.md 後續功能）。改成跳到 Google 地圖 App。
