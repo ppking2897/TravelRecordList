@@ -8,7 +8,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_add_edit.di.itinerary
 import io.github.ppking2897.travelrecord.feature.itinerary_detail.di.itineraryDetailModule
 import io.github.ppking2897.travelrecord.feature.itinerary_item.di.itineraryItemModule
 import io.github.ppking2897.travelrecord.feature.itinerary_list.di.itineraryListModule
-import io.github.ppking2897.travelrecord.feature.itinerary_map.di.itineraryMapModule
 import io.github.ppking2897.travelrecord.feature.memory.di.memoryModule
 import io.github.ppking2897.travelrecord.feature.route.di.routeModule
 import io.github.ppking2897.travelrecord.feature.today.di.todayModule
@@ -21,7 +20,6 @@ val appModule =
             itineraryListModule +
             itineraryDetailModule +
             itineraryAddEditModule +
-            itineraryMapModule +
             itineraryItemModule +
             todayModule +
             draftModule +

@@ -226,7 +226,7 @@ class ItineraryDetailViewModel(
                     sendEvent(ItineraryDetailEvent.NavigateToRoute(itinerary.id))
                 }
                 .onFailure { exception ->
-                    sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "生成路線失敗"))
+                    sendEvent(ItineraryDetailEvent.ShowError(exception.message ?: "看路線失敗"))
                 }
         }
     }

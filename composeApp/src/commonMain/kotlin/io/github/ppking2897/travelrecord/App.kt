@@ -58,8 +58,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.presentation.Edi
 import io.github.ppking2897.travelrecord.feature.itinerary_list.presentation.ItineraryListScreen
 import io.github.ppking2897.travelrecord.feature.itinerary_list.presentation.ItineraryListViewModel
 import io.github.ppking2897.travelrecord.feature.footprint.presentation.FootprintScreen
-import io.github.ppking2897.travelrecord.feature.itinerary_map.presentation.ItineraryMapScreen
-import io.github.ppking2897.travelrecord.feature.itinerary_map.presentation.ItineraryMapViewModel
 import io.github.ppking2897.travelrecord.feature.memory.presentation.MemoryScreen
 import io.github.ppking2897.travelrecord.feature.route.presentation.RouteViewScreen
 import io.github.ppking2897.travelrecord.feature.today.presentation.TodayScreen
@@ -258,8 +256,11 @@ private fun PlanNavHost(
                         },
                         onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) },
                         onEditItineraryClick = { backStack.add(AppRoute.EditItinerary(key.itineraryId)) },
-                        onRouteClick = { itineraryId -> backStack.add(AppRoute.RouteView(itineraryId)) },
-                        onMapClick = { backStack.add(AppRoute.ItineraryMap(key.itineraryId)) }
+                        onRouteClick = { itineraryId ->
+                            // 連點地圖圖示會送兩次，頂端已經是同一個路線頁就不再推
+                            val route = AppRoute.RouteView(itineraryId)
+                            if (backStack.lastOrNull() != route) backStack.add(route)
+                        }
                     )
                 }
 
@@ -302,16 +303,6 @@ private fun PlanNavHost(
                         itineraryId = key.itineraryId,
                         onNavigateBack = { backStack.removeLastOrNull() },
                         onExportSuccess = onShareRoute
-                    )
-                }
-
-                is AppRoute.ItineraryMap -> NavEntry(key) {
-                    val viewModel: ItineraryMapViewModel = koinViewModel()
-                    ItineraryMapScreen(
-                        viewModel = viewModel,
-                        itineraryId = key.itineraryId,
-                        onNavigateBack = { backStack.removeLastOrNull() },
-                        onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) }
                     )
                 }
             }

@@ -31,7 +31,4 @@ sealed interface AppRoute : NavKey {
 
     @Serializable
     data class RouteView(val itineraryId: String) : AppRoute
-
-    @Serializable
-    data class ItineraryMap(val itineraryId: String) : AppRoute
 }

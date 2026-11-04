@@ -30,7 +30,7 @@
 | 建置與實機測試 | 有 | 目前版本還沒在 Mac 上建置過 |
 | 地點搜尋 | 可用（需設定 API key） | 不可用：還沒實作讀取 key |
 | 照片 | 可用 | 不可用 |
-| 地圖頁 | 地點列表＋跳轉 Google 地圖 | 只有佔位畫面 |
+| 路線頁跳轉 Google 地圖 | 可用 | 未驗證 |
 
 不支援 Web。`composeApp/src/` 底下的 `jsMain`、`wasmJsMain`、`webMain` 是早期 Web 版留下的程式碼，目前建置設定沒有宣告 Web target，這些檔案不會被編譯，也沒有跟著其他平台更新。
 
@@ -68,11 +68,10 @@ composeApp/src/
 │   │   ├── itinerary_list/     # 行程列表畫面
 │   │   ├── itinerary_detail/   # 行程詳情畫面
 │   │   ├── itinerary_add_edit/ # 新增／編輯行程畫面
-│   │   ├── itinerary_map/      # 地圖畫面
 │   │   ├── today/              # 今日畫面
 │   │   └── footprint/          # 足跡畫面
 │   └── di/             # Koin 模組加總
-├── androidMain/        # Android 平台實作（資料庫、照片存檔與選取、分享、地圖）
+├── androidMain/        # Android 平台實作（資料庫、照片存檔與選取、分享）
 ├── iosMain/            # iOS 平台實作
 ├── commonTest/         # 共用測試：Repository 合約、ViewModel、UseCase、架構規則
 └── androidHostTest/    # 在 JVM 上跑 Room 版 Repository 的測試

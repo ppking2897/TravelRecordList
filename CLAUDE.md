@@ -26,7 +26,7 @@
 
 | 面向 | 外層 rules（目標） | 本專案現況 |
 |---|---|---|
-| Screen 拆法 | 拆出無 ViewModel 依賴的 `XxxContentView`，只在 Screen 層放一個整頁 Preview（檔案最底）；callback 不給預設值 | 10 個 Screen 都沒有拆 ContentView；`ItineraryDetailScreen` 有 1 個 callback 帶 `= {}` |
+| Screen 拆法 | 拆出無 ViewModel 依賴的 `XxxContentView`，只在 Screen 層放一個整頁 Preview（檔案最底）；callback 不給預設值 | 9 個 Screen 都沒有拆 ContentView |
 
 > 既有 ViewModel 的 `processIntent` 把整段 `when` 包在 `viewModelScope.launch` 裡，是為了保留遷移前「每個 Intent 各跑一個 coroutine」的行為；新寫的 ViewModel 照 rules，由各處理函式自己 launch。
 
