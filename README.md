@@ -26,7 +26,7 @@
 | 照片 | 可用 | 不可用 |
 | 地圖頁 | 地點列表＋跳轉 Google 地圖 | 只有佔位畫面 |
 
-不支援 Web。
+不支援 Web。`composeApp/src/` 底下的 `jsMain`、`wasmJsMain`、`webMain` 是早期 Web 版留下的程式碼，目前建置設定沒有宣告 Web target，這些檔案不會被編譯，也沒有跟著其他平台更新。
 
 ## 架構
 
