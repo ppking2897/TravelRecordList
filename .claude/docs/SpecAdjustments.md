@@ -780,7 +780,7 @@ App 沒有設計稿：示意圖沒畫標籤與滑動手勢，產品規格書寫�
 - 第 1 組路徑：
   - `feature/itinerary_list/presentation/**`
   - `feature/itinerary_detail/presentation/ItineraryDetailScreen.kt`
-  - `feature/itinerary_map/presentation/ItineraryMapScreen.kt`
+  - `feature/itinerary_map/presentation/ItineraryMapScreen.kt`（2026-11-04 已刪，見 [DayRouteMap.md](DayRouteMap.md)）
   - `feature/itinerary_add_edit/presentation/ItineraryFormContent.kt`
   - `feature/itinerary_item/presentation/ItemFormContent.kt`
   - `feature/footprint/presentation/FootprintScreen.kt`
@@ -789,15 +789,15 @@ App 沒有設計稿：示意圖沒畫標籤與滑動手勢，產品規格書寫�
   - `feature/memory/data/service/LocalRuleBasedMemoryStoryGenerator.kt`
   - `core/presentation/components/TimelineNavigator.kt`
   - `core/presentation/theme/Dimensions.kt`（`TimelineDimensions.maxItemWidth`）
-  - `core/presentation/components/MapInfoCard.kt`
-  - `androidMain/.../ItineraryMapView.android.kt`
+  - `core/presentation/components/MapInfoCard.kt`（2026-11-04 已刪，見 [DayRouteMap.md](DayRouteMap.md)）
+  - `androidMain/.../ItineraryMapView.android.kt`（2026-11-04 已刪，見 [DayRouteMap.md](DayRouteMap.md)）
   - `util/DateExtensions.kt`
   - `App.kt`
-- 第 2 組識別字：`itemDayOrder`、`GroupItemsByDateUseCase`、`GetMapMarkersUseCase`、`RouteRepositoryImpl`、`InitializeSampleDataUseCase`、`SampleDataRecordRepository`、`SampleDataRecordRepositoryImpl`、`EnsureLocalDataReadyUseCase`、`ItineraryItemDao`
+- 第 2 組識別字：`itemDayOrder`、`GroupItemsByDateUseCase`、`GetMapMarkersUseCase`（2026-11-04 已刪，見 [DayRouteMap.md](DayRouteMap.md)）、`RouteRepositoryImpl`、`InitializeSampleDataUseCase`、`SampleDataRecordRepository`、`SampleDataRecordRepositoryImpl`、`EnsureLocalDataReadyUseCase`、`ItineraryItemDao`
 - 第 2 組路徑：
   - `feature/itinerary_item/domain/**`、`feature/itinerary_item/data/local/ItineraryItemDao.kt`
   - `feature/today/presentation/TodayViewModel.kt`
-  - `feature/route/domain/usecase/GetMapMarkersUseCase.kt`、`feature/route/data/repository/RouteRepositoryImpl.kt`
+  - `feature/route/domain/usecase/GetMapMarkersUseCase.kt`（2026-11-04 已刪，見 [DayRouteMap.md](DayRouteMap.md)）、`feature/route/data/repository/RouteRepositoryImpl.kt`
   - `feature/memory/data/service/LocalRuleBasedMemoryStoryGenerator.kt`
   - `feature/itinerary/domain/usecase/InitializeSampleDataUseCase.kt`
   - `feature/itinerary/domain/repository/SampleDataRecordRepository.kt`、`feature/itinerary/data/repository/SampleDataRecordRepositoryImpl.kt`、`feature/itinerary/di/ItineraryModule.kt`
@@ -813,7 +813,7 @@ App 沒有設計稿：示意圖沒畫標籤與滑動手勢，產品規格書寫�
   - `feature/itinerary_detail/presentation/**`
 - 第 5 組識別字：`Route`、`RouteDay`、`RouteLocation`、`RouteRepositoryImpl`、`RouteViewViewModel`、`RouteViewEvent`、`RouteViewScreen`
 - 第 5 組路徑：
-  - `feature/route/**`（地圖頁用的 `GetMapMarkersUseCase`、`MapMarker` 不動）
+  - `feature/route/**`（地圖頁用的 `GetMapMarkersUseCase`、`MapMarker` 不動；2026-11-04 已隨地圖頁刪除）
   - `core/data/local/JsonSerializer.kt`
   - `App.kt`
 - 第 6 組識別字：`ItineraryDetailState`、`ItineraryDetailIntent`、`ItineraryDetailViewModel`、`ItineraryDetailScreen`、`HashtagRow`、`HashtagChip`、`ItemCard`、`SwipeActionsBox`、`ItineraryDashboardCard`

@@ -171,7 +171,7 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 ### Slice 1 — 路線頁的「當天路線」與「怎麼去」
 - **對應 Requirement**: 每天可以在 Google 地圖看當天的多站路線；相鄰兩站之間可以查大眾運輸怎麼去
-- **commit**: `6b7cabb`；審查修正另一個 commit（見 `DayRouteMap/spec-review.md`）
+- **commit**: `6b7cabb`；審查修正 `4c0c461`
 - **高風險**: 否（只開外部網址，不換 App 內的頁面、不改存起來的資料）
 - **整體狀態**: ✅
 
@@ -187,7 +187,7 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 ### Slice 2 — 每站的「從目前位置怎麼過去」
 - **對應 Requirement**: 每一站可以查從目前位置怎麼過去
-- **commit**: `6b7cabb`
+- **commit**: `6b7cabb`；審查修正 `4c0c461`
 - **高風險**: 否（只開外部網址）
 - **整體狀態**: ✅
 
@@ -198,7 +198,7 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 ### Slice 3 — 地圖圖示改打開路線頁，拿掉地圖頁
 - **對應 Requirement**: 行程詳情的地圖圖示直接打開路線頁
-- **commit**: `194dcf5`；審查修正另一個 commit（見 `DayRouteMap/spec-review.md`）
+- **commit**: `194dcf5`；審查修正 `4c0c461`
 - **高風險**: 是（換頁或返回：地圖圖示的目的地改變、拿掉一個 route）
 - **整體狀態**: ✅
 
