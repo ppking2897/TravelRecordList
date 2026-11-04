@@ -229,3 +229,7 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 - **2026-11-04** 路線頁地點卡片拿掉「座標：35.7101, 139.8107」那一行：數字對使用者沒有意義，按鈕仍用資料裡的座標定位
 - **2026-11-04** 先試做「App 內 Google 地圖＋Routes API」後放棄：Routes API 在日本查不到大眾運輸（紀錄在 improvement-plan.md 後續功能）。改成跳到 Google 地圖 App。
 - **2026-11-04** 審查修正：站的順序改照清單順序（跟畫面一致，原本另外依 `order` 排序，兩者現況一定相同）；站名裡的 `|` 換成空白；手機上沒有能開網址的 App 時提示而不閃退；連點地圖圖示不會推兩層路線頁；刪掉跟著沒人用的 `ErrorContent`。行程詳情的 Requirement「生成路線」同步改寫，見 [ItineraryDetail.md](ItineraryDetail.md)。
+
+---
+
+**Verified**: 2026-11-04 @ b77bda3
