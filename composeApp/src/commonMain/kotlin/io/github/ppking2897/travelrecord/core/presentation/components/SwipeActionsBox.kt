@@ -30,6 +30,14 @@ import io.github.ppking2897.travelrecord.core.presentation.theme.Spacing
 import kotlinx.coroutines.launch
 
 /**
+ * 滑動手勢的總開關，行程卡片與項目卡片共用
+ *
+ * 2026-11-04 先關閉：滑動太容易誤觸。刪除、編輯仍可用卡片上的選單操作。
+ * 重新開放前要先決定怎麼降低誤觸（例如提高觸發距離）。
+ */
+private const val SWIPE_ACTIONS_ENABLED = false
+
+/**
  * 卡片左滑刪除、右滑編輯
  *
  * 放手後只呼叫 callback 並讓卡片回到原位，不把卡片移走：刪除要先確認，
@@ -52,7 +60,7 @@ fun SwipeActionsBox(
     SwipeToDismissBox(
         state = state,
         modifier = modifier,
-        gesturesEnabled = enabled,
+        gesturesEnabled = SWIPE_ACTIONS_ENABLED && enabled,
         onDismiss = { direction ->
             when (direction) {
                 SwipeToDismissBoxValue.EndToStart -> onSwipeToDelete()
