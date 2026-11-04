@@ -103,7 +103,7 @@ Google 對行動 App 呼叫 web service 「強烈建議」經代理（方案 C�
 - [ ] B：加入 Places SDK for Android 與 Firebase App Check，實作 androidMain 版 `LocationSearchService`
 - [ ] B：搜尋改用 Autocomplete + session token，選定後再查 Place Details
 - [ ] 移除未使用的 `NominatimLocationService`，或明確設為無 key 時的後備
-- [ ] 為 `LocationSearchService` 的實作補上測試（假資料、錯誤處理、空 key）
+- [ ] 為 `LocationSearchService` 的實作補上測試（假資料、錯誤處理、空 key）（2026-11-04：`GooglePlacesService` 已補回應轉換、沒網路、key 無效、伺服器錯誤、語言；同時改成一律以繁體中文查詢。`NominatimLocationService` 待決定去留；地點沒座標時存成 (0, 0) 的處理待決定）
 
 ## 地基修正任務清單
 

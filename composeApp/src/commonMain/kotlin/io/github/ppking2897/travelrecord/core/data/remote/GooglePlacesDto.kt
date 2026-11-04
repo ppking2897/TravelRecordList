@@ -9,8 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GoogleTextSearchRequest(
     val textQuery: String,
-    val languageCode: String = "zh-TW",
-    val pageSize: Int = 10,
+    // 不給預設值：kotlinx-serialization 預設不輸出等於預設值的欄位，會讓 Google 收不到語言與筆數
+    val languageCode: String,
+    val pageSize: Int,
 )
 
 /**

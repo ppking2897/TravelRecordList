@@ -39,6 +39,10 @@ class GooglePlacesService(
     companion object {
         private const val BASE_URL = "https://places.googleapis.com/v1"
 
+        // 不管輸入什麼語言，建議一律以繁體中文顯示（產品規格書「地點搜尋」）
+        private const val LANGUAGE_CODE = "zh-TW"
+        private const val PAGE_SIZE = 10
+
         // Text Search 需要的欄位
         private const val TEXT_SEARCH_FIELD_MASK =
             "places.id,places.displayName,places.formattedAddress,places.location"
@@ -57,17 +61,17 @@ class GooglePlacesService(
         }
 
         return runCatching {
-            val lang = detectLanguage(query)
             val response: GoogleTextSearchResponse = httpClient.post("$BASE_URL/places:searchText") {
                 header("X-Goog-Api-Key", apiKey)
                 appIdentity.requestHeaders.forEach { (name, value) -> header(name, value) }
                 header("X-Goog-FieldMask", TEXT_SEARCH_FIELD_MASK)
-                header("Accept-Language", lang)
+                header("Accept-Language", LANGUAGE_CODE)
                 contentType(ContentType.Application.Json)
                 setBody(
                     GoogleTextSearchRequest(
                         textQuery = query,
-                        languageCode = lang,
+                        languageCode = LANGUAGE_CODE,
+                        pageSize = PAGE_SIZE,
                     )
                 )
             }.body()
@@ -90,28 +94,6 @@ class GooglePlacesService(
 
             response.toLocationDetails()
         }
-    }
-}
-
-/**
- * 根據輸入文字自動檢測語言
- *
- * - 包含平假名/片假名 → 日文 (ja)
- * - 包含韓文 → 韓文 (ko)
- * - 包含中文字符（無日文假名）→ 繁體中文 (zh-TW)
- * - 其他 → 英文 (en)
- */
-private fun detectLanguage(text: String): String {
-    val hasHiragana = text.any { it in '\u3040'..'\u309F' }
-    val hasKatakana = text.any { it in '\u30A0'..'\u30FF' }
-    val hasKorean = text.any { it in '\uAC00'..'\uD7AF' }
-    val hasChinese = text.any { it in '\u4E00'..'\u9FFF' }
-
-    return when {
-        hasHiragana || hasKatakana -> "ja"
-        hasKorean -> "ko"
-        hasChinese -> "zh-TW"
-        else -> "en"
     }
 }
 
