@@ -211,7 +211,7 @@ Android 16 強制的 edge-to-edge 與預測返回已具備：`MainActivity` 呼�
 
 **真地圖**
 
-- [ ] 加入 maplibre-compose 依賴（目前只寫在版本目錄），取代 Android 的列表版地圖與 iOS 的佔位文字
+- [ ] 加入 maplibre-compose 依賴（目前只寫在版本目錄），地圖放進路線頁（舊的列表版地圖頁與 iOS 佔位已在 2026-11-04 拿掉）
 - [ ] 依日期上色的標記與路線連線（配色沿用既有的 DateColorPalette）
 - [ ] 地圖頁與路線頁合成一個按天看的地圖頁，加「用 Google 地圖導航這天」（規格書待確認 #5）（2026-11-04：舊地圖頁已拿掉，地圖圖示改打開路線頁；「導航這天」在路線頁用 Google 地圖網址做，見 [DayRouteMap.md](DayRouteMap.md)。做真地圖時把地圖放進路線頁）
 

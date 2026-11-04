@@ -111,7 +111,10 @@ https://www.google.com/maps/dir/?api=1
   &travelmode=transit        ← 只有「怎麼去」帶
 ```
 
-- 每站的值：有座標用 `緯度,經度`，否則用地址，再沒有就用名稱；一律做 URL 參數編碼
+- 每站的值：有座標用 `緯度,經度`，否則用地址（空字串或只有空白視為沒有），再沒有就用名稱；一律做 URL 參數編碼
+- 站名裡的 `|` 換成空白：`|` 是中途站的分隔符，留在站名裡 Google 會拆成兩站
+- 站的順序照 `RouteDay.stops` 在清單裡的順序，跟路線頁畫面與「怎麼去」一致，不另外依 `order` 排序
+- 手機上沒有能開網址的 App 時，`openUri` 會丟例外；路線頁改成底部提示「沒有可以開啟地圖的 App」
 - 中途站上限：文件寫「手機瀏覽器 3 個、其他 9 個」，所以一次最多 11 站（起點＋9 中途＋終點）
 - 網址長度上限 2,048 字元；11 站全用中文名稱時約 1,000 字元，不另外處理
 - 2026-11-04 實機確認：多站路線指定 `travelmode=transit` 時，Google 地圖 App 的大眾運輸顯示「—」並改用開車；單段大眾運輸在日本可以查到班次與票價
@@ -135,6 +138,10 @@ https://www.google.com/maps/dir/?api=1
 ```
 
 - 刪除範圍以「拿掉入口後沒有任何呼叫者」為準；做真地圖時地圖改放進路線頁，需要時從 git 歷史找回
+- 跟著變成沒人用而刪掉的：`CommonComponents.kt` 的 `ErrorContent`、行程詳情的分享圖示 import
+- 刻意保留：`DateColorPalette`（依日期上色，留給真地圖，改善計畫「真地圖」那段會用到）
+- 連點地圖圖示會送兩次前往路線頁（每個 Intent 各跑一個 coroutine）；`App.kt` 推路線頁前檢查頂端是否已是同一趟的路線頁，是就不再推
+- 舊版停在地圖頁時更新 App：系統更新時會結束 App，畫面存檔跟著丟掉，打開時從行程列表重新開始，不會還原到不存在的地圖頁（2026-11-04 實機確認，所以不保留舊路由）
 - 版本目錄裡沒被引用的 `maplibre-compose` 不動（改善計畫「真地圖」的待辦）
 
 ### 函式（暫定名稱，實作時可調）
@@ -154,8 +161,8 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 ## 涵蓋範圍
 
-- 識別字：`DayMapsLink`、`toGoogleMapsDayLink`、`googleMapsTransitUrl`、`googleMapsTransitFromHereUrl`、`RouteViewScreen`
-- 路徑：`feature/route/presentation/**`
+- 識別字：`DayMapsLink`、`toGoogleMapsDayLink`、`googleMapsTransitUrl`、`googleMapsTransitFromHereUrl`、`RouteViewScreen`、`ItineraryDetailScreen`、`ItineraryDetailIntent.GenerateRoute`、`ItineraryDetailEvent.NavigateToRoute`、`AppRoute.RouteView`、`RouteRepositoryImpl`
+- 路徑：`feature/route/presentation/**`、`feature/itinerary_detail/presentation/**`、`feature/route/data/repository/RouteRepositoryImpl.kt`、`App.kt`、`core/presentation/navigation/Screen.kt`
 - 外部：Google Maps URLs（`https://www.google.com/maps/dir/?api=1`）
 
 ---
@@ -164,43 +171,43 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 ### Slice 1 — 路線頁的「當天路線」與「怎麼去」
 - **對應 Requirement**: 每天可以在 Google 地圖看當天的多站路線；相鄰兩站之間可以查大眾運輸怎麼去
-- **commit**: 未開始
+- **commit**: `6b7cabb`；審查修正另一個 commit（見 `DayRouteMap/spec-review.md`）
 - **高風險**: 否（只開外部網址，不換 App 內的頁面、不改存起來的資料）
-- **整體狀態**: 🟡（超過 11 站的提示未上實機）
+- **整體狀態**: ✅
 
 | Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
 |----------|------|------|--------|---------|
-| 兩站以上的天可以開多站路線 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#三站的天起點是第一站中途站是中間終點是最後一站且不指定交通方式`、`#兩站的天沒有中途站`、`#多站路線依當天順序排列不依清單位置`、`#中途站之間用直線分隔`（改壞：漏中途站、指定大眾運輸、不照順序都紅；反向：參數順序對調維持綠）；實機：東京第 2 天明治神宮 → 原宿竹下通在 Google 地圖帶入兩站、預設開車；東京第 1 天暫時加到 5 站（淺草寺、上野公園、晴空塔、東京車站、銀座，測完還原資料），Google 地圖起點淺草寺、3 個停靠站依序、終點銀座，開車 1 小時 2 分 |
-| 只有一站的天沒有「當天路線」 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#只有一站的天沒有多站路線`（改壞：一站也給路線 → 紅）；實機：東京第 3 天只有秋葉原，標題旁沒有按鈕 |
-| 地點沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#沒座標的站用地址連地址都沒有就用名稱`、`#只有緯度沒有經度的站視為沒有座標`（改壞：不用座標、跳過地址都紅） |
-| 超過 11 站只帶前 11 站並提示 | 邏輯 | 🟡 | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#十三站的天只帶前十一站並標示被截斷`、`#剛好十一站不算被截斷`（改壞：不截斷、11 站也標截斷都紅）；提示文字未上實機（手機上沒有 13 站的天） |
-| 相鄰兩站之間查大眾運輸 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#怎麼去從前一站到後一站並指定大眾運輸`（改壞：不指定大眾運輸 → 紅）；實機：淺草寺 → 晴空塔開啟 Google 地圖大眾運輸，19 分、都08 公車 |
-| 「怎麼去」只出現在同一天的相鄰兩站之間 | UI | ✅ | 2026-11-04 | 實機：東京第 1、2 天的兩站之間各有一個；晴空塔與明治神宮（跨天）之間、秋葉原之後都沒有 |
-| 「怎麼去」的地點沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#怎麼去的終點沒有座標時用名稱` |
+| 兩站以上的天可以開多站路線 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#三站的天起點是第一站中途站是中間終點是最後一站且不指定交通方式`、`#兩站的天沒有中途站`、`#多站路線照當天清單的順序跟畫面一致`、`#中途站之間用直線分隔`、`#站名含特殊字元時網址不會被切斷`、`#中途站分隔符在網址裡編碼成百分比寫法`、`#站名裡的直線換成空白不會被拆成兩站`（改壞：漏中途站、指定大眾運輸、不照清單順序、不做編碼、站名的 | 不換掉都紅；反向：參數順序對調維持綠）；實機 `DayRouteMap/device-check.md` #1（13 站的天帶 11 站，終點日本橋）；實機：東京第 2 天明治神宮 → 原宿竹下通在 Google 地圖帶入兩站、預設開車；東京第 1 天暫時加到 5 站（淺草寺、上野公園、晴空塔、東京車站、銀座，測完還原資料），Google 地圖起點淺草寺、3 個停靠站依序、終點銀座，開車 1 小時 2 分 |
+| 只有一站的天沒有「當天路線」 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#只有一站的天沒有多站路線`（改壞：一站也給路線 → 紅）；實機：東京第 3 天只有秋葉原，標題旁沒有按鈕；實機 `DayRouteMap/device-check.md` #3 |
+| 地點沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#沒座標的站用地址連地址都沒有就用名稱`、`#只有緯度沒有經度的站視為沒有座標`、`#地址是空字串或空白時用名稱`（改壞：不用座標、跳過地址、空白地址照用都紅）；實機 `DayRouteMap/device-check.md` #4（只有名稱的「竹下通可麗餅」被 Google 找到） |
+| 超過 11 站只帶前 11 站並提示 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#十三站的天只帶前十一站並標示被截斷`、`#剛好十一站不算被截斷`（改壞：不截斷、11 站也標截斷都紅）；實機 `DayRouteMap/device-check.md` #1、#2（提示文字、終點是第 11 站） |
+| 相鄰兩站之間查大眾運輸 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#怎麼去從前一站到後一站並指定大眾運輸`（改壞：不指定大眾運輸 → 紅）；實機：淺草寺 → 晴空塔開啟 Google 地圖大眾運輸，19 分、都08 公車；實機 `DayRouteMap/device-check.md` #5 |
+| 「怎麼去」只出現在同一天的相鄰兩站之間 | UI | ✅ | 2026-11-04 | 實機：東京第 1、2 天的兩站之間各有一個；晴空塔與明治神宮（跨天）之間、秋葉原之後都沒有；實機 `DayRouteMap/device-check.md` #6 |
+| 「怎麼去」的地點沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#怎麼去的終點沒有座標時用名稱`；實機 `DayRouteMap/device-check.md` #7 |
 
 ### Slice 2 — 每站的「從目前位置怎麼過去」
 - **對應 Requirement**: 每一站可以查從目前位置怎麼過去
-- **commit**: 未開始
+- **commit**: `6b7cabb`
 - **高風險**: 否（只開外部網址）
 - **整體狀態**: ✅
 
 | Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
 |----------|------|------|--------|---------|
-| 從目前位置到這一站 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到這站不帶起點並指定大眾運輸`（改壞：帶了起點、沒指定大眾運輸都紅）；實機：按上野公園卡片的地圖按鈕，Google 地圖起點「你的位置」、終點上野公園（人在台灣，Google 顯示找不到路線）；同格式網址到台北 101 開出大眾運輸 2 小時 35 分 |
-| 這一站沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到沒有座標的站用名稱` |
+| 從目前位置到這一站 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到這站不帶起點並指定大眾運輸`（改壞：帶了起點、沒指定大眾運輸都紅）；實機：按上野公園卡片的地圖按鈕，Google 地圖起點「你的位置」、終點上野公園（人在台灣，Google 顯示找不到路線）；同格式網址到台北 101 開出大眾運輸 2 小時 35 分；實機 `DayRouteMap/device-check.md` #8 |
+| 這一站沒有座標時改用地址或名稱 | 邏輯 | ✅ | 2026-11-04 | `unit test: RouteGoogleMapsLinkTest#從目前位置到沒有座標的站用名稱`；實機 `DayRouteMap/device-check.md` #9 |
 
 ### Slice 3 — 地圖圖示改打開路線頁，拿掉地圖頁
 - **對應 Requirement**: 行程詳情的地圖圖示直接打開路線頁
-- **commit**: 未開始
+- **commit**: `194dcf5`；審查修正另一個 commit（見 `DayRouteMap/spec-review.md`）
 - **高風險**: 是（換頁或返回：地圖圖示的目的地改變、拿掉一個 route）
-- **整體狀態**: 🟡（地點不夠時的提示未上實機）
+- **整體狀態**: ✅
 
 | Scenario | 性質 | 狀態 | 驗證日 | 驗證方式 |
 |----------|------|------|--------|---------|
-| 地點夠的行程按地圖圖示進入路線頁 | 邏輯 | ✅ | 2026-11-04 | 既有 `ItineraryDetailViewModelTest` 生成路線成功的測試（送出前往路線頁）；實機：東京 3 日遊按地圖圖示進入路線頁 |
-| 地點不夠的行程按地圖圖示留在詳情頁並提示 | 邏輯 | 🟡 | 2026-11-04 | `unit test: ItineraryDetailViewModelTest#地點不足` 預期文字改成「…才能看路線」，改 code 前先跑紅、改後綠；提示文字未上實機（手機上沒有只有一個地點的行程） |
-| 「⋮」選單沒有「生成路線」 | UI | ✅ | 2026-11-04 | 實機：選單只剩選擇模式、編輯行程、刪除行程 |
-| 從路線頁返回回到行程詳情 | UI | ✅ | 2026-11-04 | 實機：左上箭頭、系統返回各一次，都回到東京 3 日遊的詳情 |
+| 地點夠的行程按地圖圖示進入路線頁 | 邏輯＋UI | ✅ | 2026-11-04 | 單元測試只驗 ViewModel 那段：既有 `ItineraryDetailViewModelTest#生成路線成功`（送出前往路線頁）；圖示接到 `GenerateRoute`、`App.kt` 推路線頁這段接線沒有單元測試，靠實機：實機 `DayRouteMap/device-check.md` #10 |
+| 地點不夠的行程按地圖圖示留在詳情頁並提示 | 邏輯 | ✅ | 2026-11-04 | `unit test: ItineraryDetailViewModelTest#地點不足` 預期文字改成「…才能看路線」，改 code 前先跑紅、改後綠；實機 `DayRouteMap/device-check.md` #11 |
+| 「⋮」選單沒有「生成路線」 | UI | ✅ | 2026-11-04 | 實機：選單只剩選擇模式、編輯行程、刪除行程；實機 `DayRouteMap/device-check.md` #12 |
+| 從路線頁返回回到行程詳情 | UI | ✅ | 2026-11-04 | 實機：左上箭頭、系統返回各一次，都回到東京 3 日遊的詳情；實機 `DayRouteMap/device-check.md` #13；快速連點地圖圖示後按一次返回就回到詳情（#14）；舊版停在地圖頁時覆蓋安裝，不閃退（#15） |
 
 ---
 
@@ -208,7 +215,7 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 
 | 項目 | 屬於誰 | 阻擋上線？ | 移除條件 |
 |------|-------|----------|---------|
-| iOS 開 Google 地圖網址未驗證 | App（需要 Mac） | 否 | 在 iOS 實機按「當天路線」能開啟 Google 地圖或瀏覽器並帶入各站 |
+| iOS 開 Google 地圖網址未驗證 | App（需要 Mac） | 否 | 在 iOS 實機按「當天路線」「怎麼去」與每站的地圖按鈕，都能開啟 Google 地圖或瀏覽器並帶入各站，且確認瀏覽器時的站數上限與提示文字相符（code 標記在 `RouteGoogleMapsLink.kt` 檔頭） |
 
 ---
 
@@ -221,3 +228,4 @@ fun googleMapsTransitFromHereUrl(to: RouteLocation): String  // 不帶 origin，
 - **2026-11-04** ADDED: Requirement「行程詳情的地圖圖示直接打開路線頁」（地圖頁與「⋮ → 生成路線」拿掉）
 - **2026-11-04** 路線頁地點卡片拿掉「座標：35.7101, 139.8107」那一行：數字對使用者沒有意義，按鈕仍用資料裡的座標定位
 - **2026-11-04** 先試做「App 內 Google 地圖＋Routes API」後放棄：Routes API 在日本查不到大眾運輸（紀錄在 improvement-plan.md 後續功能）。改成跳到 Google 地圖 App。
+- **2026-11-04** 審查修正：站的順序改照清單順序（跟畫面一致，原本另外依 `order` 排序，兩者現況一定相同）；站名裡的 `|` 換成空白；手機上沒有能開網址的 App 時提示而不閃退；連點地圖圖示不會推兩層路線頁；刪掉跟著沒人用的 `ErrorContent`。行程詳情的 Requirement「生成路線」同步改寫，見 [ItineraryDetail.md](ItineraryDetail.md)。

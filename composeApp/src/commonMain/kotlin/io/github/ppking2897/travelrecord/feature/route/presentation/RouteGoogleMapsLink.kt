@@ -4,6 +4,8 @@ import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteDay
 import io.github.ppking2897.travelrecord.feature.route.domain.model.RouteLocation
 import io.ktor.http.URLBuilder
 
+// TODO(等外部): iOS 開 Google 地圖網址未驗證，沒裝 Google 地圖 App 時落到手機瀏覽器只收 3 個中途站；移除條件：在 iOS 實機按「當天路線」「怎麼去」與每站的地圖按鈕，都能開啟 Google 地圖或瀏覽器並帶入各站，且確認瀏覽器時的站數上限與提示文字相符
+
 /**
  * 「當天路線」（在 Google 地圖看這天）的網址
  *
@@ -15,12 +17,12 @@ data class DayMapsLink(val url: String, val truncated: Boolean)
 const val MAX_GOOGLE_MAPS_STOPS = 11
 
 /**
- * 這天依序所有地點的多站路線，不指定交通方式；不到 2 站回 null
+ * 這天依序所有地點的多站路線（照 [RouteDay.stops] 的順序，跟畫面一致），不指定交通方式；不到 2 站回 null
  *
  * 規格：.claude/docs/DayRouteMap.md「每天可以在 Google 地圖看當天的多站路線」
  */
 fun RouteDay.toGoogleMapsDayLink(): DayMapsLink? {
-    val ordered = stops.sortedBy { it.order }
+    val ordered = stops
     if (ordered.size < 2) return null
     val used = ordered.take(MAX_GOOGLE_MAPS_STOPS)
     val url = directionsUrl(
@@ -72,5 +74,5 @@ private fun RouteLocation.mapsQuery(): String {
         lat != null && lng != null -> "$lat,$lng"
         !location.address.isNullOrBlank() -> location.address
         else -> location.name
-    }
+    }.replace('|', ' ') // | 是中途站的分隔符，留在站名裡 Google 會拆成兩站
 }

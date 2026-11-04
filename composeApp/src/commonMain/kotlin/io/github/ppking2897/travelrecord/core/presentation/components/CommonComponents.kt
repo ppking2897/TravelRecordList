@@ -90,65 +90,6 @@ fun LoadingContent(
 // ============================================================================
 
 /**
- * 錯誤狀態顯示
- *
- * @param message 錯誤訊息
- * @param onRetry 重試回調（可選）
- * @param modifier Modifier
- */
-@Composable
-fun ErrorContent(
-    message: String,
-    onRetry: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(Spacing.xxl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.ErrorOutline,
-            contentDescription = null,
-            modifier = Modifier.size(IconSize.xxl),
-            tint = MaterialTheme.colorScheme.error
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.lg))
-
-        Text(
-            text = "發生錯誤",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
-
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        onRetry?.let {
-            Spacer(modifier = Modifier.height(Spacing.xl))
-
-            OutlinedButton(onClick = it) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
-                    modifier = Modifier.size(IconSize.sm)
-                )
-                Spacer(modifier = Modifier.width(Spacing.sm))
-                Text("重試")
-            }
-        }
-    }
-}
-
-/**
  * 行內錯誤提示
  */
 @Composable

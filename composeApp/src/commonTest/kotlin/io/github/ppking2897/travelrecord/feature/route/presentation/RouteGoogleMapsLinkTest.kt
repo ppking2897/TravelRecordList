@@ -60,12 +60,13 @@ class RouteGoogleMapsLinkTest {
     }
 
     @Test
-    fun 多站路線依當天順序排列不依清單位置() {
+    fun 多站路線照當天清單的順序跟畫面一致() {
         val link = dayOf(kinkakuji, fushimi, kiyomizu).toGoogleMapsDayLink().shouldNotBeNull()
 
         val p = params(link.url)
-        p["origin"] shouldBe "34.9671,135.7727"
-        p["destination"] shouldBe "35.0394,135.7292"
+        p["origin"] shouldBe "35.0394,135.7292"
+        p["waypoints"] shouldBe "34.9671,135.7727"
+        p["destination"] shouldBe "34.9949,135.785"
     }
 
     // Scenario: 只有一站的天沒有「當天路線」
@@ -175,5 +176,52 @@ class RouteGoogleMapsLinkTest {
         val akihabara = stop(1, "秋葉原")
 
         params(googleMapsTransitFromHereUrl(akihabara))["destination"] shouldBe "秋葉原"
+    }
+
+    // 技術設計：每站的值一律做 URL 參數編碼，中途站用 | 分隔並編碼成 %7C
+    @Test
+    fun 站名含特殊字元時網址不會被切斷() {
+        val tricky = stop(1, "A&B #1+C\n二樓")
+        val last = stop(2, "D=E")
+
+        val link = dayOf(fushimi, tricky, last).toGoogleMapsDayLink().shouldNotBeNull()
+
+        val p = params(link.url)
+        p.names() shouldBe setOf("api", "origin", "waypoints", "destination")
+        p["waypoints"] shouldBe "A&B #1+C\n二樓"
+        p["destination"] shouldBe "D=E"
+    }
+
+    @Test
+    fun 中途站分隔符在網址裡編碼成百分比寫法() {
+        val fourth = stop(3, "嵐山", 35.0094, 135.6668)
+
+        val url = dayOf(fushimi, kiyomizu, kinkakuji, fourth).toGoogleMapsDayLink().shouldNotBeNull().url
+
+        url.contains("%7C") shouldBe true
+        url.contains("|") shouldBe false
+    }
+
+    // Scenario: 地點沒有座標時改用地址或名稱（地址是空字串或只有空白，視為沒有地址）
+    @Test
+    fun 地址是空字串或空白時用名稱() {
+        val empty = stop(1, "錦市場", address = "")
+        val blank = stop(2, "祇園", address = "   ")
+
+        val p = params(dayOf(fushimi, empty, blank).toGoogleMapsDayLink().shouldNotBeNull().url)
+
+        p["waypoints"] shouldBe "錦市場"
+        p["destination"] shouldBe "祇園"
+    }
+
+    // 2026-11-04 決定：站名裡的 | 換成空白，不然 Google 會拆成兩站
+    @Test
+    fun 站名裡的直線換成空白不會被拆成兩站() {
+        val piped = stop(1, "A|B")
+        val last = stop(2, "清水寺", 34.9949, 135.7850)
+
+        val p = params(dayOf(fushimi, piped, last).toGoogleMapsDayLink().shouldNotBeNull().url)
+
+        p["waypoints"] shouldBe "A B"
     }
 }

@@ -256,7 +256,11 @@ private fun PlanNavHost(
                         },
                         onEditItemClick = { itemId -> backStack.add(AppRoute.EditItem(itemId)) },
                         onEditItineraryClick = { backStack.add(AppRoute.EditItinerary(key.itineraryId)) },
-                        onRouteClick = { itineraryId -> backStack.add(AppRoute.RouteView(itineraryId)) }
+                        onRouteClick = { itineraryId ->
+                            // 連點地圖圖示會送兩次，頂端已經是同一個路線頁就不再推
+                            val route = AppRoute.RouteView(itineraryId)
+                            if (backStack.lastOrNull() != route) backStack.add(route)
+                        }
                     )
                 }
 

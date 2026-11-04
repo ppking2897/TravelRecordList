@@ -1,5 +1,7 @@
 package io.github.ppking2897.travelrecord.feature.route.presentation
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -55,6 +57,13 @@ fun RouteViewScreen(
     val state by viewModel.state.collectAsState()
     val uriHandler = LocalUriHandler.current
     val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
+    // 手機上沒有能開網址的 App 時 openUri 會丟例外，改成提示而不是閃退
+    val openUrl: (String) -> Unit = { url ->
+        runCatching { uriHandler.openUri(url) }.onFailure {
+            scope.launch { snackbarHostState.showSnackbar("沒有可以開啟地圖的 App") }
+        }
+    }
 
     // 收集 Event
     LaunchedEffect(Unit) {
@@ -83,10 +92,8 @@ fun RouteViewScreen(
         onExportClick = {
             viewModel.processIntent(RouteViewIntent.ExportRoute(itineraryId))
         },
-        onOpenMapClick = { routeLocation ->
-            uriHandler.openUri(googleMapsTransitFromHereUrl(routeLocation))
-        },
-        onOpenUrl = { uriHandler.openUri(it) }
+        onOpenMapClick = { routeLocation -> openUrl(googleMapsTransitFromHereUrl(routeLocation)) },
+        onOpenUrl = openUrl
     )
 }
 
