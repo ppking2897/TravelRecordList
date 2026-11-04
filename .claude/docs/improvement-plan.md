@@ -148,7 +148,7 @@ Repository 回傳型別不在此項：規則的 `Flow<ApiResult<T>>` 是為打�
 
 - [x] 目錄結構改為實際的 feature-first 結構 → 2026-11-03
 - [x] 平台支援寫實際狀態（含 iOS 地點搜尋目前不可用）：Web target 目前未宣告，決定恢復或移除 `jsMain` / `wasmJsMain` / `webMain` → 2026-11-04 決定先保留資料夾，README 註明不支援 Web、這三個資料夾不會被編譯
-- [ ] 加上架構圖、截圖或 demo GIF、測試分數、API key 設定說明與安全取捨（2026-11-03：架構圖、API key 設定與安全取捨、CI 徽章已加；截圖要在實機重拍，`.claude/docs/images/` 的是改版前的畫面）
+- [x] 加上架構圖、截圖或 demo GIF、測試分數、API key 設定說明與安全取捨 → 2026-11-03 加架構圖、API key 設定與安全取捨、CI 徽章；2026-11-04 加 5 張 Android 實機截圖（`docs/screenshots/`，範例行程）。測試分數不放：變異測試暫不做（見第 5 節），CI 徽章代替
 - [x] 授權改為公開授權（例如 MIT、Apache 2.0）或明確說明 → 2026-11-03 採用 MIT
 - [x] 更新 `.claude/docs/product-analysis.md` 中「使用 InMemoryStorage」的過時描述（實際是 Android 用 DataStore、iOS 用 NSUserDefaults） → 2026-11-04 在報告開頭加註更正並指向產品規格書；報告是一次性紀錄，內文不改
 

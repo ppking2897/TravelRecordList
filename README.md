@@ -6,6 +6,12 @@
 
 以 Kotlin Multiplatform + Compose Multiplatform 開發，Android 是目前完整可用的平台。
 
+| 行程列表 | 行程詳情 | 今日 | 足跡 | 回憶 |
+|---|---|---|---|---|
+| <img src="docs/screenshots/itinerary-list.png" width="160" alt="行程列表"> | <img src="docs/screenshots/itinerary-detail.png" width="160" alt="行程詳情"> | <img src="docs/screenshots/today.png" width="160" alt="今日"> | <img src="docs/screenshots/footprint.png" width="160" alt="足跡"> | <img src="docs/screenshots/memory.png" width="160" alt="回憶"> |
+
+截圖為 Android 實機，內容是 App 第一次安裝時放入的範例行程。
+
 ## 功能
 
 | 階段 | 能做的事 | 分頁 |
