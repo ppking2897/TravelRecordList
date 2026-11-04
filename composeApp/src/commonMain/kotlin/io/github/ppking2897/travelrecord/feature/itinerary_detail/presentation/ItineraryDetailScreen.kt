@@ -46,7 +46,6 @@ import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.model.Loc
 import io.github.ppking2897.travelrecord.feature.itinerary_item.domain.usecase.ItemsByDate
 import io.github.ppking2897.travelrecord.core.presentation.components.AnimatedBatchActionBar
 import io.github.ppking2897.travelrecord.core.presentation.components.DeleteConfirmDialog
-import io.github.ppking2897.travelrecord.core.presentation.components.EmptyState
 import io.github.ppking2897.travelrecord.core.presentation.components.ItemCard
 import io.github.ppking2897.travelrecord.core.presentation.components.LoadingContent
 import io.github.ppking2897.travelrecord.core.presentation.components.TimelineNavigator

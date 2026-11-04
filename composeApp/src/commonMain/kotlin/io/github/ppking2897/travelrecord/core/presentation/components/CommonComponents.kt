@@ -265,69 +265,6 @@ fun SectionBadge(
 }
 
 // ============================================================================
-// 空狀態組件 (增強版)
-// ============================================================================
-
-/**
- * 增強版空狀態組件
- *
- * @param icon 圖標
- * @param title 主標題
- * @param description 描述文字
- * @param actionLabel 操作按鈕文字（可選）
- * @param onAction 操作回調（可選）
- */
-@Composable
-fun EmptyStateEnhanced(
-    icon: ImageVector,
-    title: String,
-    description: String,
-    modifier: Modifier = Modifier,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(Spacing.xxl),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(IconSize.xxl),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.lg))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.sm))
-
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        if (actionLabel != null && onAction != null) {
-            Spacer(modifier = Modifier.height(Spacing.xl))
-
-            Button(onClick = onAction) {
-                Text(actionLabel)
-            }
-        }
-    }
-}
-
-// ============================================================================
 // 表單欄位組件
 // ============================================================================
 
