@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import io.github.ppking2897.travelrecord.LocalSnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
@@ -82,15 +83,10 @@ fun RouteViewScreen(
         onExportClick = {
             viewModel.processIntent(RouteViewIntent.ExportRoute(itineraryId))
         },
-        onOpenMapClick = { location ->
-            val query = if (location.latitude != null && location.longitude != null) {
-                "${location.latitude},${location.longitude}"
-            } else {
-                location.address ?: location.name
-            }
-            val url = "https://www.google.com/maps/search/?api=1&query=${query.replace(" ", "+")}"
-            uriHandler.openUri(url)
-        }
+        onOpenMapClick = { routeLocation ->
+            uriHandler.openUri(googleMapsTransitFromHereUrl(routeLocation))
+        },
+        onOpenUrl = { uriHandler.openUri(it) }
     )
 }
 
@@ -136,12 +132,52 @@ private fun RouteInfoCard(route: Route) {
     }
 }
 
+/** 每天的標題；兩站以上的天加「當天路線」（開 Google 地圖看這天），超過 11 站時提示只帶前 11 站 */
+@Composable
+private fun RouteDayHeader(
+    title: String,
+    dayLink: DayMapsLink?,
+    onOpenUrl: (String) -> Unit
+) {
+    Column(modifier = Modifier.padding(top = Spacing.sm)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            dayLink?.let { link ->
+                TextButton(onClick = { onOpenUrl(link.url) }) {
+                    Icon(
+                        Icons.Default.Map,
+                        contentDescription = null,
+                        modifier = Modifier.size(IconSize.sm)
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.xs))
+                    Text("當天路線")
+                }
+            }
+        }
+        if (dayLink?.truncated == true) {
+            Text(
+                text = "Google 地圖一次最多 $MAX_GOOGLE_MAPS_STOPS 站，只會帶前 $MAX_GOOGLE_MAPS_STOPS 站",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @Composable
 private fun RouteLocationCard(
     routeLocation: RouteLocation,
     isFirst: Boolean,
     isLast: Boolean,
-    onOpenMapClick: (Location) -> Unit
+    onOpenMapClick: (RouteLocation) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -209,10 +245,11 @@ private fun RouteLocationCard(
                         modifier = Modifier.weight(1f)
                     )
                     
-                    IconButton(onClick = { onOpenMapClick(routeLocation.location) }) {
+                    // 從目前位置到這站（大眾運輸）
+                    IconButton(onClick = { onOpenMapClick(routeLocation) }) {
                         Icon(
                             Icons.Default.Map,
-                            contentDescription = "開啟地圖",
+                            contentDescription = "從目前位置怎麼過去",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -236,15 +273,6 @@ private fun RouteLocationCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-                
-                // 座標
-                if (routeLocation.location.latitude != null && routeLocation.location.longitude != null) {
-                    Text(
-                        text = "座標：${routeLocation.location.latitude}, ${routeLocation.location.longitude}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
                 
                 // 備註
@@ -304,7 +332,8 @@ private fun RouteViewScreenPreview() {
                 error = null,
                 onNavigateBack = {},
                 onExportClick = {},
-                onOpenMapClick = {}
+                onOpenMapClick = {},
+                onOpenUrl = {}
             )
         }
     }
@@ -322,7 +351,8 @@ private fun RouteViewScreenPreview_Loading() {
                 error = null,
                 onNavigateBack = {},
                 onExportClick = {},
-                onOpenMapClick = {}
+                onOpenMapClick = {},
+                onOpenUrl = {}
             )
         }
     }
@@ -340,7 +370,8 @@ private fun RouteViewScreenPreview_Error() {
                 error = "找不到路線",
                 onNavigateBack = {},
                 onExportClick = {},
-                onOpenMapClick = {}
+                onOpenMapClick = {},
+                onOpenUrl = {}
             )
         }
     }
@@ -355,7 +386,8 @@ private fun RouteViewScreenContent(
     error: String?,
     onNavigateBack: () -> Unit,
     onExportClick: () -> Unit,
-    onOpenMapClick: (Location) -> Unit
+    onOpenMapClick: (RouteLocation) -> Unit,
+    onOpenUrl: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -448,19 +480,36 @@ private fun RouteViewScreenContent(
                 // 依天分段，每段的編號從 1 開始
                 route.days.forEach { day ->
                     item(key = "day_${day.date}") {
-                        Text(
-                            text = day.title(),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = Spacing.sm)
+                        RouteDayHeader(
+                            title = day.title(),
+                            dayLink = day.toGoogleMapsDayLink(),
+                            onOpenUrl = onOpenUrl
                         )
                     }
                     itemsIndexed(day.stops) { index, routeLocation ->
-                        RouteLocationCard(
-                            routeLocation = routeLocation,
-                            isFirst = index == 0,
-                            isLast = index == day.stops.lastIndex,
-                            onOpenMapClick = onOpenMapClick
-                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                            RouteLocationCard(
+                                routeLocation = routeLocation,
+                                isFirst = index == 0,
+                                isLast = index == day.stops.lastIndex,
+                                onOpenMapClick = onOpenMapClick
+                            )
+                            // 只在同一天的相鄰兩站之間
+                            day.stops.getOrNull(index + 1)?.let { next ->
+                                TextButton(
+                                    onClick = { onOpenUrl(googleMapsTransitUrl(routeLocation, next)) },
+                                    modifier = Modifier.padding(start = Spacing.lg)
+                                ) {
+                                    Icon(
+                                        Icons.Default.DirectionsTransit,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(IconSize.sm)
+                                    )
+                                    Spacer(modifier = Modifier.width(Spacing.xs))
+                                    Text("怎麼去")
+                                }
+                            }
+                        }
                     }
                 }
             }
