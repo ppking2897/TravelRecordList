@@ -1,6 +1,8 @@
 # TravelApp 產品分析報告
 
 > 分析日期：2026-04-24
+>
+> **2026-11-04 註**：本報告是 4 月的一次性紀錄，內文不再更新。文中說資料存在 InMemoryStorage、重啟就消失，這在當時就不正確（Android 存 DataStore、iOS 存 NSUserDefaults）；2026-10-15 起行程與項目已改存 Room。現況以 [product-spec.md](product-spec.md) 為準。
 > 分析基礎：程式碼現狀掃描 + 同類 App 參考（Google Maps、TripAdvisor、Klook、KKday、Airbnb、Booking.com、TripIt、Wanderlog、Polarsteps、Foursquare、Splitwise、TravelSpend、Maps.me）
 
 ---
